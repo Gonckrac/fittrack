@@ -201,6 +201,43 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 
 /* BOTTOM NAV (alternative to tabs for mobile) */
 .nav-hint { text-align:center; padding:6px; font-size:10px; color:var(--text3); border-top:1px solid var(--border); flex-shrink:0; }
+
+/* AI CHAT MODAL */
+.ai-modal { background:var(--bg2); border-radius:24px 24px 0 0; padding:0; width:100%; max-width:430px; transform:translateY(100%); transition:transform 0.3s ease; height:85vh; display:flex; flex-direction:column; overflow:hidden; }
+.modal-overlay.open .ai-modal { transform:translateY(0); }
+.ai-modal-header { padding:16px 20px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
+.ai-modal-title { font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:space-between; }
+.ai-modal-subtitle { font-size:11px; color:var(--text2); margin-top:3px; }
+.ai-chat-area { flex:1; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:10px; scrollbar-width:none; }
+.ai-chat-area::-webkit-scrollbar { display:none; }
+.ai-bubble { max-width:85%; padding:10px 14px; border-radius:16px; font-size:13px; line-height:1.5; }
+.ai-bubble.user { align-self:flex-end; background:var(--accent); color:white; border-bottom-right-radius:4px; }
+.ai-bubble.bot { align-self:flex-start; background:var(--bg3); color:var(--text); border-bottom-left-radius:4px; border:1px solid var(--border); }
+.ai-bubble.bot.loading { color:var(--text2); font-style:italic; }
+.ai-result-card { background:var(--bg4); border-radius:12px; padding:12px; margin-top:8px; border:1px solid var(--border); }
+.ai-result-title { font-size:12px; font-weight:700; color:var(--text); margin-bottom:8px; }
+.ai-result-macros { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-bottom:8px; }
+.ai-macro-pill { background:var(--bg3); border-radius:8px; padding:6px 4px; text-align:center; }
+.ai-macro-pill .val { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; }
+.ai-macro-pill .lbl { font-size:9px; color:var(--text2); text-transform:uppercase; margin-top:2px; }
+.ai-items-list { font-size:11px; color:var(--text2); margin-bottom:8px; line-height:1.8; }
+.ai-notes { font-size:11px; color:var(--accent); font-style:italic; margin-bottom:10px; }
+.ai-add-btns { display:flex; gap:6px; flex-wrap:wrap; }
+.ai-meal-btn { flex:1; min-width:80px; padding:7px 8px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; color:var(--text2); font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; text-align:center; }
+.ai-meal-btn:hover { border-color:var(--accent); color:var(--accent); }
+.ai-meal-btn.primary { background:var(--accent); color:white; border-color:var(--accent); }
+.ai-input-area { padding:12px 16px; border-top:1px solid var(--border); flex-shrink:0; background:var(--bg2); }
+.ai-input-row { display:flex; gap:8px; align-items:center; }
+.ai-inp { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:24px; padding:10px 16px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; }
+.ai-inp:focus { border-color:var(--accent); }
+.ai-inp::placeholder { color:var(--text3); }
+.ai-send-btn { width:40px; height:40px; border-radius:50%; background:var(--accent); border:none; color:white; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.2s; }
+.ai-send-btn:hover { background:#3d6ee8; }
+.ai-send-btn:disabled { background:var(--bg4); cursor:not-allowed; }
+.ai-quick-chips { display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none; }
+.ai-quick-chips::-webkit-scrollbar { display:none; }
+.ai-chip { flex-shrink:0; padding:5px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:11px; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all 0.2s; }
+.ai-chip:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -271,7 +308,10 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <!-- MEALS -->
       <div id="mealsContainer"></div>
 
-      <button class="btn btn-primary" style="width:100%;margin-top:4px" onclick="openAddFood()">+ Agregar alimento</button>
+      <div style="display:flex;gap:8px;margin-top:4px">
+        <button class="btn btn-primary" style="flex:1" onclick="openAddFood()">+ Agregar</button>
+        <button class="btn btn-ghost" style="flex:1;border-color:var(--accent2);color:var(--accent2)" onclick="openAIChat()">✨ IA Macros</button>
+      </div>
     </div>
 
     <!-- ═══ TRAINING PAGE ═══ -->
@@ -506,6 +546,48 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       </select>
     </div>
     <button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="addFood()">Agregar</button>
+  </div>
+</div>
+
+
+<!-- AI CHAT MODAL -->
+<div class="modal-overlay" id="aiChatModal" onclick="closeAIChat(event)">
+  <div class="ai-modal" onclick="event.stopPropagation()">
+    <div class="ai-modal-header">
+      <div class="ai-modal-title">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">✨</span>
+          <div>
+            <div>IA Nutricional</div>
+            <div class="ai-modal-subtitle">Gemini · Análisis de macros instantáneo</div>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeAIChat()">✕</button>
+      </div>
+    </div>
+    <div class="ai-chat-area" id="aiChatArea">
+      <div class="ai-bubble bot">
+        👋 Hola! Decime qué comiste y te calculo los macros al toque.<br><br>
+        <strong>Ejemplos:</strong><br>
+        • 200g carne vacuna y 300g papa<br>
+        • bowl de avena con banana y miel<br>
+        • 2 huevos revueltos con tostadas
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <div class="ai-quick-chips" id="aiChips">
+        <div class="ai-chip" onclick="sendAIChip(this)">200g pechuga pollo</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">150g arroz cocido</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">2 huevos revueltos</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">100g atún en lata</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">250ml leche entera</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">1 banana mediana</div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-inp" id="aiInput" placeholder="Ej: 200g carne y 300g papa..." onkeydown="if(event.key==='Enter')sendAIMessage()">
+        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">↑</button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -1092,6 +1174,123 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+
+// ─── AI NUTRITION CHAT ───────────────────────────────────────────
+const NUTRITION_BACKEND = 'https://fittrack-backend-one.vercel.app/api/nutrition';
+let lastAIResult = null;
+
+function openAIChat() {
+  document.getElementById('aiChatModal').classList.add('open');
+  setTimeout(() => document.getElementById('aiInput').focus(), 300);
+}
+
+function closeAIChat(event) {
+  if (event && event.target !== document.getElementById('aiChatModal')) return;
+  document.getElementById('aiChatModal').classList.remove('open');
+}
+
+function sendAIChip(el) {
+  document.getElementById('aiInput').value = el.textContent;
+  sendAIMessage();
+}
+
+function appendBubble(text, type) {
+  const area = document.getElementById('aiChatArea');
+  const div = document.createElement('div');
+  div.className = 'ai-bubble ' + type;
+  div.innerHTML = text;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+
+function buildResultCard(data) {
+  const meals = ['Desayuno','Almuerzo','Merienda','Cena','Extra'];
+  const itemsHtml = data.items && data.items.length > 1
+    ? '<div class="ai-items-list">' + data.items.map(it =>
+        `• ${it.food} (${it.amount}): ${it.prot}p · ${it.carb}c · ${it.fat}g`
+      ).join('<br>') + '</div>'
+    : '';
+
+  const mealBtns = meals.map(m =>
+    `<button class="ai-meal-btn" onclick="addAIResultToMeal('${m}')">+${m}</button>`
+  ).join('');
+
+  return `
+    <div class="ai-result-card">
+      <div class="ai-result-title">📊 ${data.name}</div>
+      <div class="ai-result-macros">
+        <div class="ai-macro-pill"><div class="val prot-color">${data.prot}g</div><div class="lbl">Prot</div></div>
+        <div class="ai-macro-pill"><div class="val carb-color">${data.carb}g</div><div class="lbl">Carbs</div></div>
+        <div class="ai-macro-pill"><div class="val fat-color">${data.fat}g</div><div class="lbl">Grasas</div></div>
+        <div class="ai-macro-pill"><div class="val kcal-color">${data.kcal}</div><div class="lbl">Kcal</div></div>
+      </div>
+      ${itemsHtml}
+      ${data.notes ? '<div class="ai-notes">💡 ' + data.notes + '</div>' : ''}
+      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">Agregar a comida:</div>
+      <div class="ai-add-btns">${mealBtns}</div>
+    </div>`;
+}
+
+function addAIResultToMeal(meal) {
+  if (!lastAIResult) return;
+  const food = {
+    id: Date.now().toString(),
+    name: lastAIResult.name,
+    meal: meal,
+    prot: lastAIResult.prot,
+    carb: lastAIResult.carb,
+    fat: lastAIResult.fat,
+  };
+  state[TODAY].foods.push(food);
+  saveState(state);
+  renderMeals();
+  showToast(`✓ Agregado a ${meal}`);
+  // Visual feedback en los botones
+  document.querySelectorAll('.ai-meal-btn').forEach(btn => {
+    if (btn.textContent.includes(meal)) {
+      btn.textContent = '✓ Agregado';
+      btn.classList.add('primary');
+    }
+  });
+}
+
+async function sendAIMessage() {
+  const inp = document.getElementById('aiInput');
+  const query = inp.value.trim();
+  if (!query) return;
+
+  const sendBtn = document.getElementById('aiSendBtn');
+  sendBtn.disabled = true;
+  inp.value = '';
+
+  appendBubble(query, 'user');
+  const loadingBubble = appendBubble('Analizando macros...', 'bot loading');
+
+  try {
+    const res = await fetch(NUTRITION_BACKEND, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    const data = await res.json();
+
+    loadingBubble.remove();
+
+    if (data.error) throw new Error(data.error);
+
+    lastAIResult = data;
+    appendBubble(buildResultCard(data), 'bot');
+
+  } catch(err) {
+    loadingBubble.className = 'ai-bubble bot';
+    loadingBubble.innerHTML = '❌ Error al analizar. Revisá tu conexión o intentá de nuevo.';
+  } finally {
+    sendBtn.disabled = false;
+    inp.focus();
+  }
 }
 
 // ─── START ───────────────────────────────────────────────────────
