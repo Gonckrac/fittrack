@@ -370,7 +370,14 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     <!-- ═══ SLEEP PAGE ═══ -->
     <div class="page" id="page-sleep">
       <div class="card" style="text-align:center;padding:20px">
-        <div class="card-title" style="justify-content:center"><span>🌙</span> Disposicion Oura hoy</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="card-title" style="margin-bottom:0"><span>🌙</span> Disposicion Oura hoy</div>
+          <button id="syncBtn" onclick="syncOura()" class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-size:11px">↻ Sync Oura</button>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:12px;margin-bottom:12px">
+          <span id="syncStatus" style="font-size:11px;color:var(--text3)">● Sin sincronizar</span>
+          <span id="lastSync" style="font-size:10px;color:var(--text3)"></span>
+        </div>
         <div class="readiness-circle">
           <svg width="100" height="100" viewBox="0 0 100 100">
             <circle cx="50" cy="50" r="40" fill="none" stroke="var(--bg4)" stroke-width="8"/>
@@ -582,6 +589,45 @@ const SUPPS = [
 ];
 
 // ─── INIT ────────────────────────────────────────────────────────
+// ─── OURA AUTO-SYNC ──────────────────────────────────────────────
+const BACKEND = 'https://fittrack-backend-one.vercel.app/api/oura';
+
+async function syncOura() {
+  const syncBtn = document.getElementById('syncBtn');
+  const syncStatus = document.getElementById('syncStatus');
+  if (syncBtn) { syncBtn.textContent = '⟳ Sincronizando...'; syncBtn.disabled = true; }
+  try {
+    const res = await fetch(BACKEND);
+    if (!res.ok) throw new Error('Error ' + res.status);
+    const data = await res.json();
+    if (!state[TODAY].sleep) state[TODAY].sleep = {};
+    if (data.readiness?.score) state[TODAY].sleep.readiness = data.readiness.score;
+    if (data.sleep?.total_hours) state[TODAY].sleep.hours = data.sleep.total_hours;
+    if (data.sleep?.efficiency) state[TODAY].sleep.efficiency = data.sleep.efficiency;
+    if (data.sleep?.deep_hours) state[TODAY].sleep.deep = data.sleep.deep_hours;
+    if (data.sleep?.hrv_avg) state[TODAY].sleep.hrv = data.sleep.hrv_avg;
+    if (data.sleep?.resting_hr) state[TODAY].sleep.restingHr = data.sleep.resting_hr;
+    if (!state[TODAY].kcal) state[TODAY].kcal = {};
+    if (data.activity?.total_calories) state[TODAY].kcal.burned = data.activity.total_calories;
+    if (data.activity?.active_calories) state[TODAY].kcal.active = data.activity.active_calories;
+    if (data.activity?.steps) state[TODAY].steps = data.activity.steps;
+    state[TODAY].lastSync = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
+    saveState(state);
+    renderSleep();
+    renderKcal();
+    const st = document.getElementById('syncStatus');
+    const ls = document.getElementById('lastSync');
+    if (st) { st.textContent = '● Conectado'; st.style.color = 'var(--green)'; }
+    if (ls) ls.textContent = 'Ultima sync: ' + state[TODAY].lastSync;
+    showToast('Oura sincronizado ✓');
+  } catch(err) {
+    const st = document.getElementById('syncStatus');
+    if (st) { st.textContent = '● Sin conexion'; st.style.color = 'var(--red)'; }
+  } finally {
+    if (syncBtn) { syncBtn.textContent = '↻ Sync Oura'; syncBtn.disabled = false; }
+  }
+}
+
 function init() {
   updateHeader();
   renderMeals();
@@ -590,6 +636,7 @@ function init() {
   renderMetrics();
   renderSleep();
   renderKcal();
+  syncOura();
 }
 
 function updateHeader() {
