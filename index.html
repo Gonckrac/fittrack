@@ -1622,8 +1622,7 @@ function renderBodyChart() {
 }
 
 // ─── AI NUTRITION CHAT ────────────────────────────────────────────
-const GEMINI_KEY = 'AIzaSyBaqj09pqzFnwImAmnhvidWdz3En0NWCGs';
-const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
+const NUTRITION_BACKEND = 'https://fittrack-backend-one.vercel.app/api/nutrition';
 let lastAIResult = null;
 
 function openAIChat() {
@@ -1674,35 +1673,6 @@ function addAIToMeal(meal) {
   document.querySelectorAll('.ai-meal-btn').forEach(b => { if(b.textContent===meal){b.textContent='✓ Listo';b.classList.add('primary');} });
 }
 
-async function parseWithGemini(query) {
-  const prompt = `Sos un nutricionista experto. El usuario describe lo que comió. Calculá los macros totales.
-Respondé SOLO con un JSON válido, sin texto extra, sin markdown, sin backticks. Formato exacto:
-{"name":"nombre corto del plato","prot":25,"carb":40,"fat":8,"kcal":336,"notes":"nota opcional breve","items":[{"food":"ingrediente","amount":"200g","prot":25,"carb":40,"fat":8}]}
-Reglas:
-- prot, carb, fat, kcal deben ser números enteros (no strings)
-- kcal = prot*4 + carb*4 + fat*9
-- Si es un solo alimento, items tiene solo ese elemento
-- name debe ser corto (máx 4 palabras)
-El usuario dice: "${query}"`;
-
-  const res = await fetch(GEMINI_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }],
-      generationConfig: { temperature: 0.1, maxOutputTokens: 512 }
-    })
-  });
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error('Gemini HTTP ' + res.status + ': ' + (err?.error?.message || ''));
-  }
-  const raw = await res.json();
-  const text = raw.candidates?.[0]?.content?.parts?.[0]?.text || '';
-  const clean = text.replace(/```json|```/g, '').trim();
-  return JSON.parse(clean);
-}
-
 async function sendAIMessage() {
   const inp = document.getElementById('aiInput');
   const query = inp.value.trim();
@@ -1712,7 +1682,13 @@ async function sendAIMessage() {
   appendBubble(query, 'user');
   const loading = appendBubble('⚡ Analizando con Gemini...', 'bot loading');
   try {
-    const data = await parseWithGemini(query);
+    const res = await fetch(NUTRITION_BACKEND, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query })
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'HTTP ' + res.status);
     loading.remove();
     lastAIResult = data;
     appendBubble(buildResultCard(data), 'bot');
