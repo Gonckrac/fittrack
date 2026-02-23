@@ -1633,7 +1633,7 @@ function closeAIChat() {
   document.getElementById('aiChatModal').classList.remove('open');
 }
 function sendAIChip(el) {
-  document.getElementById('aiInput').value = el.textContent;
+  document.getElementById('aiInput').value = el.textContent.trim();
   sendAIMessage();
 }
 function appendBubble(text, type) {
@@ -1664,13 +1664,40 @@ function buildResultCard(data) {
     '</div>';
 }
 function addAIToMeal(meal) {
-  if (!lastAIResult) return;
-  state[TODAY].foods.push({ id:Date.now().toString(), name:lastAIResult.name, meal, prot:lastAIResult.prot, carb:lastAIResult.carb, fat:lastAIResult.fat });
+  if (!lastAIResult) { showToast('⚠ Sin resultado de IA'); return; }
+  state[TODAY].foods.push({ id:Date.now().toString(), name:lastAIResult.name, meal, prot:+lastAIResult.prot||0, carb:+lastAIResult.carb||0, fat:+lastAIResult.fat||0 });
   saveState(state);
   renderMeals();
+  renderHome();
   showToast('✓ Agregado a ' + meal);
   document.querySelectorAll('.ai-meal-btn').forEach(b => { if(b.textContent===meal){b.textContent='✓ Listo';b.classList.add('primary');} });
 }
+
+async function parseWithClaude(query) {
+  const prompt = `Sos un nutricionista experto. El usuario describe lo que comió. Calculá los macros totales.
+Respondé SOLO con un JSON válido, sin texto extra, sin markdown, sin backticks. Formato exacto:
+{"name":"nombre corto del plato","prot":25,"carb":40,"fat":8,"kcal":336,"notes":"nota opcional breve","items":[{"food":"ingrediente","amount":"200g","prot":25,"carb":40,"fat":8}]}
+- prot, carb, fat, kcal deben ser números (no strings)
+- Si es un solo alimento, items puede tener solo ese elemento
+- kcal = prot*4 + carb*4 + fat*9
+Usuario dice: "${query}"`;
+
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 500,
+      messages: [{ role: 'user', content: prompt }]
+    })
+  });
+  const raw = await res.json();
+  const text = raw.content?.[0]?.text || '';
+  // Limpiar posibles backticks
+  const clean = text.replace(/```json|```/g, '').trim();
+  return JSON.parse(clean);
+}
+
 async function sendAIMessage() {
   const inp = document.getElementById('aiInput');
   const query = inp.value.trim();
@@ -1679,20 +1706,50 @@ async function sendAIMessage() {
   btn.disabled = true; inp.value = '';
   appendBubble(query, 'user');
   const loading = appendBubble('Analizando...', 'bot loading');
+  
+  let data = null;
+  let errorMsg = '';
+
+  // Intentar primero con el backend de Vercel
   try {
-    const res = await fetch(NUTRITION_BACKEND, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query}) });
-    const data = await res.json();
-    loading.remove();
-    if (data.error) throw new Error(data.error);
-    lastAIResult = data;
-    appendBubble(buildResultCard(data), 'bot');
-  } catch(err) {
-    loading.className = 'ai-bubble bot';
-    loading.innerHTML = '❌ Error al analizar. Revisá la conexión.';
-  } finally {
-    btn.disabled = false;
-    document.getElementById('aiInput').focus();
+    const res = await fetch(NUTRITION_BACKEND, { 
+      method:'POST', 
+      headers:{'Content-Type':'application/json'}, 
+      body:JSON.stringify({query}),
+      signal: AbortSignal.timeout(8000)
+    });
+    if (res.ok) {
+      const json = await res.json();
+      if (json && !json.error && json.prot !== undefined) {
+        data = json;
+      } else {
+        errorMsg = json.error || 'Backend sin datos válidos';
+      }
+    } else {
+      errorMsg = 'Backend HTTP ' + res.status;
+    }
+  } catch(e) {
+    errorMsg = 'Backend: ' + e.message;
   }
+
+  // Si el backend falló, usar Claude directamente
+  if (!data) {
+    try {
+      data = await parseWithClaude(query);
+    } catch(e2) {
+      loading.className = 'ai-bubble bot';
+      loading.innerHTML = '❌ No se pudo analizar.<br><small style="color:var(--text3)">Backend: ' + errorMsg + '<br>Claude: ' + e2.message + '</small>';
+      btn.disabled = false;
+      document.getElementById('aiInput').focus();
+      return;
+    }
+  }
+
+  loading.remove();
+  lastAIResult = data;
+  appendBubble(buildResultCard(data), 'bot');
+  btn.disabled = false;
+  document.getElementById('aiInput').focus();
 }
 
 // ─── SLEEP ───────────────────────────────────────────────────────
