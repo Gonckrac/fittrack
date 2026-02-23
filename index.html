@@ -1622,7 +1622,8 @@ function renderBodyChart() {
 }
 
 // ─── AI NUTRITION CHAT ────────────────────────────────────────────
-const NUTRITION_BACKEND = 'https://fittrack-backend-one.vercel.app/api/nutrition';
+const GROQ_KEY = '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';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 let lastAIResult = null;
 
 function openAIChat() {
@@ -1680,18 +1681,32 @@ async function sendAIMessage() {
   const btn = document.getElementById('aiSendBtn');
   btn.disabled = true; inp.value = '';
   appendBubble(query, 'user');
-  const loading = appendBubble('⚡ Analizando con Gemini...', 'bot loading');
+  const loading = appendBubble('⚡ Analizando...', 'bot loading');
   try {
-    const res = await fetch(NUTRITION_BACKEND, {
+    const res = await fetch(GROQ_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.1,
+        max_tokens: 512,
+        messages: [{
+          role: 'system',
+          content: 'Sos un nutricionista experto. Respondé SOLO con JSON válido, sin texto extra, sin markdown, sin backticks. Formato exacto: {"name":"nombre corto del plato","prot":25,"carb":40,"fat":8,"kcal":336,"notes":"tip nutricional breve","items":[{"food":"ingrediente","amount":"200g","prot":25,"carb":40,"fat":8}]}. Todos los números son enteros. kcal = prot*4 + carb*4 + fat*9.'
+        }, {
+          role: 'user',
+          content: 'Calculá los macros de: ' + query
+        }]
+      })
     });
     const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'HTTP ' + res.status);
+    if (!res.ok) throw new Error(data.error?.message || 'HTTP ' + res.status);
+    const text = data.choices?.[0]?.message?.content || '';
+    const clean = text.replace(/```json|```/g, '').trim();
+    const result = JSON.parse(clean);
     loading.remove();
-    lastAIResult = data;
-    appendBubble(buildResultCard(data), 'bot');
+    lastAIResult = result;
+    appendBubble(buildResultCard(result), 'bot');
   } catch(err) {
     loading.className = 'ai-bubble bot';
     loading.innerHTML = '❌ Error: ' + err.message;
