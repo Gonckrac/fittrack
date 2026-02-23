@@ -682,6 +682,18 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <button class="modal-close" onclick="closeModal('addFoodModal')">✕</button>
     </div>
     <div class="input-group">
+      <label class="input-label">⚡ Predeterminados</label>
+      <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:4px">
+        <button class="btn btn-ghost" style="text-align:left;font-size:12px;padding:8px 12px" onclick="fillPreset('Leche Proteica Lacteá (200ml)', 9.2, 9.2, 0)">
+          🥛 Leche Proteica Lacteá (200ml) — 9.2p · 9.2c · 0g
+        </button>
+        <button class="btn btn-ghost" style="text-align:left;font-size:12px;padding:8px 12px" onclick="fillPreset('Yogur SER Proteico (175g)', 15, 14, 1.9)">
+          🫙 Yogur SER Proteico (175g) — 15p · 14c · 1.9g
+        </button>
+      </div>
+      <div style="font-size:10px;color:var(--text3);margin-bottom:10px;text-align:center">— o ingresá manualmente —</div>
+    </div>
+    <div class="input-group">
       <label class="input-label">Nombre</label>
       <input class="inp" id="foodName" placeholder="Pechuga de pollo">
     </div>
@@ -759,6 +771,15 @@ function saveState(s) {
 }
 
 let state = loadState();
+
+// Limpiar días viejos (guardar solo últimos 30 días)
+const allKeys = Object.keys(state).filter(k => k.match(/^\d{4}-\d{2}-\d{2}$/));
+allKeys.sort();
+if (allKeys.length > 30) {
+  allKeys.slice(0, allKeys.length - 30).forEach(k => delete state[k]);
+  saveState(state);
+}
+
 if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: state.lastTrainDay || 1 };
 if (!state.metricsHistory) state.metricsHistory = [];
 if (!state.kcalHistory) state.kcalHistory = [];
@@ -818,7 +839,6 @@ const SUPPS = [
   { id:"creatina",  name:"Creatina",       dose:"5g (4 caps)",        time:"Manana", group:"morning" },
   { id:"d3k2",      name:"D3 + K2",        dose:"1 softgel",          time:"Manana", group:"morning" },
   { id:"vitc",      name:"Vitamina C",     dose:"1 capsula",          time:"Manana", group:"morning" },
-  { id:"lionsmane", name:"Lion's Mane",    dose:"3 capsulas",         time:"Manana", group:"morning" },
   { id:"omega3",    name:"Omega 3",        dose:"2 softgels",         time:"Mediodia", group:"noon" },
   { id:"astax",     name:"Astaxanthin",    dose:"1 softgel",          time:"Mediodia", group:"noon" },
   { id:"magglicin", name:"Mag. Glicinato", dose:"2 softgels",         time:"Noche", group:"night" },
@@ -1155,6 +1175,12 @@ function renderMeals() {
 
 function openAddFood() {
   document.getElementById('addFoodModal').classList.add('open');
+}
+function fillPreset(name, prot, carb, fat) {
+  document.getElementById('foodName').value = name;
+  document.getElementById('foodProt').value = prot;
+  document.getElementById('foodCarb').value = carb;
+  document.getElementById('foodFat').value = fat;
 }
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
