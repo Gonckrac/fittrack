@@ -202,8 +202,36 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 /* BOTTOM NAV (alternative to tabs for mobile) */
 .nav-hint { text-align:center; padding:6px; font-size:10px; color:var(--text3); border-top:1px solid var(--border); flex-shrink:0; }
 
+/* CHARTS & PROGRESS */
+.chart-wrap { width:100%; height:160px; margin-top:8px; }
+.chart-svg { width:100%; height:100%; overflow:visible; }
+.chart-line { fill:none; stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round; }
+.chart-area { opacity:0.12; }
+.chart-label-x { font-size:9px; fill:var(--text3); text-anchor:middle; font-family:'Space Mono',monospace; }
+.chart-label-y { font-size:9px; fill:var(--text3); text-anchor:end; font-family:'Space Mono',monospace; }
+.chart-grid { stroke:var(--border); stroke-width:1; }
+.prog-selector { display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none; }
+.prog-selector::-webkit-scrollbar { display:none; }
+.prog-sel-btn { flex-shrink:0; padding:5px 12px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:11px; color:var(--text2); cursor:pointer; font-family:'DM Sans',sans-serif; white-space:nowrap; transition:all 0.2s; }
+.prog-sel-btn.active { background:var(--accent); color:white; border-color:var(--accent); }
+.stat-trio { display:flex; gap:8px; margin-top:10px; }
+.stat-pill { flex:1; text-align:center; background:var(--bg3); border-radius:8px; padding:8px 4px; border:1px solid var(--border); }
+.stat-pill-val { font-family:'Space Mono',monospace; font-size:15px; font-weight:700; }
+.stat-pill-lbl { font-size:10px; color:var(--text2); margin-top:2px; }
+.suggestion-card { border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; display:flex; align-items:flex-start; gap:10px; }
+.suggestion-card.warn { background:rgba(243,156,18,0.08); border:1px solid rgba(243,156,18,0.3); }
+.suggestion-card.success { background:rgba(46,204,113,0.08); border:1px solid rgba(46,204,113,0.3); }
+.suggestion-card.info { background:rgba(79,126,255,0.08); border:1px solid rgba(79,126,255,0.3); }
+.suggestion-icon { font-size:18px; flex-shrink:0; }
+.suggestion-title { font-size:12px; font-weight:700; color:var(--text); }
+.suggestion-sub { font-size:11px; color:var(--text2); margin-top:2px; line-height:1.4; }
+.ex-history-item { padding:8px 0; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center; }
+.ex-history-date { font-size:11px; color:var(--text2); }
+.ex-history-val { font-size:12px; font-family:'Space Mono',monospace; color:var(--text); }
+.ex-history-pr { font-size:10px; color:var(--yellow); font-weight:700; margin-left:6px; }
+.ex-select { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; width:100%; margin-bottom:12px; }
 /* AI CHAT MODAL */
-.ai-modal { background:var(--bg2); border-radius:24px 24px 0 0; padding:0; width:100%; max-width:430px; transform:translateY(100%); transition:transform 0.3s ease; height:85vh; display:flex; flex-direction:column; overflow:hidden; }
+.ai-modal { background:var(--bg2); border-radius:24px 24px 0 0; width:100%; max-width:430px; transform:translateY(100%); transition:transform 0.3s ease; height:85vh; display:flex; flex-direction:column; overflow:hidden; }
 .modal-overlay.open .ai-modal { transform:translateY(0); }
 .ai-modal-header { padding:16px 20px 12px; border-bottom:1px solid var(--border); flex-shrink:0; }
 .ai-modal-title { font-size:16px; font-weight:700; display:flex; align-items:center; justify-content:space-between; }
@@ -215,7 +243,6 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .ai-bubble.bot { align-self:flex-start; background:var(--bg3); color:var(--text); border-bottom-left-radius:4px; border:1px solid var(--border); }
 .ai-bubble.bot.loading { color:var(--text2); font-style:italic; }
 .ai-result-card { background:var(--bg4); border-radius:12px; padding:12px; margin-top:8px; border:1px solid var(--border); }
-.ai-result-title { font-size:12px; font-weight:700; color:var(--text); margin-bottom:8px; }
 .ai-result-macros { display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:6px; margin-bottom:8px; }
 .ai-macro-pill { background:var(--bg3); border-radius:8px; padding:6px 4px; text-align:center; }
 .ai-macro-pill .val { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; }
@@ -224,20 +251,47 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .ai-notes { font-size:11px; color:var(--accent); font-style:italic; margin-bottom:10px; }
 .ai-add-btns { display:flex; gap:6px; flex-wrap:wrap; }
 .ai-meal-btn { flex:1; min-width:80px; padding:7px 8px; background:var(--bg3); border:1px solid var(--border); border-radius:8px; color:var(--text2); font-size:11px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; text-align:center; }
-.ai-meal-btn:hover { border-color:var(--accent); color:var(--accent); }
-.ai-meal-btn.primary { background:var(--accent); color:white; border-color:var(--accent); }
+.ai-meal-btn:hover,.ai-meal-btn.primary { background:var(--accent); color:white; border-color:var(--accent); }
 .ai-input-area { padding:12px 16px; border-top:1px solid var(--border); flex-shrink:0; background:var(--bg2); }
-.ai-input-row { display:flex; gap:8px; align-items:center; }
-.ai-inp { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:24px; padding:10px 16px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; }
-.ai-inp:focus { border-color:var(--accent); }
-.ai-inp::placeholder { color:var(--text3); }
-.ai-send-btn { width:40px; height:40px; border-radius:50%; background:var(--accent); border:none; color:white; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; transition:background 0.2s; }
-.ai-send-btn:hover { background:#3d6ee8; }
-.ai-send-btn:disabled { background:var(--bg4); cursor:not-allowed; }
 .ai-quick-chips { display:flex; gap:6px; overflow-x:auto; margin-bottom:10px; scrollbar-width:none; }
 .ai-quick-chips::-webkit-scrollbar { display:none; }
 .ai-chip { flex-shrink:0; padding:5px 10px; background:var(--bg3); border:1px solid var(--border); border-radius:20px; font-size:11px; color:var(--text2); cursor:pointer; white-space:nowrap; transition:all 0.2s; }
 .ai-chip:hover { border-color:var(--accent); color:var(--accent); }
+.ai-input-row { display:flex; gap:8px; align-items:center; }
+.ai-inp { flex:1; background:var(--bg3); border:1px solid var(--border); border-radius:24px; padding:10px 16px; color:var(--text); font-size:13px; font-family:'DM Sans',sans-serif; outline:none; }
+.ai-inp:focus { border-color:var(--accent); }
+.ai-inp::placeholder { color:var(--text3); }
+.ai-send-btn { width:40px; height:40px; border-radius:50%; background:var(--accent); border:none; color:white; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.ai-send-btn:disabled { background:var(--bg4); cursor:not-allowed; }
+/* HOME DASHBOARD */
+.home-greeting { font-size:22px; font-weight:700; color:var(--text); margin-bottom:2px; }
+.home-sub { font-size:12px; color:var(--text2); margin-bottom:16px; }
+.home-balance { background:linear-gradient(135deg,#1a1a2e,#16213e); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:12px; text-align:center; position:relative; overflow:hidden; }
+.home-balance::before { content:''; position:absolute; top:-40px; right:-40px; width:120px; height:120px; border-radius:50%; background:var(--accent); opacity:0.06; }
+.home-balance-num { font-family:'Space Mono',monospace; font-size:48px; font-weight:700; line-height:1; }
+.home-balance-lbl { font-size:11px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-top:4px; }
+.home-balance-row { display:flex; justify-content:center; gap:20px; margin-top:14px; }
+.home-bal-item { text-align:center; }
+.home-bal-val { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--text); }
+.home-bal-lbl { font-size:10px; color:var(--text2); margin-top:2px; }
+.home-macros { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-bottom:12px; }
+.home-macro { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px 10px; text-align:center; }
+.home-macro-ring { width:56px; height:56px; margin:0 auto 8px; position:relative; }
+.home-macro-ring svg { transform:rotate(-90deg); }
+.home-macro-ring-val { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:12px; font-weight:700; }
+.home-macro-name { font-size:10px; color:var(--text2); font-weight:600; text-transform:uppercase; letter-spacing:0.5px; }
+.home-macro-grams { font-size:11px; color:var(--text3); margin-top:2px; font-family:'Space Mono',monospace; }
+.home-quick { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:12px; }
+.home-quick-btn { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; display:flex; align-items:center; gap:10px; cursor:pointer; transition:all 0.2s; }
+.home-quick-btn:active { border-color:var(--accent); background:var(--bg3); }
+.home-quick-icon { font-size:22px; }
+.home-quick-label { font-size:12px; font-weight:600; color:var(--text); }
+.home-quick-sub { font-size:10px; color:var(--text2); margin-top:1px; }
+.home-oura { background:var(--card); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; display:flex; align-items:center; gap:12px; margin-bottom:12px; }
+.home-oura-score { width:48px; height:48px; border-radius:50%; border:3px solid var(--accent); display:flex; align-items:center; justify-content:center; font-family:'Space Mono',monospace; font-size:16px; font-weight:700; color:var(--accent); flex-shrink:0; }
+.home-oura-info { flex:1; }
+.home-oura-title { font-size:13px; font-weight:700; color:var(--text); }
+.home-oura-sub { font-size:11px; color:var(--text2); margin-top:2px; }
 </style>
 </head>
 <body>
@@ -328,6 +382,25 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
         </div>
       </div>
       <div id="exerciseList"></div>
+
+      <!-- SUGERENCIAS -->
+      <div class="section-div" style="margin-top:4px">💡 Sugerencias</div>
+      <div id="trainSuggestions"></div>
+
+      <!-- FUERZA POR EJERCICIO -->
+      <div class="section-div">📈 Progreso por ejercicio</div>
+      <div class="card">
+        <select class="ex-select" id="exSelect" onchange="renderStrengthChart()">
+          <option value="">— Seleccionar ejercicio —</option>
+        </select>
+        <div id="strengthChartWrap" style="display:none">
+          <div class="chart-wrap">
+            <svg class="chart-svg" id="strengthChartSvg" viewBox="0 0 360 160" preserveAspectRatio="none"></svg>
+          </div>
+        </div>
+        <div id="strengthChartStats"></div>
+        <div id="exHistoryList"></div>
+      </div>
     </div>
 
     <!-- ═══ SUPPLEMENTS PAGE ═══ -->
@@ -403,8 +476,20 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
         <button class="btn btn-primary" style="width:100%" onclick="saveMetrics()">Guardar medicion</button>
       </div>
 
-      <div class="section-div">Historial</div>
-      <div id="metricsHistory"></div>
+      <!-- GRAFICOS EVOLUCION -->
+      <div class="section-div">📈 Evolucion</div>
+      <div class="card">
+        <div class="prog-selector" id="bodyChartSelector">
+          <button class="prog-sel-btn active" onclick="selectBodyChart('weight',this)">⚖️ Peso</button>
+          <button class="prog-sel-btn" onclick="selectBodyChart('bf',this)">🟡 % Grasa</button>
+          <button class="prog-sel-btn" onclick="selectBodyChart('muscle',this)">🟢 % Muscular</button>
+          <button class="prog-sel-btn" onclick="selectBodyChart('waist',this)">📏 Cintura</button>
+        </div>
+        <div class="chart-wrap">
+          <svg class="chart-svg" id="bodyChartSvg" viewBox="0 0 360 160" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="stat-trio" id="bodyChartStats"></div>
+      </div>
     </div>
 
     <!-- ═══ SLEEP PAGE ═══ -->
@@ -427,10 +512,6 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
           <div class="readiness-num" id="readinessNum">—</div>
         </div>
         <div class="readiness-label" id="readinessLabel">Sin datos</div>
-        <div style="display:flex;gap:8px;margin-top:16px">
-          <input class="inp" id="inpReadiness" type="number" min="0" max="100" placeholder="78" style="text-align:center;font-size:20px;font-family:'Space Mono',monospace">
-          <button class="btn btn-primary" onclick="saveReadiness()">Guardar</button>
-        </div>
       </div>
 
       <div class="sleep-grid">
@@ -438,25 +519,21 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
           <div class="sleep-icon">😴</div>
           <div class="sleep-label">Horas de sueno</div>
           <div class="sleep-val" id="sleepHours">—</div>
-          <input class="inp" id="inpSleepH" type="number" step="0.5" placeholder="7.5" style="margin-top:8px;text-align:center" onchange="saveSleep()">
         </div>
         <div class="sleep-card">
           <div class="sleep-icon">📊</div>
           <div class="sleep-label">Eficiencia</div>
           <div class="sleep-val" id="sleepEff">—</div>
-          <input class="inp" id="inpSleepEff" type="number" min="0" max="100" placeholder="87" style="margin-top:8px;text-align:center" onchange="saveSleep()">
         </div>
         <div class="sleep-card">
           <div class="sleep-icon">🌊</div>
           <div class="sleep-label">Sueno profundo</div>
           <div class="sleep-val" id="sleepDeep">—</div>
-          <input class="inp" id="inpSleepDeep" type="number" step="0.5" placeholder="1.5" style="margin-top:8px;text-align:center" onchange="saveSleep()">
         </div>
         <div class="sleep-card">
           <div class="sleep-icon">💓</div>
           <div class="sleep-label">HRV (ms)</div>
           <div class="sleep-val" id="sleepHRV">—</div>
-          <input class="inp" id="inpHRV" type="number" placeholder="45" style="margin-top:8px;text-align:center" onchange="saveSleep()">
         </div>
       </div>
 
@@ -496,19 +573,6 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
             <div class="balance-fill-right" id="surplusBar" style="width:0%;background:var(--red)"></div>
           </div>
         </div>
-      </div>
-
-      <div class="card">
-        <div class="card-title"><span>📲</span> Ingresar datos de Oura</div>
-        <div class="input-group">
-          <label class="input-label">Calorias quemadas segun Oura (TDEE)</label>
-          <input class="inp" id="inpOuraBurned" type="number" placeholder="2750">
-        </div>
-        <div class="input-group">
-          <label class="input-label">Calorias activas (solo ejercicio)</label>
-          <input class="inp" id="inpOuraActive" type="number" placeholder="350">
-        </div>
-        <button class="btn btn-primary" style="width:100%" onclick="saveKcalData()">Actualizar balance</button>
       </div>
 
       <div class="section-div">Historial semanal</div>
@@ -551,15 +615,15 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 
 
 <!-- AI CHAT MODAL -->
-<div class="modal-overlay" id="aiChatModal" onclick="closeAIChat(event)">
-  <div class="ai-modal" onclick="event.stopPropagation()">
+<div class="modal-overlay" id="aiChatModal" onclick="if(event.target===this)closeAIChat()">
+  <div class="ai-modal">
     <div class="ai-modal-header">
       <div class="ai-modal-title">
         <div style="display:flex;align-items:center;gap:8px">
           <span style="font-size:20px">✨</span>
           <div>
             <div>IA Nutricional</div>
-            <div class="ai-modal-subtitle">Gemini · Análisis de macros instantáneo</div>
+            <div class="ai-modal-subtitle">Gemini · Calculá macros en segundos</div>
           </div>
         </div>
         <button class="modal-close" onclick="closeAIChat()">✕</button>
@@ -567,7 +631,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     </div>
     <div class="ai-chat-area" id="aiChatArea">
       <div class="ai-bubble bot">
-        👋 Hola! Decime qué comiste y te calculo los macros al toque.<br><br>
+        👋 Decime qué comiste y calculo los macros.<br><br>
         <strong>Ejemplos:</strong><br>
         • 200g carne vacuna y 300g papa<br>
         • bowl de avena con banana y miel<br>
@@ -575,12 +639,11 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       </div>
     </div>
     <div class="ai-input-area">
-      <div class="ai-quick-chips" id="aiChips">
+      <div class="ai-quick-chips">
         <div class="ai-chip" onclick="sendAIChip(this)">200g pechuga pollo</div>
         <div class="ai-chip" onclick="sendAIChip(this)">150g arroz cocido</div>
         <div class="ai-chip" onclick="sendAIChip(this)">2 huevos revueltos</div>
         <div class="ai-chip" onclick="sendAIChip(this)">100g atún en lata</div>
-        <div class="ai-chip" onclick="sendAIChip(this)">250ml leche entera</div>
         <div class="ai-chip" onclick="sendAIChip(this)">1 banana mediana</div>
       </div>
       <div class="ai-input-row">
@@ -608,6 +671,7 @@ let state = loadState();
 if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: state.lastTrainDay || 1 };
 if (!state.metricsHistory) state.metricsHistory = [];
 if (!state.kcalHistory) state.kcalHistory = [];
+if (!state.exerciseHistory) state.exerciseHistory = {};
 
 // ─── TRAINING DATA ────────────────────────────────────────────────
 const TRAINING = {
@@ -940,8 +1004,11 @@ function toggleSet(exIdx, sIdx) {
   btn.className = 'set-check ' + (s.done ? 'done' : '');
   btn.textContent = s.done ? '✓' : '';
   if (s.done) showToast('Serie completada ✓');
-  // Update header badge
+  const allSets = state[TODAY]['trainSets_'+day][exIdx];
+  if (allSets.every(s => s.done)) saveExerciseHistory(day, exIdx, allSets);
   renderTraining();
+  renderTrainSuggestions();
+  populateExSelect();
 }
 
 function addSet(exIdx) {
@@ -1000,6 +1067,7 @@ function saveMetrics() {
   saveState(state);
   renderMetrics();
   showToast('Medicion guardada ✓');
+  renderBodyChart();
   document.getElementById('inpWeight').value=''; document.getElementById('inpBF').value='';
   document.getElementById('inpMuscle').value=''; document.getElementById('inpWaist').value='';
 }
@@ -1029,43 +1097,293 @@ function renderMetrics() {
     }
   }
 
-  const histEl = document.getElementById('metricsHistory');
-  if (hist.length === 0) { histEl.innerHTML = '<div class="empty"><div class="empty-icon">📏</div>Sin mediciones aun</div>'; return; }
-  histEl.innerHTML = hist.slice(0,8).map(e => `
-    <div class="history-row">
-      <div class="history-date">${e.date.slice(5)}</div>
-      <div class="history-vals">
-        ${e.weight?`<span class="history-val">${e.weight}kg</span>`:''}
-        ${e.bf?`<span class="history-val" style="color:var(--yellow)">${e.bf}%</span>`:''}
-        ${e.waist?`<span class="history-val" style="color:var(--accent2)">${e.waist}cm</span>`:''}
-      </div>
-    </div>`).join('');
+  renderBodyChart();
+}
+
+
+// ─── EXERCISE HISTORY ────────────────────────────────────────────
+function saveExerciseHistory(day, exIdx, sets) {
+  const ex = TRAINING[day]?.exercises[exIdx];
+  if (!ex) return;
+  const key = ex.name;
+  if (!state.exerciseHistory[key]) state.exerciseHistory[key] = [];
+  if (state.exerciseHistory[key].find(h => h.date === TODAY)) return;
+  const kgVals = sets.map(s => parseFloat(s.kg)).filter(v => !isNaN(v) && v > 0);
+  const repsVals = sets.map(s => parseFloat(s.reps)).filter(v => !isNaN(v) && v > 0);
+  if (kgVals.length === 0) return;
+  const maxKg = Math.max(...kgVals);
+  const avgReps = repsVals.length ? Math.round(repsVals.reduce((a,b)=>a+b,0)/repsVals.length) : null;
+  const oneRM = avgReps ? Math.round(maxKg * (1 + avgReps / 30)) : maxKg;
+  state.exerciseHistory[key].unshift({ date:TODAY, maxKg, avgReps, oneRM, sets:sets.length });
+  if (state.exerciseHistory[key].length > 40) state.exerciseHistory[key] = state.exerciseHistory[key].slice(0,40);
+  saveState(state);
+}
+
+function findExByName(name) {
+  for (const d of Object.values(TRAINING)) {
+    const ex = d.exercises.find(e => e.name === name);
+    if (ex) return ex;
+  }
+  return null;
+}
+
+// ─── SUGGESTIONS ─────────────────────────────────────────────────
+function renderTrainSuggestions() {
+  const container = document.getElementById('trainSuggestions');
+  if (!container) return;
+  const hist = state.exerciseHistory || {};
+  const suggestions = [];
+
+  Object.entries(hist).forEach(([name, history]) => {
+    if (history.length < 2) return;
+    const recent = history.slice(0, 6);
+    const latest = recent[0];
+
+    // Stalled: same kg 3+ sessions
+    if (recent.length >= 3) {
+      const last3 = recent.slice(0,3).map(h => h.maxKg);
+      if (last3.every(v => v === last3[0])) {
+        suggestions.push({ type:'warn', icon:'⚠️',
+          title:'Estancamiento — ' + name,
+          sub: last3.length + ' sesiones con ' + last3[0] + 'kg. Subí a ' + (last3[0]+2.5).toFixed(1) + 'kg o sumá 1 rep.'
+        });
+      }
+    }
+
+    // Ready to progress: at top of rep range
+    const ex = findExByName(name);
+    if (ex && latest.avgReps) {
+      const parts = ex.reps.split('-');
+      const topReps = parts.length > 1 ? +parts[1] : null;
+      if (topReps && latest.avgReps >= topReps) {
+        suggestions.push({ type:'info', icon:'⬆️',
+          title:'Subir peso — ' + name,
+          sub: 'Llegaste a ' + latest.avgReps + ' reps con ' + latest.maxKg + 'kg. Probá ' + (latest.maxKg+2.5).toFixed(1) + 'kg.'
+        });
+      }
+    }
+
+    // New PR
+    const allOneRM = history.map(h => h.oneRM || h.maxKg);
+    if (history.length >= 2 && latest.oneRM === Math.max(...allOneRM)) {
+      suggestions.push({ type:'success', icon:'🏆',
+        title:'PR — ' + name,
+        sub: '1RM estimado: ' + latest.oneRM + 'kg (' + latest.maxKg + 'kg × ' + (latest.avgReps||'?') + ' reps)'
+      });
+    }
+  });
+
+  if (suggestions.length === 0) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:14px 0">Aparecen después de completar algunas sesiones ✓</div>';
+    return;
+  }
+  container.innerHTML = suggestions.slice(0,5).map(s =>
+    '<div class="suggestion-card ' + s.type + '">' +
+    '<div class="suggestion-icon">' + s.icon + '</div>' +
+    '<div><div class="suggestion-title">' + s.title + '</div>' +
+    '<div class="suggestion-sub">' + s.sub + '</div></div></div>'
+  ).join('');
+}
+
+// ─── STRENGTH CHART ───────────────────────────────────────────────
+function populateExSelect() {
+  const sel = document.getElementById('exSelect');
+  if (!sel) return;
+  const hist = state.exerciseHistory || {};
+  const allEx = [];
+  Object.values(TRAINING).forEach(d => d.exercises.forEach(e => allEx.push(e.name)));
+  sel.innerHTML = '<option value="">— Seleccionar ejercicio —</option>' +
+    [...new Set(allEx)].map(name => {
+      const hasData = hist[name] && hist[name].length > 0;
+      return '<option value="' + name + '">' + (hasData ? '📊 ' : '') + name + '</option>';
+    }).join('');
+}
+
+function drawLineChart(svgId, data, color) {
+  const svg = document.getElementById(svgId);
+  if (!svg) return;
+  if (data.length < 2) {
+    svg.innerHTML = '<text x="180" y="85" text-anchor="middle" fill="var(--text3)" font-size="12" font-family="DM Sans,sans-serif">Sin suficientes datos aún</text>';
+    return;
+  }
+  const W=360, H=160, pL=38, pR=10, pT=14, pB=26;
+  const vals = data.map(d=>d.val);
+  const minV = Math.min(...vals), maxV = Math.max(...vals);
+  const range = maxV - minV || 1;
+  const px = i => pL + (i/(data.length-1))*(W-pL-pR);
+  const py = v => pT + (1-(v-minV)/range)*(H-pT-pB);
+  let html = '';
+  [0, 0.5, 1].forEach(t => {
+    const y = pT + t*(H-pT-pB);
+    const v = (maxV - t*range).toFixed(1);
+    html += '<line class="chart-grid" x1="' + pL + '" x2="' + (W-pR) + '" y1="' + y + '" y2="' + y + '"/>';
+    html += '<text class="chart-label-y" x="' + (pL-4) + '" y="' + (y+3) + '">' + v + '</text>';
+  });
+  const aPath = 'M' + px(0) + ',' + py(data[0].val) + ' ' +
+    data.map((d,i)=>'L'+px(i)+','+py(d.val)).join(' ') +
+    ' L'+px(data.length-1)+','+(H-pB)+' L'+px(0)+','+(H-pB)+' Z';
+  html += '<path d="' + aPath + '" fill="' + color + '" class="chart-area"/>';
+  html += '<path d="M' + px(0) + ',' + py(data[0].val) + ' ' +
+    data.map((d,i)=>'L'+px(i)+','+py(d.val)).join(' ') +
+    '" class="chart-line" stroke="' + color + '"/>';
+  data.forEach((d,i) => {
+    const x=px(i), y=py(d.val);
+    html += '<circle cx="' + x + '" cy="' + y + '" r="4" fill="' + color + '" stroke="var(--bg)" stroke-width="2"/>';
+    if (data.length<=7 || i%Math.ceil(data.length/6)===0)
+      html += '<text class="chart-label-x" x="' + x + '" y="' + (H-pB+14) + '">' + d.label + '</text>';
+  });
+  svg.innerHTML = html;
+}
+
+function renderStrengthChart() {
+  const name = document.getElementById('exSelect')?.value;
+  const wrap = document.getElementById('strengthChartWrap');
+  const statsEl = document.getElementById('strengthChartStats');
+  const histList = document.getElementById('exHistoryList');
+  if (!name) {
+    if(wrap) wrap.style.display='none';
+    if(statsEl) statsEl.innerHTML='';
+    if(histList) histList.innerHTML='';
+    return;
+  }
+  const history = (state.exerciseHistory||{})[name] || [];
+  if (history.length === 0) {
+    wrap.style.display='none';
+    statsEl.innerHTML='<div style="color:var(--text3);font-size:12px;text-align:center;padding:14px 0">Sin datos — completá las series para ver el progreso.</div>';
+    histList.innerHTML=''; return;
+  }
+  const chartData = history.slice().reverse().map(h=>({ val:h.oneRM||h.maxKg, label:h.date.slice(5) }));
+  wrap.style.display = chartData.length >= 2 ? 'block' : 'none';
+  if (chartData.length >= 2) drawLineChart('strengthChartSvg', chartData, 'var(--accent)');
+  const latest = history[0], prev = history[1];
+  const allOneRM = history.map(h=>h.oneRM||h.maxKg);
+  const maxOneRM = Math.max(...allOneRM);
+  const diff = prev ? ((latest.oneRM||latest.maxKg)-(prev.oneRM||prev.maxKg)).toFixed(1) : null;
+  statsEl.innerHTML = '<div class="stat-trio">' +
+    '<div class="stat-pill"><div class="stat-pill-val" style="color:var(--accent)">' + latest.maxKg + 'kg</div><div class="stat-pill-lbl">Último peso</div></div>' +
+    '<div class="stat-pill"><div class="stat-pill-val" style="color:var(--yellow)">' + maxOneRM + 'kg</div><div class="stat-pill-lbl">1RM estimado</div></div>' +
+    '<div class="stat-pill"><div class="stat-pill-val" style="color:' + (diff>0?'var(--green)':diff<0?'var(--red)':'var(--text)') + '">' + (diff!=null?((+diff>0?'+':'')+diff+'kg'):'—') + '</div><div class="stat-pill-lbl">vs anterior</div></div>' +
+    '</div>';
+  histList.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin:10px 0 6px">Historial</div>' +
+    history.slice(0,8).map(h => {
+      const isPR = (h.oneRM||h.maxKg) === maxOneRM;
+      return '<div class="ex-history-item"><div class="ex-history-date">' + h.date + '</div>' +
+        '<div style="display:flex;align-items:center"><div class="ex-history-val">' + h.maxKg + 'kg × ' + (h.avgReps||'?') + ' reps</div>' +
+        (isPR?'<span class="ex-history-pr">PR</span>':'') + '</div></div>';
+    }).join('');
+}
+
+// ─── BODY COMPOSITION CHART ───────────────────────────────────────
+let currentBodyMetric = 'weight';
+
+function selectBodyChart(metric, btn) {
+  currentBodyMetric = metric;
+  document.querySelectorAll('#bodyChartSelector .prog-sel-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderBodyChart();
+}
+
+function renderBodyChart() {
+  const configs = {
+    weight: { key:'weight', color:'var(--accent)',   unit:'kg', best:'max' },
+    bf:     { key:'bf',     color:'var(--yellow)',   unit:'%',  best:'min' },
+    muscle: { key:'muscle', color:'var(--green)',    unit:'%',  best:'max' },
+    waist:  { key:'waist',  color:'var(--accent2)',  unit:'cm', best:'min' },
+  };
+  const cfg = configs[currentBodyMetric];
+  const hist = (state.metricsHistory||[]).slice().reverse();
+  const data = hist.filter(h=>h[cfg.key]!=null).map(h=>({ val:h[cfg.key], label:h.date.slice(5) }));
+  drawLineChart('bodyChartSvg', data, cfg.color);
+  const statsEl = document.getElementById('bodyChartStats');
+  if (data.length >= 2) {
+    const first=data[0].val, last=data[data.length-1].val;
+    const diff=(last-first).toFixed(1);
+    const best = cfg.best==='min' ? Math.min(...data.map(d=>d.val)) : Math.max(...data.map(d=>d.val));
+    const diffGood = (cfg.best==='max'&&+diff>0)||(cfg.best==='min'&&+diff<0);
+    statsEl.innerHTML =
+      '<div class="stat-pill"><div class="stat-pill-val" style="color:' + cfg.color + '">' + last + cfg.unit + '</div><div class="stat-pill-lbl">Actual</div></div>' +
+      '<div class="stat-pill"><div class="stat-pill-val" style="color:' + (diffGood?'var(--green)':'var(--red)') + '">' + (+diff>0?'+':'') + diff + cfg.unit + '</div><div class="stat-pill-lbl">Cambio total</div></div>' +
+      '<div class="stat-pill"><div class="stat-pill-val" style="color:var(--yellow)">' + best + cfg.unit + '</div><div class="stat-pill-lbl">' + (cfg.best==='min'?'Mínimo':'Máximo') + '</div></div>';
+  } else {
+    statsEl.innerHTML = '<div style="color:var(--text3);font-size:12px;width:100%;text-align:center;padding:10px 0">Registrá al menos 2 mediciones para ver el gráfico.</div>';
+  }
+}
+
+// ─── AI NUTRITION CHAT ────────────────────────────────────────────
+const NUTRITION_BACKEND = 'https://fittrack-backend-one.vercel.app/api/nutrition';
+let lastAIResult = null;
+
+function openAIChat() {
+  document.getElementById('aiChatModal').classList.add('open');
+  setTimeout(() => document.getElementById('aiInput').focus(), 300);
+}
+function closeAIChat() {
+  document.getElementById('aiChatModal').classList.remove('open');
+}
+function sendAIChip(el) {
+  document.getElementById('aiInput').value = el.textContent;
+  sendAIMessage();
+}
+function appendBubble(text, type) {
+  const area = document.getElementById('aiChatArea');
+  const div = document.createElement('div');
+  div.className = 'ai-bubble ' + type;
+  div.innerHTML = text;
+  area.appendChild(div);
+  area.scrollTop = area.scrollHeight;
+  return div;
+}
+function buildResultCard(data) {
+  const meals = ['Desayuno','Almuerzo','Merienda','Cena','Extra'];
+  const itemsHtml = data.items && data.items.length > 1
+    ? '<div class="ai-items-list">' + data.items.map(it => '• ' + it.food + ' (' + it.amount + '): ' + it.prot + 'p · ' + it.carb + 'c · ' + it.fat + 'g').join('<br>') + '</div>' : '';
+  return '<div class="ai-result-card">' +
+    '<div style="font-size:13px;font-weight:700;margin-bottom:8px">📊 ' + data.name + '</div>' +
+    '<div class="ai-result-macros">' +
+      '<div class="ai-macro-pill"><div class="val prot-color">' + data.prot + 'g</div><div class="lbl">Prot</div></div>' +
+      '<div class="ai-macro-pill"><div class="val carb-color">' + data.carb + 'g</div><div class="lbl">Carbs</div></div>' +
+      '<div class="ai-macro-pill"><div class="val fat-color">' + data.fat + 'g</div><div class="lbl">Grasas</div></div>' +
+      '<div class="ai-macro-pill"><div class="val kcal-color">' + data.kcal + '</div><div class="lbl">Kcal</div></div>' +
+    '</div>' +
+    itemsHtml +
+    (data.notes ? '<div class="ai-notes">💡 ' + data.notes + '</div>' : '') +
+    '<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">Agregar a:</div>' +
+    '<div class="ai-add-btns">' + meals.map(m => '<button class="ai-meal-btn" onclick="addAIToMeal(\'' + m + '\')">' + m + '</button>').join('') + '</div>' +
+    '</div>';
+}
+function addAIToMeal(meal) {
+  if (!lastAIResult) return;
+  state[TODAY].foods.push({ id:Date.now().toString(), name:lastAIResult.name, meal, prot:lastAIResult.prot, carb:lastAIResult.carb, fat:lastAIResult.fat });
+  saveState(state);
+  renderMeals();
+  showToast('✓ Agregado a ' + meal);
+  document.querySelectorAll('.ai-meal-btn').forEach(b => { if(b.textContent===meal){b.textContent='✓ Listo';b.classList.add('primary');} });
+}
+async function sendAIMessage() {
+  const inp = document.getElementById('aiInput');
+  const query = inp.value.trim();
+  if (!query) return;
+  const btn = document.getElementById('aiSendBtn');
+  btn.disabled = true; inp.value = '';
+  appendBubble(query, 'user');
+  const loading = appendBubble('Analizando...', 'bot loading');
+  try {
+    const res = await fetch(NUTRITION_BACKEND, { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({query}) });
+    const data = await res.json();
+    loading.remove();
+    if (data.error) throw new Error(data.error);
+    lastAIResult = data;
+    appendBubble(buildResultCard(data), 'bot');
+  } catch(err) {
+    loading.className = 'ai-bubble bot';
+    loading.innerHTML = '❌ Error al analizar. Revisá la conexión.';
+  } finally {
+    btn.disabled = false;
+    document.getElementById('aiInput').focus();
+  }
 }
 
 // ─── SLEEP ───────────────────────────────────────────────────────
-function saveReadiness() {
-  const val = +document.getElementById('inpReadiness').value;
-  if (!val || val < 0 || val > 100) return;
-  state[TODAY].sleep.readiness = val;
-  saveState(state);
-  renderSleep();
-  showToast('Disposicion guardada ✓');
-}
-
-function saveSleep() {
-  const s = state[TODAY].sleep;
-  const h = document.getElementById('inpSleepH').value;
-  const eff = document.getElementById('inpSleepEff').value;
-  const deep = document.getElementById('inpSleepDeep').value;
-  const hrv = document.getElementById('inpHRV').value;
-  if (h) s.hours = +h;
-  if (eff) s.efficiency = +eff;
-  if (deep) s.deep = +deep;
-  if (hrv) s.hrv = +hrv;
-  saveState(state);
-  renderSleep();
-}
-
 function renderSleep() {
   const s = state[TODAY].sleep || {};
   const r = s.readiness;
@@ -1083,11 +1401,10 @@ function renderSleep() {
     document.getElementById('readinessLabel').style.color = color;
   }
 
-  if (s.hours) { document.getElementById('sleepHours').textContent = s.hours + 'h'; document.getElementById('inpSleepH').value = s.hours; }
-  if (s.efficiency) { document.getElementById('sleepEff').textContent = s.efficiency + '%'; document.getElementById('inpSleepEff').value = s.efficiency; }
-  if (s.deep) { document.getElementById('sleepDeep').textContent = s.deep + 'h'; document.getElementById('inpSleepDeep').value = s.deep; }
-  if (s.hrv) { document.getElementById('sleepHRV').textContent = s.hrv + ' ms'; document.getElementById('inpHRV').value = s.hrv; }
-  if (r) document.getElementById('inpReadiness').value = r;
+  if (s.hours) document.getElementById('sleepHours').textContent = s.hours + 'h';
+  if (s.efficiency) document.getElementById('sleepEff').textContent = s.efficiency + '%';
+  if (s.deep) document.getElementById('sleepDeep').textContent = s.deep + 'h';
+  if (s.hrv) document.getElementById('sleepHRV').textContent = s.hrv + ' ms';
 
   // HRV chart (last 7 days)
   const days7 = [];
@@ -1109,23 +1426,6 @@ function renderSleep() {
 }
 
 // ─── KCAL ────────────────────────────────────────────────────────
-function saveKcalData() {
-  const burned = +document.getElementById('inpOuraBurned').value || 0;
-  const active = +document.getElementById('inpOuraActive').value || 0;
-  state[TODAY].kcal = { burned, active };
-
-  // Save to history
-  const existing = state.kcalHistory.findIndex(k => k.date === TODAY);
-  const entry = { date: TODAY, burned, consumed: Math.round(calcTotals().kcal) };
-  if (existing >= 0) state.kcalHistory[existing] = entry;
-  else state.kcalHistory.unshift(entry);
-  if (state.kcalHistory.length > 14) state.kcalHistory = state.kcalHistory.slice(0,14);
-
-  saveState(state);
-  renderKcal();
-  showToast('Datos Oura actualizados ✓');
-}
-
 function updateKcalBalance() {
   renderKcal();
 }
@@ -1139,10 +1439,6 @@ function renderKcal() {
   document.getElementById('kcalBurned').textContent = burned;
   document.getElementById('kcalBalance').textContent = (balance > 0 ? '+' : '') + balance;
   document.getElementById('kcalBalance').style.color = balance > 0 ? 'var(--red)' : 'var(--green)';
-
-  if (document.getElementById('inpOuraBurned').value === '' && burned > 0) {
-    document.getElementById('inpOuraBurned').value = burned;
-  }
 
   // Balance bar
   if (burned > 0) {
@@ -1174,123 +1470,6 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
-}
-
-
-// ─── AI NUTRITION CHAT ───────────────────────────────────────────
-const NUTRITION_BACKEND = 'https://fittrack-backend-one.vercel.app/api/nutrition';
-let lastAIResult = null;
-
-function openAIChat() {
-  document.getElementById('aiChatModal').classList.add('open');
-  setTimeout(() => document.getElementById('aiInput').focus(), 300);
-}
-
-function closeAIChat(event) {
-  if (event && event.target !== document.getElementById('aiChatModal')) return;
-  document.getElementById('aiChatModal').classList.remove('open');
-}
-
-function sendAIChip(el) {
-  document.getElementById('aiInput').value = el.textContent;
-  sendAIMessage();
-}
-
-function appendBubble(text, type) {
-  const area = document.getElementById('aiChatArea');
-  const div = document.createElement('div');
-  div.className = 'ai-bubble ' + type;
-  div.innerHTML = text;
-  area.appendChild(div);
-  area.scrollTop = area.scrollHeight;
-  return div;
-}
-
-function buildResultCard(data) {
-  const meals = ['Desayuno','Almuerzo','Merienda','Cena','Extra'];
-  const itemsHtml = data.items && data.items.length > 1
-    ? '<div class="ai-items-list">' + data.items.map(it =>
-        `• ${it.food} (${it.amount}): ${it.prot}p · ${it.carb}c · ${it.fat}g`
-      ).join('<br>') + '</div>'
-    : '';
-
-  const mealBtns = meals.map(m =>
-    `<button class="ai-meal-btn" onclick="addAIResultToMeal('${m}')">+${m}</button>`
-  ).join('');
-
-  return `
-    <div class="ai-result-card">
-      <div class="ai-result-title">📊 ${data.name}</div>
-      <div class="ai-result-macros">
-        <div class="ai-macro-pill"><div class="val prot-color">${data.prot}g</div><div class="lbl">Prot</div></div>
-        <div class="ai-macro-pill"><div class="val carb-color">${data.carb}g</div><div class="lbl">Carbs</div></div>
-        <div class="ai-macro-pill"><div class="val fat-color">${data.fat}g</div><div class="lbl">Grasas</div></div>
-        <div class="ai-macro-pill"><div class="val kcal-color">${data.kcal}</div><div class="lbl">Kcal</div></div>
-      </div>
-      ${itemsHtml}
-      ${data.notes ? '<div class="ai-notes">💡 ' + data.notes + '</div>' : ''}
-      <div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600;">Agregar a comida:</div>
-      <div class="ai-add-btns">${mealBtns}</div>
-    </div>`;
-}
-
-function addAIResultToMeal(meal) {
-  if (!lastAIResult) return;
-  const food = {
-    id: Date.now().toString(),
-    name: lastAIResult.name,
-    meal: meal,
-    prot: lastAIResult.prot,
-    carb: lastAIResult.carb,
-    fat: lastAIResult.fat,
-  };
-  state[TODAY].foods.push(food);
-  saveState(state);
-  renderMeals();
-  showToast(`✓ Agregado a ${meal}`);
-  // Visual feedback en los botones
-  document.querySelectorAll('.ai-meal-btn').forEach(btn => {
-    if (btn.textContent.includes(meal)) {
-      btn.textContent = '✓ Agregado';
-      btn.classList.add('primary');
-    }
-  });
-}
-
-async function sendAIMessage() {
-  const inp = document.getElementById('aiInput');
-  const query = inp.value.trim();
-  if (!query) return;
-
-  const sendBtn = document.getElementById('aiSendBtn');
-  sendBtn.disabled = true;
-  inp.value = '';
-
-  appendBubble(query, 'user');
-  const loadingBubble = appendBubble('Analizando macros...', 'bot loading');
-
-  try {
-    const res = await fetch(NUTRITION_BACKEND, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
-    });
-    const data = await res.json();
-
-    loadingBubble.remove();
-
-    if (data.error) throw new Error(data.error);
-
-    lastAIResult = data;
-    appendBubble(buildResultCard(data), 'bot');
-
-  } catch(err) {
-    loadingBubble.className = 'ai-bubble bot';
-    loadingBubble.innerHTML = '❌ Error al analizar. Revisá tu conexión o intentá de nuevo.';
-  } finally {
-    sendBtn.disabled = false;
-    inp.focus();
-  }
 }
 
 // ─── START ───────────────────────────────────────────────────────
