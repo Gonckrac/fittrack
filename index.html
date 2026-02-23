@@ -726,7 +726,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
           <span style="font-size:20px">✨</span>
           <div>
             <div>IA Nutricional</div>
-            <div class="ai-modal-subtitle">Gemini · Calculá macros en segundos</div>
+            <div class="ai-modal-subtitle">Gemini 2.0 Flash · Calculá macros en segundos</div>
           </div>
         </div>
         <button class="modal-close" onclick="closeAIChat()">✕</button>
@@ -1622,7 +1622,8 @@ function renderBodyChart() {
 }
 
 // ─── AI NUTRITION CHAT ────────────────────────────────────────────
-const NUTRITION_BACKEND = 'https://fittrack-backend-one.vercel.app/api/nutrition';
+const GEMINI_KEY = 'AIzaSyBaqj09pqzFnwImAmnhvidWdz3En0NWCGs';
+const GEMINI_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=' + GEMINI_KEY;
 let lastAIResult = null;
 
 function openAIChat() {
@@ -1673,27 +1674,31 @@ function addAIToMeal(meal) {
   document.querySelectorAll('.ai-meal-btn').forEach(b => { if(b.textContent===meal){b.textContent='✓ Listo';b.classList.add('primary');} });
 }
 
-async function parseWithClaude(query) {
+async function parseWithGemini(query) {
   const prompt = `Sos un nutricionista experto. El usuario describe lo que comió. Calculá los macros totales.
 Respondé SOLO con un JSON válido, sin texto extra, sin markdown, sin backticks. Formato exacto:
 {"name":"nombre corto del plato","prot":25,"carb":40,"fat":8,"kcal":336,"notes":"nota opcional breve","items":[{"food":"ingrediente","amount":"200g","prot":25,"carb":40,"fat":8}]}
-- prot, carb, fat, kcal deben ser números (no strings)
-- Si es un solo alimento, items puede tener solo ese elemento
+Reglas:
+- prot, carb, fat, kcal deben ser números enteros (no strings)
 - kcal = prot*4 + carb*4 + fat*9
-Usuario dice: "${query}"`;
+- Si es un solo alimento, items tiene solo ese elemento
+- name debe ser corto (máx 4 palabras)
+El usuario dice: "${query}"`;
 
-  const res = await fetch('https://api.anthropic.com/v1/messages', {
+  const res = await fetch(GEMINI_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      model: 'claude-sonnet-4-20250514',
-      max_tokens: 500,
-      messages: [{ role: 'user', content: prompt }]
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.1, maxOutputTokens: 512 }
     })
   });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new Error('Gemini HTTP ' + res.status + ': ' + (err?.error?.message || ''));
+  }
   const raw = await res.json();
-  const text = raw.content?.[0]?.text || '';
-  // Limpiar posibles backticks
+  const text = raw.candidates?.[0]?.content?.parts?.[0]?.text || '';
   const clean = text.replace(/```json|```/g, '').trim();
   return JSON.parse(clean);
 }
@@ -1705,51 +1710,19 @@ async function sendAIMessage() {
   const btn = document.getElementById('aiSendBtn');
   btn.disabled = true; inp.value = '';
   appendBubble(query, 'user');
-  const loading = appendBubble('Analizando...', 'bot loading');
-  
-  let data = null;
-  let errorMsg = '';
-
-  // Intentar primero con el backend de Vercel
+  const loading = appendBubble('⚡ Analizando con Gemini...', 'bot loading');
   try {
-    const res = await fetch(NUTRITION_BACKEND, { 
-      method:'POST', 
-      headers:{'Content-Type':'application/json'}, 
-      body:JSON.stringify({query}),
-      signal: AbortSignal.timeout(8000)
-    });
-    if (res.ok) {
-      const json = await res.json();
-      if (json && !json.error && json.prot !== undefined) {
-        data = json;
-      } else {
-        errorMsg = json.error || 'Backend sin datos válidos';
-      }
-    } else {
-      errorMsg = 'Backend HTTP ' + res.status;
-    }
-  } catch(e) {
-    errorMsg = 'Backend: ' + e.message;
+    const data = await parseWithGemini(query);
+    loading.remove();
+    lastAIResult = data;
+    appendBubble(buildResultCard(data), 'bot');
+  } catch(err) {
+    loading.className = 'ai-bubble bot';
+    loading.innerHTML = '❌ Error: ' + err.message;
+  } finally {
+    btn.disabled = false;
+    document.getElementById('aiInput').focus();
   }
-
-  // Si el backend falló, usar Claude directamente
-  if (!data) {
-    try {
-      data = await parseWithClaude(query);
-    } catch(e2) {
-      loading.className = 'ai-bubble bot';
-      loading.innerHTML = '❌ No se pudo analizar.<br><small style="color:var(--text3)">Backend: ' + errorMsg + '<br>Claude: ' + e2.message + '</small>';
-      btn.disabled = false;
-      document.getElementById('aiInput').focus();
-      return;
-    }
-  }
-
-  loading.remove();
-  lastAIResult = data;
-  appendBubble(buildResultCard(data), 'bot');
-  btn.disabled = false;
-  document.getElementById('aiInput').focus();
 }
 
 // ─── SLEEP ───────────────────────────────────────────────────────
