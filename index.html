@@ -292,6 +292,26 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .home-oura-info { flex:1; }
 .home-oura-title { font-size:13px; font-weight:700; color:var(--text); }
 .home-oura-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+
+/* HOME DASHBOARD */
+.day-score-circle { width:180px; height:180px; margin:20px auto; position:relative; }
+.day-score-circle svg { transform:rotate(-90deg); }
+.day-score-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-family:'Space Mono', monospace; font-size:52px; font-weight:700; color:var(--accent); flex-direction:column; }
+.day-score-unit { font-size:14px; color:var(--text2); margin-top:-4px; }
+.day-score-label { text-align:center; font-size:12px; color:var(--text2); margin-top:12px; font-weight:700; text-transform:uppercase; letter-spacing:1px; }
+.day-score-msg { text-align:center; font-size:13px; color:var(--text); margin-top:6px; font-weight:500; max-width:280px; margin-left:auto; margin-right:auto; }
+.day-metrics { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; margin-top:20px; }
+.day-metric-item { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; text-align:center; }
+.day-metric-icon { font-size:18px; margin-bottom:4px; }
+.day-metric-val { font-family:'Space Mono', monospace; font-size:16px; font-weight:700; color:var(--text); }
+.day-metric-lbl { font-size:10px; color:var(--text2); margin-top:3px; text-transform:uppercase; letter-spacing:0.5px; }
+.day-metric-status { font-size:9px; color:var(--text3); margin-top:2px; }
+.day-tips { margin-top:20px; }
+.day-tip-item { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px; margin-bottom:8px; display:flex; gap:10px; }
+.day-tip-icon { font-size:18px; flex-shrink:0; }
+.day-tip-content { flex:1; }
+.day-tip-title { font-size:12px; font-weight:700; color:var(--text); }
+.day-tip-sub { font-size:11px; color:var(--text2); margin-top:2px; line-height:1.4; }
 </style>
 </head>
 <body>
@@ -309,7 +329,8 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 
   <!-- TABS -->
   <div class="tabs">
-    <button class="tab active" onclick="showPage('macros')"><span class="tab-icon">🍽</span>Macros</button>
+    <button class="tab active" onclick="showPage('home')"><span class="tab-icon">📊</span>Resumen</button>
+    <button class="tab" onclick="showPage('macros')"><span class="tab-icon">🍽</span>Macros</button>
     <button class="tab" onclick="showPage('training')"><span class="tab-icon">💪</span>Entreno</button>
     <button class="tab" onclick="showPage('supps')"><span class="tab-icon">💊</span>Supls</button>
     <button class="tab" onclick="showPage('metrics')"><span class="tab-icon">📊</span>Metricas</button>
@@ -320,8 +341,78 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
   <!-- CONTENT -->
   <div class="content">
 
+    <!-- ═══ HOME PAGE ═══ -->
+    <div class="page active" id="page-home">
+      <div style="padding-top:20px">
+        <div style="text-align:center;margin-bottom:8px">
+          <div style="font-size:28px;font-weight:700;color:var(--accent);letter-spacing:-0.5px">📊 RESUMEN DEL DÍA</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px" id="homeDate"></div>
+        </div>
+        
+        <div class="card">
+          <div class="day-score-circle">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+              <circle cx="90" cy="90" r="75" fill="none" stroke="var(--bg4)" stroke-width="10"/>
+              <circle cx="90" cy="90" r="75" fill="none" stroke="var(--accent)" stroke-width="10"
+                stroke-dasharray="471" id="dayScoreDash" stroke-dashoffset="471" stroke-linecap="round"/>
+            </svg>
+            <div class="day-score-num">
+              <span id="dayScore">—</span>
+              <span class="day-score-unit">/100</span>
+            </div>
+          </div>
+          <div class="day-score-label" id="dayScoreLabel">Cargando...</div>
+          <div class="day-score-msg" id="dayScoreMsg"></div>
+        </div>
+
+        <div class="day-metrics">
+          <div class="day-metric-item">
+            <div class="day-metric-icon">🍽</div>
+            <div class="day-metric-val" id="dayMacroScore">—</div>
+            <div class="day-metric-lbl">Macros</div>
+            <div class="day-metric-status" id="dayMacroStatus"></div>
+          </div>
+          <div class="day-metric-item">
+            <div class="day-metric-icon">💪</div>
+            <div class="day-metric-val" id="dayTrainScore">—</div>
+            <div class="day-metric-lbl">Entreno</div>
+            <div class="day-metric-status" id="dayTrainStatus"></div>
+          </div>
+          <div class="day-metric-item">
+            <div class="day-metric-icon">🌙</div>
+            <div class="day-metric-val" id="daySleepScore">—</div>
+            <div class="day-metric-lbl">Sueño</div>
+            <div class="day-metric-status" id="daySleepStatus"></div>
+          </div>
+          <div class="day-metric-item">
+            <div class="day-metric-icon">💊</div>
+            <div class="day-metric-val" id="daySuppScore">—</div>
+            <div class="day-metric-lbl">Suplementos</div>
+            <div class="day-metric-status" id="daySuppStatus"></div>
+          </div>
+          <div class="day-metric-item">
+            <div class="day-metric-icon">🔥</div>
+            <div class="day-metric-val" id="dayKcalScore">—</div>
+            <div class="day-metric-lbl">Balance Kcal</div>
+            <div class="day-metric-status" id="dayKcalStatus"></div>
+          </div>
+          <div class="day-metric-item">
+            <div class="day-metric-icon">⏰</div>
+            <div class="day-metric-val" id="dayStepsScore">—</div>
+            <div class="day-metric-lbl">Pasos</div>
+            <div class="day-metric-status" id="dayStepsStatus"></div>
+          </div>
+        </div>
+
+        <div class="day-tips">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:8px">💡 Sugerencias</div>
+          <div id="homeTipsContainer"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- ═══ MACROS PAGE ═══ -->
-    <div class="page active" id="page-macros">
+    <div class="page" id="page-macros">
       <div class="card">
         <div class="card-title"><span>📈</span> Resumen del dia</div>
         <div class="macro-overview">
@@ -761,6 +852,7 @@ async function syncOura() {
     saveState(state);
     renderSleep();
     renderKcal();
+    renderHome();
     const st = document.getElementById('syncStatus');
     const ls = document.getElementById('lastSync');
     if (st) { st.textContent = '● Conectado'; st.style.color = 'var(--green)'; }
@@ -776,6 +868,7 @@ async function syncOura() {
 
 function init() {
   updateHeader();
+  renderHome();
   renderMeals();
   renderTraining();
   renderSupps();
@@ -815,6 +908,194 @@ function calcTotals() {
     t.kcal += (f.prot*4)+(f.carb*4)+(f.fat*9);
   });
   return t;
+}
+
+// ─── HOME PAGE ────────────────────────────────────────────────────
+function calculateDayScore() {
+  const t = calcTotals();
+  const s = state[TODAY].supps || {};
+  const sleep = state[TODAY].sleep || {};
+  const foods = state[TODAY].foods || [];
+  const trainDay = state[TODAY].trainDay;
+  const kcal = state[TODAY].kcal || {};
+  
+  let scores = {
+    macros: 0,
+    training: 0,
+    sleep: 0,
+    supps: 0,
+    kcal: 0,
+    steps: 0
+  };
+  
+  // MACROS SCORE (0-100): proteína, carbos y grasas
+  const pctP = Math.min(100, (t.prot / TARGETS.prot) * 100);
+  const pctC = Math.min(100, (t.carb / TARGETS.carb) * 100);
+  const pctF = Math.min(100, (t.fat / TARGETS.fat) * 100);
+  scores.macros = Math.round((pctP + pctC + pctF) / 3);
+  
+  // TRAINING SCORE (0-100): ¿Entrenó y completó ejercicios?
+  if (trainDay === 0) {
+    scores.training = 100; // Descanso es bueno
+  } else {
+    const daySets = state[TODAY]['trainSets_'+trainDay] || {};
+    let totalSets = 0, doneSets = 0;
+    Object.values(daySets).forEach(exSets => {
+      exSets.forEach(s => {
+        totalSets++;
+        if (s.done) doneSets++;
+      });
+    });
+    scores.training = totalSets > 0 ? Math.round((doneSets / totalSets) * 100) : 0;
+  }
+  
+  // SLEEP SCORE (0-100): readiness de Oura
+  if (sleep.readiness) {
+    scores.sleep = sleep.readiness; // Ya es 0-100
+  } else {
+    scores.sleep = 0;
+  }
+  
+  // SUPPS SCORE (0-100): cantidad tomados
+  const suppsDone = Object.values(s).filter(v => v).length;
+  scores.supps = Math.round((suppsDone / SUPPS.length) * 100);
+  
+  // KCAL BALANCE SCORE (0-100): qué tan cerca del objetivo
+  const balance = t.kcal - (kcal.burned || 0);
+  const target = -300; // Déficit de 300 es ideal
+  const diff = Math.abs(balance - target);
+  scores.kcal = Math.max(0, 100 - (diff / 300) * 50);
+  
+  // STEPS SCORE (0-100): pasos (10k es ideal)
+  const steps = state[TODAY].steps || 0;
+  scores.steps = Math.min(100, Math.round((steps / 10000) * 100));
+  
+  // PROMEDIO GENERAL
+  const weights = { macros:0.25, training:0.25, sleep:0.15, supps:0.15, kcal:0.15, steps:0.05 };
+  const overall = Math.round(
+    scores.macros * weights.macros +
+    scores.training * weights.training +
+    scores.sleep * weights.sleep +
+    scores.supps * weights.supps +
+    scores.kcal * weights.kcal +
+    scores.steps * weights.steps
+  );
+  
+  return { overall, scores };
+}
+
+function renderHome() {
+  document.getElementById('homeDate').textContent = document.getElementById('headerDate').textContent;
+  
+  const dayData = calculateDayScore();
+  const overall = dayData.overall;
+  const scores = dayData.scores;
+  
+  // Actualizar círculo principal
+  document.getElementById('dayScore').textContent = overall;
+  
+  // Color y mensaje según score
+  let color, label, msg;
+  if (overall >= 85) {
+    color = 'var(--green)';
+    label = '¡Excelente día!';
+    msg = 'Vas muy bien. Seguí así 💪';
+  } else if (overall >= 70) {
+    color = 'var(--accent)';
+    label = 'Buen día';
+    msg = 'Muy bien, faltan algunos detalles';
+  } else if (overall >= 50) {
+    color = 'var(--yellow)';
+    label = 'Día regular';
+    msg = 'Podés mejorar algunos aspectos';
+  } else {
+    color = 'var(--red)';
+    label = 'Día difícil';
+    msg = 'Mañana es un nuevo día para mejorar';
+  }
+  
+  const dash = document.getElementById('dayScoreDash');
+  if (dash) {
+    dash.style.stroke = color;
+    const offset = 471 - (471 * overall / 100);
+    dash.style.strokeDashoffset = offset;
+  }
+  
+  document.getElementById('dayScore').style.color = color;
+  const labelEl = document.getElementById('dayScoreLabel');
+  if (labelEl) {
+    labelEl.textContent = label;
+    labelEl.style.color = color;
+  }
+  document.getElementById('dayScoreMsg').textContent = msg;
+  
+  // Actualizar tarjetas de métricas
+  const metrics = [
+    { id: 'dayMacroScore', val: scores.macros, icon: '🍽', lbl: 'Macros' },
+    { id: 'dayTrainScore', val: scores.training, icon: '💪', lbl: 'Entreno' },
+    { id: 'daySleepScore', val: scores.sleep, icon: '🌙', lbl: 'Sueño' },
+    { id: 'daySuppScore', val: scores.supps, icon: '💊', lbl: 'Suplementos' },
+    { id: 'dayKcalScore', val: scores.kcal, icon: '🔥', lbl: 'Balance' },
+    { id: 'dayStepsScore', val: scores.steps, icon: '⏰', lbl: 'Pasos' }
+  ];
+  
+  metrics.forEach(m => {
+    const el = document.getElementById(m.id);
+    if (el) {
+      el.textContent = Math.round(m.val) + '%';
+      let metricColor = m.val >= 80 ? 'var(--green)' : m.val >= 60 ? 'var(--yellow)' : 'var(--red)';
+      el.style.color = metricColor;
+    }
+    const statusEl = document.getElementById(m.id.replace('Score', 'Status'));
+    if (statusEl) {
+      if (m.val >= 80) {
+        statusEl.textContent = '✓ Bien';
+        statusEl.style.color = 'var(--green)';
+      } else if (m.val >= 60) {
+        statusEl.textContent = '⚠ Regular';
+        statusEl.style.color = 'var(--yellow)';
+      } else {
+        statusEl.textContent = '✕ Bajo';
+        statusEl.style.color = 'var(--red)';
+      }
+    }
+  });
+  
+  // Sugerencias dinámicas
+  const tips = [];
+  const t = calcTotals();
+  
+  if (scores.macros < 70) {
+    tips.push({ icon: '🥗', msg: 'Necesitas cumplir mejor tus macros. Faltá proteína o carbos.' });
+  }
+  if (scores.training < 50 && state[TODAY].trainDay !== 0) {
+    tips.push({ icon: '💪', msg: 'Completá tu entrenamiento de hoy para maximizar el progreso.' });
+  }
+  if (scores.sleep < 60 && state[TODAY].sleep && state[TODAY].sleep.readiness) {
+    tips.push({ icon: '😴', msg: 'Tu disposición está baja. Considera descansar más o entrenar light.' });
+  }
+  if (scores.supps < 80) {
+    tips.push({ icon: '💊', msg: 'Olvidaste algunos suplementos. Recordá tomarlos según el horario.' });
+  }
+  if (scores.kcal < 60) {
+    tips.push({ icon: '⚖️', msg: 'Tu balance calórico está lejos del objetivo. Revisa tu ingesta.' });
+  }
+  if (scores.steps < 50) {
+    tips.push({ icon: '🚶', msg: 'Pocos pasos hoy. Intentá caminar más durante el día.' });
+  }
+  if (tips.length === 0) {
+    tips.push({ icon: '⭐', msg: '¡Vas muy bien! Seguí con esta disciplina.' });
+  }
+  
+  const tipsContainer = document.getElementById('homeTipsContainer');
+  if (tipsContainer) {
+    tipsContainer.innerHTML = tips.slice(0, 3).map(t =>
+      '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:10px 12px;margin-bottom:6px;display:flex;gap:8px;align-items:center">' +
+      '<div style="font-size:16px">' + t.icon + '</div>' +
+      '<div style="flex:1;font-size:11px;color:var(--text2)">' + t.msg + '</div>' +
+      '</div>'
+    ).join('');
+  }
 }
 
 function renderMeals() {
@@ -894,12 +1175,14 @@ function addFood() {
   document.getElementById('foodName').value=''; document.getElementById('foodProt').value='';
   document.getElementById('foodCarb').value=''; document.getElementById('foodFat').value='';
   renderMeals();
+  renderHome();
   showToast('Alimento agregado ✓');
 }
 function removeFood(id) {
   state[TODAY].foods = state[TODAY].foods.filter(f => f.id !== id);
   saveState(state);
   renderMeals();
+  renderHome();
 }
 
 // ─── TRAINING ────────────────────────────────────────────────────
@@ -1009,6 +1292,7 @@ function toggleSet(exIdx, sIdx) {
   if (allSets.every(s => s.done)) saveExerciseHistory(day, exIdx, allSets);
   renderTraining();
   renderTrainSuggestions();
+  renderHome();
   populateExSelect();
 }
 
@@ -1052,6 +1336,7 @@ function toggleSupp(id) {
   state[TODAY].supps[id] = !state[TODAY].supps[id];
   saveState(state);
   renderSupps();
+  renderHome();
   if (state[TODAY].supps[id]) showToast('Suplemento marcado ✓');
 }
 
