@@ -761,13 +761,26 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 
 <script>
 // ─── STATE ────────────────────────────────────────────────────────
-const TODAY = new Date().toISOString().split('T')[0];
+const TODAY = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
 
 function loadState() {
   try { return JSON.parse(localStorage.getItem('fittrack') || '{}'); } catch(e) { return {}; }
 }
 function saveState(s) {
   localStorage.setItem('fittrack', JSON.stringify(s));
+}
+
+// Ciclo automático: 1 → 2 → Descanso → 3 → 4 → 5 → Descanso → ...
+// Día 1 = Lunes 23 Feb 2026
+const CYCLE = [1, 2, 0, 3, 4, 5, 0]; // 0 = Descanso
+const CYCLE_START = new Date('2026-02-23'); // Día 1 del ciclo
+
+function getAutoTrainDay() {
+  const today = new Date(TODAY);
+  const diffMs = today - CYCLE_START;
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+  const idx = ((diffDays % CYCLE.length) + CYCLE.length) % CYCLE.length;
+  return CYCLE[idx];
 }
 
 let state = loadState();
@@ -780,7 +793,7 @@ if (allKeys.length > 30) {
   saveState(state);
 }
 
-if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: state.lastTrainDay || 1 };
+if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: getAutoTrainDay() };
 if (!state.metricsHistory) state.metricsHistory = [];
 if (!state.kcalHistory) state.kcalHistory = [];
 if (!state.exerciseHistory) state.exerciseHistory = {};
@@ -1216,12 +1229,10 @@ let trainingSets = {};
 
 function setTrainDay(day) {
   state[TODAY].trainDay = day;
-  state.lastTrainDay = day;
   trainingSets = {};
   saveState(state);
   updateHeader();
   renderTraining();
-  // Update btn styles
   for(let i=0;i<=5;i++) {
     const b = document.getElementById('tbtn'+i);
     if(b) b.className = 'btn btn-sm ' + (i===day?'btn-primary':'btn-ghost');
