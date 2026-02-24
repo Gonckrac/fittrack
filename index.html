@@ -105,6 +105,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .set-row { display:grid; grid-template-columns:30px 1fr 1fr 40px; gap:8px; align-items:center; margin-bottom:6px; }
 .set-num { font-size:11px; color:var(--text3); font-family:'Space Mono', monospace; text-align:center; }
 .set-input { background:var(--bg4); border:1px solid var(--border); border-radius:6px; padding:6px 8px; color:var(--text); font-size:13px; font-family:'Space Mono', monospace; width:100%; text-align:center; outline:none; }
+.set-input::placeholder { color:var(--text3); font-size:12px; }
 .set-input:focus { border-color:var(--accent); }
 .set-check { width:28px; height:28px; border-radius:6px; border:2px solid var(--border); background:none; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:14px; transition:all 0.2s; }
 .set-check.done { background:var(--green); border-color:var(--green); }
@@ -230,6 +231,17 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .ex-history-val { font-size:12px; font-family:'Space Mono',monospace; color:var(--text); }
 .ex-history-pr { font-size:10px; color:var(--yellow); font-weight:700; margin-left:6px; }
 .ex-select { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:8px 12px; color:var(--text); font-size:12px; font-family:'DM Sans',sans-serif; outline:none; width:100%; margin-bottom:12px; }
+/* PROGRESSION TARGET */
+.prog-target { background:rgba(77,138,255,0.08); border:1px solid rgba(77,138,255,0.25); border-radius:8px; padding:8px 12px; margin-bottom:8px; display:flex; align-items:center; gap:8px; }
+.prog-target-icon { font-size:14px; flex-shrink:0; }
+.prog-target-text { flex:1; font-size:11px; color:var(--accent); font-weight:600; line-height:1.4; }
+.prog-target-sub { font-size:10px; color:var(--text2); font-weight:400; margin-top:1px; }
+.prog-target.warn { background:rgba(255,212,77,0.08); border-color:rgba(255,212,77,0.25); }
+.prog-target.warn .prog-target-text { color:var(--yellow); }
+.prog-target.success { background:rgba(77,255,180,0.08); border-color:rgba(77,255,180,0.3); }
+.prog-target.success .prog-target-text { color:var(--green); }
+.pr-flash { animation: prFlash 0.6s ease; }
+@keyframes prFlash { 0%{background:rgba(77,255,180,0.25)} 100%{background:transparent} }
 /* AI CHAT MODAL */
 .ai-modal { background:var(--bg2); border-radius:24px 24px 0 0; width:100%; max-width:430px; transform:translateY(100%); transition:transform 0.3s ease; height:85vh; display:flex; flex-direction:column; overflow:hidden; }
 .modal-overlay.open .ai-modal { transform:translateY(0); }
@@ -1227,6 +1239,57 @@ function removeFood(id) {
 // ─── TRAINING ────────────────────────────────────────────────────
 let trainingSets = {};
 
+// ─── DOUBLE PROGRESSION TARGET ───────────────────────────────────
+function getProgressionTarget(exName, repRange) {
+  const history = (state.exerciseHistory || {})[exName] || [];
+  if (history.length === 0) return null;
+
+  const latest = history[0];
+  const ex = findExByName(exName);
+  const parts = repRange ? repRange.split('-') : [];
+  const minReps = parts.length >= 1 ? +parts[0] : null;
+  const maxReps = parts.length >= 2 ? +parts[1] : null;
+
+  if (!minReps || !maxReps || !latest.maxKg) return {
+    type: 'info',
+    line1: `Última sesión: ${latest.maxKg}kg × ${latest.avgReps || '?'} reps`,
+    line2: 'Igualá o superá esa marca hoy.'
+  };
+
+  const avgReps = latest.avgReps || minReps;
+
+  if (avgReps >= maxReps) {
+    // Reached top of range — increase weight
+    const nextKg = (latest.maxKg + 2.5).toFixed(1);
+    return {
+      type: 'warn',
+      line1: `🔼 Subí a ${nextKg}kg × ${minReps} reps`,
+      line2: `Última vez: ${latest.maxKg}kg × ${avgReps} reps (tope del rango)`
+    };
+  } else {
+    // Add a rep
+    const nextReps = avgReps + 1;
+    return {
+      type: 'info',
+      line1: `🎯 Apuntá a ${latest.maxKg}kg × ${nextReps} reps`,
+      line2: `Última vez: ${latest.maxKg}kg × ${avgReps} reps`
+    };
+  }
+}
+
+// Check if completing these sets is a new PR
+function checkIfPR(exName, sets) {
+  const history = (state.exerciseHistory || {})[exName] || [];
+  const kgVals = sets.map(s => parseFloat(s.kg)).filter(v => !isNaN(v) && v > 0);
+  if (!kgVals.length) return false;
+  const maxKg = Math.max(...kgVals);
+  const repsVals = sets.map(s => parseFloat(s.reps)).filter(v => !isNaN(v) && v > 0);
+  const avgReps = repsVals.length ? Math.round(repsVals.reduce((a,b)=>a+b,0)/repsVals.length) : 0;
+  const oneRM = avgReps ? Math.round(maxKg * (1 + avgReps / 30)) : maxKg;
+  const prevBest = history.length ? Math.max(...history.map(h => h.oneRM || h.maxKg)) : 0;
+  return oneRM > prevBest;
+}
+
 function setTrainDay(day) {
   state[TODAY].trainDay = day;
   trainingSets = {};
@@ -1268,15 +1331,37 @@ function renderTraining() {
 
     const exSets = savedSets[exIdx] || Array.from({length:ex.sets}, () => ({kg:'',reps:'',done:false}));
 
-    const setsHtml = exSets.map((s, sIdx) => `
+    // Get last session's per-set data for placeholders
+    const lastSession = (state.exerciseHistory || {})[ex.name]?.[0];
+    const lastSetsLog = lastSession?.setsLog || [];
+
+    const setsHtml = exSets.map((s, sIdx) => {
+      const prev = lastSetsLog[sIdx];
+      const kgPlaceholder = prev?.kg ? prev.kg + 'kg' : 'kg';
+      const repsPlaceholder = prev?.reps ? prev.reps + ' reps' : ex.reps;
+      return `
       <div class="set-row">
         <div class="set-num">${sIdx+1}</div>
-        <input class="set-input" placeholder="kg" value="${s.kg||''}" oninput="updateSet(${exIdx},${sIdx},'kg',this.value)">
-        <input class="set-input" placeholder="${ex.reps}" value="${s.reps||''}" oninput="updateSet(${exIdx},${sIdx},'reps',this.value)">
+        <input class="set-input" placeholder="${kgPlaceholder}" value="${s.kg||''}" oninput="updateSet(${exIdx},${sIdx},'kg',this.value)" ${!s.kg && prev?.kg ? 'style="color:var(--text3)"' : ''}>
+        <input class="set-input" placeholder="${repsPlaceholder}" value="${s.reps||''}" oninput="updateSet(${exIdx},${sIdx},'reps',this.value)" ${!s.reps && prev?.reps ? 'style="color:var(--text3)"' : ''}>
         <button class="set-check ${s.done?'done':''}" id="sc-${exIdx}-${sIdx}" onclick="toggleSet(${exIdx},${sIdx})">${s.done?'✓':''}</button>
-      </div>`).join('');
+      </div>`;
+    }).join('');
 
     const doneCount = exSets.filter(s=>s.done).length;
+    const allDone = doneCount === exSets.length && exSets.length > 0;
+    const isPR = allDone && checkIfPR(ex.name, exSets);
+
+    // Progression target banner
+    const target = getProgressionTarget(ex.name, ex.reps);
+    const targetHtml = target ? `
+      <div class="prog-target ${target.type}" style="margin-bottom:8px">
+        <div class="prog-target-icon">${target.type==='warn'?'🔼':target.type==='success'?'🏆':'🎯'}</div>
+        <div>
+          <div class="prog-target-text">${target.line1}</div>
+          <div class="prog-target-sub">${target.line2}</div>
+        </div>
+      </div>` : '';
 
     card.innerHTML = `
       <div class="exercise-header" onclick="toggleExCard(${exIdx})">
@@ -1284,12 +1369,13 @@ function renderTraining() {
           <div class="exercise-name">${ex.name}</div>
           <div class="exercise-muscle">${ex.muscle} · ${ex.sets}x${ex.reps}</div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${doneCount > 0 ? `<span class="tag tag-green">${doneCount}/${ex.sets}</span>` : ''}
+        <div style="display:flex;align-items:center;gap:6px">
+          ${isPR ? `<span class="tag tag-green">🏆 PR</span>` : doneCount > 0 ? `<span class="tag tag-green">${doneCount}/${ex.sets}</span>` : ''}
           <div class="exercise-chevron">▾</div>
         </div>
       </div>
       <div class="sets-container">
+        ${targetHtml}
         ${setsHtml}
         <button class="add-set-btn" onclick="addSet(${exIdx})">+ Serie</button>
       </div>`;
@@ -1324,9 +1410,21 @@ function toggleSet(exIdx, sIdx) {
   const btn = document.getElementById(`sc-${exIdx}-${sIdx}`);
   btn.className = 'set-check ' + (s.done ? 'done' : '');
   btn.textContent = s.done ? '✓' : '';
-  if (s.done) showToast('Serie completada ✓');
   const allSets = state[TODAY]['trainSets_'+day][exIdx];
-  if (allSets.every(s => s.done)) saveExerciseHistory(day, exIdx, allSets);
+  const allDone = allSets.every(s => s.done);
+  if (s.done) {
+    if (allDone) {
+      const ex = TRAINING[day]?.exercises[exIdx];
+      if (ex && checkIfPR(ex.name, allSets)) {
+        showToast('🏆 ¡NUEVO PR en ' + ex.name + '!');
+      } else {
+        showToast('✓ Ejercicio completado');
+      }
+    } else {
+      showToast('Serie completada ✓');
+    }
+  }
+  if (allDone) saveExerciseHistory(day, exIdx, allSets);
   renderTraining();
   renderTrainSuggestions();
   renderHome();
@@ -1437,7 +1535,9 @@ function saveExerciseHistory(day, exIdx, sets) {
   const maxKg = Math.max(...kgVals);
   const avgReps = repsVals.length ? Math.round(repsVals.reduce((a,b)=>a+b,0)/repsVals.length) : null;
   const oneRM = avgReps ? Math.round(maxKg * (1 + avgReps / 30)) : maxKg;
-  state.exerciseHistory[key].unshift({ date:TODAY, maxKg, avgReps, oneRM, sets:sets.length });
+  // Save individual sets too so we can show them as placeholders next session
+  const setsLog = sets.map(s => ({ kg: s.kg || '', reps: s.reps || '' }));
+  state.exerciseHistory[key].unshift({ date:TODAY, maxKg, avgReps, oneRM, sets:sets.length, setsLog });
   if (state.exerciseHistory[key].length > 40) state.exerciseHistory[key] = state.exerciseHistory[key].slice(0,40);
   saveState(state);
 }
