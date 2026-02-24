@@ -588,8 +588,10 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
 
       <div class="section-div">Manana — con el desayuno</div>
       <div class="supps-grid" id="suppsMorning"></div>
-      <div class="section-div">Mediodia — con el almuerzo</div>
-      <div class="supps-grid" id="suppsNoon"></div>
+      <div id="suppsSectionNoon">
+        <div class="section-div">Mediodia — con el almuerzo</div>
+        <div class="supps-grid" id="suppsNoon"></div>
+      </div>
       <div class="section-div">Noche — antes de dormir</div>
       <div class="supps-grid" id="suppsNight"></div>
     </div>
@@ -1090,14 +1092,22 @@ const TRAINING = {
   ]},
 };
 
+// Martes 24 Feb 2026 = día ON para suplementos "día por medio"
+const EVERY_OTHER_REF = new Date('2026-02-24T00:00:00');
+
+function isSuppActiveToday(s) {
+  if (!s.everOther) return true;
+  const today = new Date(TODAY + 'T00:00:00');
+  const diffDays = Math.round((today - EVERY_OTHER_REF) / (1000 * 60 * 60 * 24));
+  return diffDays % 2 === 0; // par = ON (hoy martes 24 y cada 2 días)
+}
+
 const SUPPS = [
-  { id:"creatina",  name:"Creatina",       dose:"5g (4 caps)",        time:"Manana", group:"morning" },
-  { id:"d3k2",      name:"D3 + K2",        dose:"1 softgel",          time:"Manana", group:"morning" },
-  { id:"vitc",      name:"Vitamina C",     dose:"1 capsula",          time:"Manana", group:"morning" },
-  { id:"omega3",    name:"Omega 3",        dose:"2 softgels",         time:"Mediodia", group:"noon" },
-  { id:"astax",     name:"Astaxanthin",    dose:"1 softgel",          time:"Mediodia", group:"noon" },
-  { id:"magglicin", name:"Mag. Glicinato", dose:"2 softgels",         time:"Noche", group:"night" },
-  { id:"magthreon", name:"Mag. L-Treonato","dose":"3 capsulas",       time:"Noche", group:"night" },
+  { id:"creatina",  name:"Creatina",       dose:"5g",        time:"Manana", group:"morning" },
+  { id:"omega3",    name:"Omega 3",        dose:"diario",    time:"Manana", group:"morning" },
+  { id:"d3k2",      name:"D3 + K2",        dose:"1 softgel", time:"Manana", group:"morning", everOther:true },
+  { id:"vitc",      name:"Vitamina C",     dose:"1000 mg",   time:"Manana", group:"morning", everOther:true },
+  { id:"magglicin", name:"Mag. Glicinato", dose:"160 mg",    time:"Noche",  group:"night"   },
 ];
 
 // ─── INIT ────────────────────────────────────────────────────────
@@ -1683,25 +1693,33 @@ function renderSupps() {
   const groups = {morning: document.getElementById('suppsMorning'), noon: document.getElementById('suppsNoon'), night: document.getElementById('suppsNight')};
   Object.values(groups).forEach(g => g.innerHTML = '');
 
+  // Solo los suplementos activos hoy (filtra los "día por medio" cuando no toca)
+  const todaySupps = SUPPS.filter(s => isSuppActiveToday(s));
+
   let doneCount = 0;
-  SUPPS.forEach(s => {
+  todaySupps.forEach(s => {
     if (taken[s.id]) doneCount++;
     const div = document.createElement('div');
     div.className = 'supp-item ' + (taken[s.id] ? 'taken' : '');
     div.onclick = () => toggleSupp(s.id);
+    const badge = s.everOther ? '<span style="font-size:9px;color:var(--accent);background:rgba(77,138,255,0.15);border-radius:4px;padding:1px 5px;margin-left:4px">día por medio</span>' : '';
     div.innerHTML = `
       <div class="supp-check">${taken[s.id]?'✓':''}</div>
       <div class="supp-info">
-        <div class="supp-name">${s.name}</div>
+        <div class="supp-name">${s.name}${badge}</div>
         <div class="supp-dose">${s.dose}</div>
       </div>
       <div class="supp-time">${s.time}</div>`;
     groups[s.group].appendChild(div);
   });
 
+  // Hide sections that have no supplements
+  const noonSection = document.getElementById('suppsSectionNoon');
+  if (noonSection) noonSection.style.display = groups.noon.children.length > 0 ? '' : 'none';
+
   document.getElementById('suppDoneCount').textContent = doneCount;
-  document.getElementById('suppTotal').textContent = SUPPS.length;
-  document.getElementById('suppBar').style.width = Math.round(doneCount/SUPPS.length*100) + '%';
+  document.getElementById('suppTotal').textContent = todaySupps.length;
+  document.getElementById('suppBar').style.width = todaySupps.length > 0 ? Math.round(doneCount/todaySupps.length*100) + '%' : '0%';
 }
 
 function toggleSupp(id) {
