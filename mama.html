@@ -336,6 +336,19 @@ body.theme-dark { --accent:#4d8aff; --accent2:#ff6b4d; --green:#4dffb4; --bg:#05
 .plan-val { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--accent); }
 .plan-tip { font-size:11px; color:var(--text2); line-height:1.5; margin-top:12px; padding:10px 12px; background:rgba(77,138,255,0.08); border-radius:8px; border-left:3px solid var(--accent); }
 
+/* ── WEIGHT GOAL BAR ── */
+.weight-goal-bar-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:12px; }
+.weight-goal-bar-title { font-size:11px; font-weight:700; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; display:flex; align-items:center; gap:6px; }
+.weight-goal-labels { display:flex; justify-content:space-between; margin-bottom:6px; }
+.weight-goal-start { font-size:12px; color:var(--text3); font-family:'Space Mono',monospace; }
+.weight-goal-target { font-size:12px; color:var(--green); font-family:'Space Mono',monospace; font-weight:700; }
+.weight-goal-track { height:12px; background:var(--bg4); border-radius:6px; overflow:hidden; position:relative; }
+.weight-goal-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,var(--accent),var(--green)); transition:width 0.6s ease; }
+.weight-goal-info { display:flex; justify-content:space-between; margin-top:8px; }
+.weight-goal-lost { font-size:12px; font-weight:700; color:var(--green); font-family:'Space Mono',monospace; }
+.weight-goal-remaining { font-size:12px; color:var(--text2); font-family:'Space Mono',monospace; }
+.weight-goal-pct { font-size:11px; color:var(--text2); }
+
 /* ── ACTIVITY SELECTOR ── */
 .activity-opts { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
 .activity-opt { padding:12px 14px; background:var(--bg3); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.2s; }
@@ -611,6 +624,21 @@ body.theme-dark { --accent:#4d8aff; --accent2:#ff6b4d; --green:#4dffb4; --bg:#05
 
     <!-- METRICS (solo peso) -->
     <div class="page" id="page-metrics">
+      <!-- BARRA DE META DE PESO -->
+      <div class="weight-goal-bar-wrap" id="weightGoalBar" style="display:none">
+        <div class="weight-goal-bar-title"><span>🎯</span> Progreso hacia tu meta</div>
+        <div class="weight-goal-labels">
+          <span class="weight-goal-start" id="wgStart">—</span>
+          <span class="weight-goal-target" id="wgTarget">Meta: —</span>
+        </div>
+        <div class="weight-goal-track">
+          <div class="weight-goal-fill" id="wgFill" style="width:0%"></div>
+        </div>
+        <div class="weight-goal-info">
+          <span class="weight-goal-lost" id="wgLost">−0 kg bajados</span>
+          <span class="weight-goal-remaining" id="wgRemaining">Faltan — kg</span>
+        </div>
+      </div>
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-val" id="metricWeight">—</div>
@@ -1726,6 +1754,30 @@ function renderMetrics() {
     el.textContent = (+diff>0?'▲ +':'▼ ')+diff+' kg vs anterior';
     el.className = 'metric-change '+(+diff>0?'up':'down');
   }
+
+  // ── BARRA DE PROGRESO DE META ────────────────────────────────────
+  var goalBar = document.getElementById('weightGoalBar');
+  if (hist.length > 0 && latest && latest.weight) {
+    // El peso inicial es el primero que se registró (el más antiguo)
+    var oldest = hist[hist.length - 1];
+    var startWeight = oldest.weight;
+    var targetWeight = startWeight - 10; // meta: bajar 10 kg
+    var currentWeight = latest.weight;
+    var totalToLose = startWeight - targetWeight; // siempre 10
+    var lost = Math.max(0, startWeight - currentWeight);
+    var pct = Math.min(100, Math.round(lost / totalToLose * 100));
+    var remaining = Math.max(0, currentWeight - targetWeight);
+
+    document.getElementById('wgStart').textContent = startWeight.toFixed(1)+' kg';
+    document.getElementById('wgTarget').textContent = 'Meta: '+targetWeight.toFixed(1)+' kg';
+    document.getElementById('wgFill').style.width = pct+'%';
+    document.getElementById('wgLost').textContent = '−'+lost.toFixed(1)+' kg bajados';
+    document.getElementById('wgRemaining').textContent = remaining > 0 ? 'Faltan '+remaining.toFixed(1)+' kg' : '¡Meta alcanzada! 🎉';
+    goalBar.style.display = 'block';
+  } else {
+    if (goalBar) goalBar.style.display = 'none';
+  }
+  // ─────────────────────────────────────────────────────────────────
   var data = hist.slice().reverse().filter(function(h){return h.weight;}).map(function(h){return {val:h.weight,label:h.date.slice(5)};});
   var statsEl = document.getElementById('bodyChartStats');
   if (data.length >= 2) {
