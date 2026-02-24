@@ -275,8 +275,53 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .ai-inp::placeholder { color:var(--text3); }
 .ai-send-btn { width:40px; height:40px; border-radius:50%; background:var(--accent); border:none; color:white; font-size:18px; cursor:pointer; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
 .ai-send-btn:disabled { background:var(--bg4); cursor:not-allowed; }
-/* HOME DASHBOARD */
-.home-greeting { font-size:22px; font-weight:700; color:var(--text); margin-bottom:2px; }
+/* ── FULL COLOR THEMES (bg + borders + accent + text + card) ── */
+/* Default = Noche (dark blue) — no class needed */
+body.theme-rose     { --accent:#ff6b9d; --accent2:#ff9b6b; --green:#4dffb4; --red:#ff6b4d; --yellow:#ffd44d; --bg:#0f0508; --bg2:#180a0e; --bg3:#200c12; --bg4:#2a1018; --border:#3d1a24; --card:#0d0609; --text2:#b87b8a; --text3:#6b3d4a; }
+body.theme-lavender { --accent:#a78bfa; --accent2:#f472b6; --green:#4dffb4; --red:#f472b6; --yellow:#fbbf24; --bg:#080510; --bg2:#0e0918; --bg3:#140d20; --bg4:#1a1228; --border:#2d1f4a; --card:#060410; --text2:#8b7ab8; --text3:#4a3d70; }
+body.theme-emerald  { --accent:#10d9a0; --accent2:#fbbf24; --green:#10d9a0; --red:#ef4444; --yellow:#fbbf24; --bg:#050f0a; --bg2:#081812; --bg3:#0c2018; --bg4:#102818; --border:#1a3d2a; --card:#040d08; --text2:#5a9b7a; --text3:#2d5a3d; }
+body.theme-sunset   { --accent:#f97316; --accent2:#eab308; --green:#4dffb4; --red:#ef4444; --yellow:#eab308; --bg:#0f0800; --bg2:#180f00; --bg3:#201500; --bg4:#281c00; --border:#3d2a00; --card:#0d0700; --text2:#b88a40; --text3:#6b4d1a; }
+body.theme-ocean    { --accent:#06b6d4; --accent2:#8b5cf6; --green:#4dffb4; --red:#ef4444; --yellow:#ffd44d; --bg:#00090f; --bg2:#000f18; --bg3:#001520; --bg4:#001b28; --border:#003040; --card:#00070d; --text2:#2a7a9a; --text3:#0a4a5a; }
+body.theme-crimson  { --accent:#ff3860; --accent2:#ff8c42; --green:#4dffb4; --red:#ff3860; --yellow:#ffd44d; --bg:#0f0508; --bg2:#180a0d; --bg3:#200c10; --bg4:#2a1015; --border:#3d1520; --card:#0d0407; --text2:#b8607a; --text3:#6b2d3d; }
+body.theme-gold     { --accent:#f7b731; --accent2:#fd9644; --green:#26de81; --red:#fc5c65; --yellow:#f7b731; --bg:#0d0900; --bg2:#160f00; --bg3:#1e1500; --bg4:#271c00; --border:#3d2e00; --card:#0b0800; --text2:#a88a3a; --text3:#5a4a1a; }
+body.theme-steel    { --accent:#94a3b8; --accent2:#64748b; --green:#4dffb4; --red:#f87171; --yellow:#fbbf24; --bg:#050507; --bg2:#08080c; --bg3:#0d0d14; --bg4:#12121e; --border:#1e1e2e; --card:#040407; --text2:#64748b; --text3:#334155; }
+body.theme-mint     { --accent:#2dd4bf; --accent2:#34d399; --green:#34d399; --red:#f87171; --yellow:#fbbf24; --bg:#030d0c; --bg2:#051210; --bg3:#081a18; --bg4:#0c2220; --border:#133d38; --card:#020b0a; --text2:#3d8a80; --text3:#1a4a45; }
+body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --red:#db2777; --yellow:#fbbf24; --bg:#060408; --bg2:#0a0710; --bg3:#100b18; --bg4:#160f20; --border:#2d1f45; --card:#040308; --text2:#6b5a8a; --text3:#3d2d5a; }
+
+/* HYDRATION */
+.hydration-widget { display:flex; flex-direction:column; align-items:center; gap:16px; padding:8px 0; }
+.glass-wrap { position:relative; width:100px; height:160px; cursor:pointer; }
+.glass-svg { width:100%; height:100%; overflow:visible; filter:drop-shadow(0 4px 20px rgba(77,138,255,0.25)); }
+.glass-label { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; pointer-events:none; }
+.glass-pct { font-family:'Space Mono', monospace; font-size:22px; font-weight:700; color:var(--text); text-shadow:0 1px 4px rgba(0,0,0,0.7); }
+.glass-ml { font-size:10px; color:var(--text2); margin-top:2px; }
+.water-fill { transition:height 0.6s cubic-bezier(0.34,1.56,0.64,1), y 0.6s cubic-bezier(0.34,1.56,0.64,1); }
+.wave-path { animation: waveAnim 2s ease-in-out infinite; }
+@keyframes waveAnim { 0%,100%{d:path("M0,8 Q20,0 40,8 Q60,16 80,8 L80,40 L0,40 Z")} 50%{d:path("M0,8 Q20,16 40,8 Q60,0 80,8 L80,40 L0,40 Z")} }
+.hydration-btns { display:flex; flex-direction:column; gap:8px; width:100%; }
+.hydration-quick { display:flex; gap:6px; flex-wrap:wrap; }
+.hydration-btn { flex:1; min-width:60px; padding:8px 6px; background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); color:var(--accent); font-size:12px; font-weight:700; cursor:pointer; font-family:'Space Mono', monospace; transition:all 0.2s; text-align:center; }
+.hydration-btn:active { background:var(--accent); color:white; transform:scale(0.95); }
+.hydration-meta { display:flex; justify-content:space-between; font-size:11px; color:var(--text2); width:100%; }
+.hydration-reset { background:none; border:none; color:var(--text3); font-size:11px; cursor:pointer; font-family:'DM Sans',sans-serif; padding:0; }
+.hydration-reset:hover { color:var(--red); }
+
+/* GOAL BARS in metrics */
+.goal-section { margin-bottom:12px; }
+.goal-bar-wrap { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:14px; margin-bottom:8px; }
+.goal-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.goal-title { font-size:12px; font-weight:700; color:var(--text); }
+.goal-values { font-size:11px; color:var(--text2); font-family:'Space Mono',monospace; }
+.goal-track { height:14px; background:var(--bg4); border-radius:7px; overflow:hidden; position:relative; }
+.goal-fill { height:100%; border-radius:7px; transition:width 0.8s cubic-bezier(0.34,1.56,0.64,1); position:relative; }
+.goal-fill::after { content:''; position:absolute; top:0; left:0; right:0; height:50%; background:rgba(255,255,255,0.15); border-radius:7px 7px 0 0; }
+.goal-fill.bf-fill { background:linear-gradient(90deg, var(--green), var(--yellow)); }
+.goal-fill.muscle-fill { background:linear-gradient(90deg, var(--accent), var(--green)); }
+.goal-status { font-size:10px; margin-top:6px; font-weight:600; }
+.goal-status.good { color:var(--green); }
+.goal-status.warn { color:var(--yellow); }
+.goal-status.far  { color:var(--red); }
+ { font-size:22px; font-weight:700; color:var(--text); margin-bottom:2px; }
 .home-sub { font-size:12px; color:var(--text2); margin-bottom:16px; }
 .home-balance { background:linear-gradient(135deg,#1a1a2e,#16213e); border:1px solid var(--border); border-radius:var(--radius); padding:20px; margin-bottom:12px; text-align:center; position:relative; overflow:hidden; }
 .home-balance::before { content:''; position:absolute; top:-40px; right:-40px; width:120px; height:120px; border-radius:50%; background:var(--accent); opacity:0.06; }
@@ -304,6 +349,21 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .home-oura-info { flex:1; }
 .home-oura-title { font-size:13px; font-weight:700; color:var(--text); }
 .home-oura-sub { font-size:11px; color:var(--text2); margin-top:2px; }
+
+/* THEME PICKER DROPDOWN */
+.theme-picker-overlay { position:fixed; inset:0; z-index:98; display:none; }
+.theme-picker-overlay.open { display:block; }
+.theme-picker-dropdown { position:fixed; top:62px; right:12px; z-index:99; background:var(--bg2); border:1px solid var(--border); border-radius:16px; padding:14px; width:284px; box-shadow:0 8px 32px rgba(0,0,0,0.7); opacity:0; transform:translateY(-8px) scale(0.97); transition:opacity 0.2s, transform 0.2s; pointer-events:none; max-width:calc(100vw - 24px); }
+.theme-picker-dropdown.open { opacity:1; transform:translateY(0) scale(1); pointer-events:all; }
+.theme-picker-title { font-size:10px; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:1px; margin-bottom:10px; }
+.theme-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; }
+.theme-card { border-radius:12px; padding:12px 8px; text-align:center; cursor:pointer; border:2px solid transparent; transition:all 0.2s; position:relative; }
+.theme-card.active { border-color:rgba(255,255,255,0.9); transform:scale(1.05); }
+.theme-card .tc-dots { display:flex; gap:3px; justify-content:center; margin-bottom:6px; }
+.theme-card .tc-dot { width:10px; height:10px; border-radius:50%; }
+.theme-card .tc-name { font-size:10px; font-weight:700; color:rgba(255,255,255,0.9); text-shadow:0 1px 3px rgba(0,0,0,0.6); letter-spacing:0.2px; }
+.theme-card .tc-check { position:absolute; top:5px; right:5px; font-size:11px; opacity:0; }
+.theme-card.active .tc-check { opacity:1; }
 
 /* HOME DASHBOARD */
 .day-score-circle { width:180px; height:180px; margin:20px auto; position:relative; }
@@ -335,6 +395,10 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <div class="header-date" id="headerDate"></div>
     </div>
     <div class="header-right">
+      <button id="themePickerBtn" onclick="toggleThemePicker(event)" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;color:var(--text2);display:flex;align-items:center;gap:5px;transition:all 0.2s">
+        <span id="themePickerDot" style="width:10px;height:10px;border-radius:50%;background:var(--accent);flex-shrink:0;display:inline-block"></span>
+        <span style="font-size:11px;font-weight:600">Tema</span>
+      </button>
       <div class="day-badge" id="dayBadge">DIA 1</div>
     </div>
   </div>
@@ -348,6 +412,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     <button class="tab" onclick="showPage('metrics')"><span class="tab-icon">📊</span>Metricas</button>
     <button class="tab" onclick="showPage('sleep')"><span class="tab-icon">🌙</span>Sueno</button>
     <button class="tab" onclick="showPage('kcal')"><span class="tab-icon">🔥</span>Kcal</button>
+    <button class="tab" onclick="showPage('water')"><span class="tab-icon">💧</span>Agua</button>
   </div>
 
   <!-- CONTENT -->
@@ -409,10 +474,10 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
             <div class="day-metric-status" id="dayKcalStatus"></div>
           </div>
           <div class="day-metric-item">
-            <div class="day-metric-icon">⏰</div>
-            <div class="day-metric-val" id="dayStepsScore">—</div>
-            <div class="day-metric-lbl">Pasos</div>
-            <div class="day-metric-status" id="dayStepsStatus"></div>
+            <div class="day-metric-icon">💧</div>
+            <div class="day-metric-val" id="dayWaterScore">—</div>
+            <div class="day-metric-lbl">Agua</div>
+            <div class="day-metric-status" id="dayWaterStatus"></div>
           </div>
         </div>
 
@@ -531,6 +596,34 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 
     <!-- ═══ METRICS PAGE ═══ -->
     <div class="page" id="page-metrics">
+
+      <!-- GOAL BARS -->
+      <div class="goal-section">
+        <div class="card-title" style="margin-bottom:8px"><span>🎯</span> Progreso hacia el objetivo</div>
+
+        <div class="goal-bar-wrap">
+          <div class="goal-header">
+            <div class="goal-title">🟡 % Grasa corporal</div>
+            <div class="goal-values"><span id="goalBfCurrent">—</span> → <span style="color:var(--green)">12%</span></div>
+          </div>
+          <div class="goal-track">
+            <div class="goal-fill bf-fill" id="goalBfBar" style="width:0%"></div>
+          </div>
+          <div class="goal-status" id="goalBfStatus"></div>
+        </div>
+
+        <div class="goal-bar-wrap">
+          <div class="goal-header">
+            <div class="goal-title">🟢 % Muscular</div>
+            <div class="goal-values"><span id="goalMuscCurrent">—</span> → <span style="color:var(--accent)">mantener/subir</span></div>
+          </div>
+          <div class="goal-track">
+            <div class="goal-fill muscle-fill" id="goalMuscBar" style="width:0%"></div>
+          </div>
+          <div class="goal-status" id="goalMuscStatus"></div>
+        </div>
+      </div>
+
       <div class="metrics-grid">
         <div class="metric-card">
           <div class="metric-val" id="metricWeight">—</div>
@@ -682,6 +775,91 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
       <div id="kcalHistory"></div>
     </div>
 
+    <!-- ═══ WATER PAGE ═══ -->
+    <div class="page" id="page-water">
+      <div class="card" style="text-align:center;padding:24px 20px">
+        <div class="card-title" style="justify-content:center;margin-bottom:20px"><span>💧</span> Hidratación del día</div>
+
+        <!-- BIG GLASS -->
+        <div style="display:flex;justify-content:center;margin-bottom:20px">
+          <div class="glass-wrap" onclick="addWater(250)" style="width:120px;height:192px">
+            <svg class="glass-svg" viewBox="0 0 80 140" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <clipPath id="glassClipW">
+                  <path d="M8,4 L72,4 L68,136 L12,136 Z"/>
+                </clipPath>
+                <linearGradient id="waterGradW" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.9"/>
+                  <stop offset="100%" style="stop-color:var(--green);stop-opacity:0.7"/>
+                </linearGradient>
+                <linearGradient id="glassGradW" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:var(--border);stop-opacity:0.8"/>
+                  <stop offset="30%" style="stop-color:rgba(255,255,255,0.08)"/>
+                  <stop offset="100%" style="stop-color:var(--border);stop-opacity:0.6"/>
+                </linearGradient>
+              </defs>
+              <g clip-path="url(#glassClipW)">
+                <rect id="waterRectW" x="8" y="136" width="64" height="0" fill="url(#waterGradW)" rx="2"/>
+                <path id="wavePathW" fill="url(#waterGradW)" opacity="0.5"/>
+              </g>
+              <path d="M8,4 L72,4 L68,136 L12,136 Z" fill="none" stroke="url(#glassGradW)" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M16,12 L18,120" stroke="rgba(255,255,255,0.12)" stroke-width="4" stroke-linecap="round"/>
+              <path d="M6,4 L74,4" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <div class="glass-label">
+              <div class="glass-pct" id="waterPctW">0%</div>
+              <div class="glass-ml" id="waterMlW">0ml</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent)" id="waterMlNum">0</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">ml tomados</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green)" id="waterGlassesNum">0</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">vasos</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--yellow)" id="waterRemainingNum">3000</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">ml restantes</div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="hydration-quick" style="margin-bottom:12px">
+          <button class="hydration-btn" onclick="addWater(150)">+150ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso chico</div></button>
+          <button class="hydration-btn" onclick="addWater(250)">+250ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso normal</div></button>
+          <button class="hydration-btn" onclick="addWater(350)">+350ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso grande</div></button>
+          <button class="hydration-btn" onclick="addWater(500)">+500ml<div style="font-size:9px;color:var(--text3);margin-top:1px">botella</div></button>
+        </div>
+        <button class="hydration-reset" onclick="resetWater()" style="font-size:12px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;width:100%">↺ Resetear hidratación</button>
+      </div>
+
+      <!-- Goal bar -->
+      <div class="card">
+        <div class="card-title"><span>🎯</span> Objetivo diario: 3000ml</div>
+        <div style="height:16px;background:var(--bg4);border-radius:8px;overflow:hidden;margin-bottom:8px">
+          <div id="waterGoalBar" style="height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);width:0%"></div>
+        </div>
+        <div id="waterGoalMsg" style="font-size:11px;color:var(--text2);text-align:center"></div>
+      </div>
+
+      <!-- Tips -->
+      <div class="card">
+        <div class="card-title"><span>💡</span> Tips de hidratación</div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)">🌅 Al despertar tomá un vaso grande en ayunas</div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)">💪 Durante el entreno: 500-750ml por hora</div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)">🍽 Tomá un vaso antes de cada comida</div>
+          <div style="background:var(--bg3);border-radius:8px;padding:10px 12px;font-size:12px;color:var(--text2)">🌙 Reducí ingesta 1 hora antes de dormir</div>
+        </div>
+      </div>
+    </div>
+
   </div><!-- /content -->
   <div class="nav-hint">Desliza las pestanas para ver todas las secciones</div>
 </div><!-- /app -->
@@ -765,6 +943,58 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
         <input class="ai-inp" id="aiInput" placeholder="Ej: 200g carne y 300g papa..." onkeydown="if(event.key==='Enter')sendAIMessage()">
         <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">↑</button>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME PICKER DROPDOWN -->
+<div class="theme-picker-overlay" id="themePickerOverlay" onclick="closeThemePicker()"></div>
+<div class="theme-picker-dropdown" id="themePickerDropdown">
+  <div class="theme-picker-title">🎨 Elegí tu tema</div>
+  <div class="theme-grid">
+    <div class="theme-card active" data-theme="dark" style="background:linear-gradient(135deg,#080d18,#1a2440)" onclick="applyTheme('dark')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#4d8aff"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#ff6b4d"></div></div>
+      <div class="tc-name">Noche</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="rose" style="background:linear-gradient(135deg,#180a0e,#3d1a24)" onclick="applyTheme('rose')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#ff6b9d"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#ff9b6b"></div></div>
+      <div class="tc-name">Rosa</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="lavender" style="background:linear-gradient(135deg,#0e0918,#2d1f4a)" onclick="applyTheme('lavender')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#a78bfa"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#f472b6"></div></div>
+      <div class="tc-name">Lavanda</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="emerald" style="background:linear-gradient(135deg,#081812,#1a3d2a)" onclick="applyTheme('emerald')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#10d9a0"></div><div class="tc-dot" style="background:#fbbf24"></div><div class="tc-dot" style="background:#4dffb4"></div></div>
+      <div class="tc-name">Esmeralda</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="sunset" style="background:linear-gradient(135deg,#180f00,#3d2a00)" onclick="applyTheme('sunset')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#f97316"></div><div class="tc-dot" style="background:#eab308"></div><div class="tc-dot" style="background:#4dffb4"></div></div>
+      <div class="tc-name">Atardecer</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="ocean" style="background:linear-gradient(135deg,#000f18,#003040)" onclick="applyTheme('ocean')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#06b6d4"></div><div class="tc-dot" style="background:#8b5cf6"></div><div class="tc-dot" style="background:#4dffb4"></div></div>
+      <div class="tc-name">Océano</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="crimson" style="background:linear-gradient(135deg,#180508,#3d1520)" onclick="applyTheme('crimson')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#ff3860"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#ff8c42"></div></div>
+      <div class="tc-name">Carmesí</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="gold" style="background:linear-gradient(135deg,#160f00,#3d2e00)" onclick="applyTheme('gold')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#f7b731"></div><div class="tc-dot" style="background:#26de81"></div><div class="tc-dot" style="background:#fd9644"></div></div>
+      <div class="tc-name">Dorado</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="steel" style="background:linear-gradient(135deg,#08080c,#1e1e2e)" onclick="applyTheme('steel')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#94a3b8"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#f87171"></div></div>
+      <div class="tc-name">Acero</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="mint" style="background:linear-gradient(135deg,#051210,#133d38)" onclick="applyTheme('mint')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#2dd4bf"></div><div class="tc-dot" style="background:#34d399"></div><div class="tc-dot" style="background:#fbbf24"></div></div>
+      <div class="tc-name">Menta</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="violet" style="background:linear-gradient(135deg,#0a0710,#2d1f45)" onclick="applyTheme('violet')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#7c3aed"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#db2777"></div></div>
+      <div class="tc-name">Violeta</div><div class="tc-check">✓</div>
     </div>
   </div>
 </div>
@@ -912,6 +1142,7 @@ async function syncOura() {
 }
 
 function init() {
+  applyTheme(currentTheme);
   updateHeader();
   renderHome();
   renderMeals();
@@ -920,6 +1151,8 @@ function init() {
   renderMetrics();
   renderSleep();
   renderKcal();
+  renderWater(false);
+  renderGoalBars();
   populateExSelect();
   syncOura();
 }
@@ -1074,6 +1307,8 @@ function renderHome() {
   }
   document.getElementById('dayScoreMsg').textContent = msg;
   
+  // Water score for home metric
+  const waterPct = Math.min(100, Math.round((state[TODAY].water || 0) / WATER_GOAL * 100));
   // Actualizar tarjetas de métricas
   const metrics = [
     { id: 'dayMacroScore', val: scores.macros, icon: '🍽', lbl: 'Macros' },
@@ -1081,7 +1316,7 @@ function renderHome() {
     { id: 'daySleepScore', val: scores.sleep, icon: '🌙', lbl: 'Sueño' },
     { id: 'daySuppScore', val: scores.supps, icon: '💊', lbl: 'Suplementos' },
     { id: 'dayKcalScore', val: scores.kcal, icon: '🔥', lbl: 'Balance' },
-    { id: 'dayStepsScore', val: scores.steps, icon: '⏰', lbl: 'Pasos' }
+    { id: 'dayWaterScore', val: waterPct, icon: '💧', lbl: 'Agua', raw: (state[TODAY].water||0) + 'ml' }
   ];
   
   metrics.forEach(m => {
@@ -1093,7 +1328,10 @@ function renderHome() {
     }
     const statusEl = document.getElementById(m.id.replace('Score', 'Status'));
     if (statusEl) {
-      if (m.val >= 80) {
+      if (m.raw) {
+        statusEl.textContent = m.raw;
+        statusEl.style.color = 'var(--text2)';
+      } else if (m.val >= 80) {
         statusEl.textContent = '✓ Bien';
         statusEl.style.color = 'var(--green)';
       } else if (m.val >= 60) {
@@ -1521,7 +1759,6 @@ function renderMetrics() {
   renderBodyChart();
 }
 
-
 // ─── EXERCISE HISTORY ────────────────────────────────────────────
 function saveExerciseHistory(day, exIdx, sets) {
   const ex = TRAINING[day]?.exercises[exIdx];
@@ -1914,6 +2151,187 @@ function showToast(msg) {
   t.textContent = msg;
   t.classList.add('show');
   setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+// ─── THEME SYSTEM ─────────────────────────────────────────────────
+const THEME_NAMES = {
+  dark:'Noche', rose:'Rosa', lavender:'Lavanda', emerald:'Esmeralda',
+  sunset:'Atardecer', ocean:'Océano', crimson:'Carmesí', gold:'Dorado',
+  steel:'Acero', mint:'Menta', violet:'Violeta'
+};
+let currentTheme = localStorage.getItem('fittrack_theme') || 'dark';
+
+function applyTheme(theme) {
+  currentTheme = theme;
+  localStorage.setItem('fittrack_theme', theme);
+  document.body.className = theme === 'dark' ? '' : 'theme-' + theme;
+  // Update dot in header button
+  const dot = document.getElementById('themePickerDot');
+  if (dot) { setTimeout(() => { dot.style.background = 'var(--accent)'; }, 50); }
+  // Update active state in grid
+  document.querySelectorAll('.theme-card').forEach(c => {
+    c.classList.toggle('active', c.dataset.theme === theme);
+  });
+  closeThemePicker();
+  showToast('🎨 ' + (THEME_NAMES[theme] || theme));
+}
+
+function toggleThemePicker(e) {
+  e.stopPropagation();
+  const dd = document.getElementById('themePickerDropdown');
+  const ov = document.getElementById('themePickerOverlay');
+  const isOpen = dd.classList.contains('open');
+  if (isOpen) { closeThemePicker(); } else { dd.classList.add('open'); ov.classList.add('open'); }
+}
+
+function closeThemePicker() {
+  document.getElementById('themePickerDropdown').classList.remove('open');
+  document.getElementById('themePickerOverlay').classList.remove('open');
+}
+
+// ─── HYDRATION ────────────────────────────────────────────────────
+const WATER_GOAL = 3000; // ml
+
+function getWater() {
+  return state[TODAY].water || 0;
+}
+
+function addWater(ml) {
+  if (!state[TODAY].water) state[TODAY].water = 0;
+  state[TODAY].water = Math.min(WATER_GOAL + 500, state[TODAY].water + ml);
+  saveState(state);
+  renderWater(true);
+  showToast('💧 +' + ml + 'ml');
+}
+
+function resetWater() {
+  state[TODAY].water = 0;
+  saveState(state);
+  renderWater(false);
+}
+
+function renderWater(animate) {
+  const ml = getWater();
+  const pct = Math.min(100, Math.round(ml / WATER_GOAL * 100));
+  const glasses = Math.floor(ml / 250);
+  const remaining = Math.max(0, WATER_GOAL - ml);
+
+  // Update water page stats
+  const pctW = document.getElementById('waterPctW');
+  const mlW = document.getElementById('waterMlW');
+  const mlNum = document.getElementById('waterMlNum');
+  const glassesNum = document.getElementById('waterGlassesNum');
+  const remainingNum = document.getElementById('waterRemainingNum');
+  const goalBar = document.getElementById('waterGoalBar');
+  const goalMsg = document.getElementById('waterGoalMsg');
+
+  if (pctW) pctW.textContent = pct + '%';
+  if (mlW) mlW.textContent = ml + 'ml';
+  if (mlNum) mlNum.textContent = ml;
+  if (glassesNum) glassesNum.textContent = glasses;
+  if (remainingNum) remainingNum.textContent = remaining;
+  if (goalBar) goalBar.style.width = pct + '%';
+  if (goalMsg) {
+    if (pct >= 100) goalMsg.textContent = '🏆 ¡Objetivo cumplido! Bien hidratado.';
+    else if (pct >= 70) goalMsg.textContent = `💧 Vas bien — ${remaining}ml para el objetivo`;
+    else goalMsg.textContent = `⚠ Tomá más agua — ${remaining}ml restantes`;
+  }
+
+  // Update home summary counter
+  const dayWater = document.getElementById('dayWaterScore');
+  const dayWaterStatus = document.getElementById('dayWaterStatus');
+  if (dayWater) dayWater.textContent = pct + '%';
+  if (dayWaterStatus) {
+    dayWaterStatus.textContent = ml + 'ml / ' + WATER_GOAL + 'ml';
+  }
+
+  // Animate the SVG water fill (water page glass)
+  const rect = document.getElementById('waterRectW');
+  const wave = document.getElementById('wavePathW');
+  if (!rect || !wave) return;
+
+  const fillH = Math.round(pct / 100 * 132);
+  const yPos = 136 - fillH;
+  rect.setAttribute('y', yPos);
+  rect.setAttribute('height', fillH);
+  const wx = 8, ww = 64;
+  wave.setAttribute('d', `M${wx},${yPos+6} Q${wx+16},${yPos-2} ${wx+32},${yPos+6} Q${wx+48},${yPos+14} ${wx+ww},${yPos+6} L${wx+ww},136 L${wx},136 Z`);
+
+  if (pctW) {
+    if (pct >= 100) pctW.style.color = 'var(--green)';
+    else if (pct >= 60) pctW.style.color = 'var(--accent)';
+    else pctW.style.color = 'var(--text)';
+  }
+}
+
+// ─── GOAL BARS ────────────────────────────────────────────────────
+function renderGoalBars() {
+  const hist = state.metricsHistory || [];
+  const last = hist.length > 0 ? hist[hist.length - 1] : null;
+  const bf = last?.bf ?? null;
+  const musc = last?.muscle ?? null;
+
+  // BF goal: target 12%, assume starting point ~20% (or use oldest record)
+  const BF_START = hist.length > 0 ? (hist[0].bf || 20) : 20;
+  const BF_GOAL = 12;
+
+  const bfBarEl = document.getElementById('goalBfBar');
+  const bfCurrEl = document.getElementById('goalBfCurrent');
+  const bfStatusEl = document.getElementById('goalBfStatus');
+
+  if (bf !== null) {
+    bfCurrEl.textContent = bf + '%';
+    // Progress: how much of the journey from BF_START → BF_GOAL have we covered?
+    const totalDelta = BF_START - BF_GOAL;
+    const achieved = BF_START - bf;
+    const pct = totalDelta > 0 ? Math.min(100, Math.max(0, Math.round(achieved / totalDelta * 100))) : 0;
+    bfBarEl.style.width = pct + '%';
+    const remaining = (bf - BF_GOAL).toFixed(1);
+    if (bf <= BF_GOAL) {
+      bfStatusEl.textContent = '🏆 ¡Objetivo alcanzado! Sos una máquina.';
+      bfStatusEl.className = 'goal-status good';
+    } else if (bf <= BF_GOAL + 2) {
+      bfStatusEl.textContent = `⚡ A ${remaining}% del objetivo — casi lo tenés`;
+      bfStatusEl.className = 'goal-status warn';
+    } else {
+      bfStatusEl.textContent = `📍 Te faltan ${remaining}% — ${pct}% del camino hecho`;
+      bfStatusEl.className = 'goal-status far';
+    }
+  } else {
+    bfCurrEl.textContent = '—';
+    bfBarEl.style.width = '0%';
+    bfStatusEl.textContent = 'Sin datos aún — registrá tu primera medición';
+    bfStatusEl.className = 'goal-status far';
+  }
+
+  // Muscle goal: maintain or increase from first record
+  const MUSC_BASE = hist.length > 0 ? (hist[0].muscle || 75) : 75;
+  const muscBarEl = document.getElementById('goalMuscBar');
+  const muscCurrEl = document.getElementById('goalMuscCurrent');
+  const muscStatusEl = document.getElementById('goalMuscStatus');
+
+  if (musc !== null) {
+    muscCurrEl.textContent = musc + '%';
+    // Progress bar: % relative to baseline, cap at 105%
+    const pct = Math.min(100, Math.max(0, Math.round(musc / MUSC_BASE * 100)));
+    muscBarEl.style.width = pct + '%';
+    const diff = (musc - MUSC_BASE).toFixed(1);
+    if (musc >= MUSC_BASE + 1) {
+      muscStatusEl.textContent = `🔥 +${diff}% vs base — estás ganando músculo mientras bajás grasa`;
+      muscStatusEl.className = 'goal-status good';
+    } else if (musc >= MUSC_BASE - 0.5) {
+      muscStatusEl.textContent = `✅ ${diff}% vs base — manteniendo bien la masa muscular`;
+      muscStatusEl.className = 'goal-status good';
+    } else {
+      muscStatusEl.textContent = `⚠ ${diff}% vs base — revisá proteína e intensidad de entreno`;
+      muscStatusEl.className = 'goal-status warn';
+    }
+  } else {
+    muscCurrEl.textContent = '—';
+    muscBarEl.style.width = '0%';
+    muscStatusEl.textContent = 'Sin datos aún — registrá tu primera medición';
+    muscStatusEl.className = 'goal-status far';
+  }
 }
 
 // ─── START ───────────────────────────────────────────────────────
