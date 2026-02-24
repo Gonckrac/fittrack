@@ -309,6 +309,39 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 /* ── SETTINGS MODAL ── */
 .settings-modal { background:var(--bg2); border-radius:24px 24px 0 0; padding:20px; width:100%; max-width:430px; transform:translateY(100%); transition:transform 0.3s ease; max-height:90vh; overflow-y:auto; }
 .modal-overlay.open .settings-modal { transform:translateY(0); }
+
+/* ── COLOR THEMES ── */
+body.theme-rose { --accent:#ff6b9d; --accent2:#ff9b6b; --green:#4dffb4; --bg:#0f0508; --bg2:#180a0e; --bg3:#200c12; --bg4:#2a1018; --border:#3d1a24; --card:#0d0609; --text2:#b87b8a; --text3:#6b3d4a; }
+body.theme-lavender { --accent:#a78bfa; --accent2:#f472b6; --green:#4dffb4; --bg:#080510; --bg2:#0e0918; --bg3:#140d20; --bg4:#1a1228; --border:#2d1f4a; --card:#060410; --text2:#8b7ab8; --text3:#4a3d70; }
+body.theme-emerald { --accent:#10d9a0; --accent2:#fbbf24; --green:#10d9a0; --bg:#050f0a; --bg2:#081812; --bg3:#0c2018; --bg4:#102818; --border:#1a3d2a; --card:#040d08; --text2:#5a9b7a; --text3:#2d5a3d; }
+body.theme-sunset { --accent:#f97316; --accent2:#eab308; --green:#4dffb4; --bg:#0f0800; --bg2:#180f00; --bg3:#201500; --bg4:#281c00; --border:#3d2a00; --card:#0d0700; --text2:#b88a40; --text3:#6b4d1a; }
+body.theme-ocean { --accent:#06b6d4; --accent2:#8b5cf6; --green:#4dffb4; --bg:#00090f; --bg2:#000f18; --bg3:#001520; --bg4:#001b28; --border:#003040; --card:#00070d; --text2:#2a7a9a; --text3:#0a4a5a; }
+body.theme-dark { --accent:#4d8aff; --accent2:#ff6b4d; --green:#4dffb4; --bg:#05080f; --bg2:#080d18; --bg3:#0c1220; --bg4:#111a2e; --border:#1a2440; --card:#090e1c; --text2:#7b8ab8; --text3:#3d4d70; }
+
+/* ── PALETTE PICKER ── */
+.palette-grid { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; margin-bottom:8px; }
+.palette-card { border-radius:14px; padding:16px 12px; text-align:center; cursor:pointer; border:2px solid transparent; transition:all 0.2s; position:relative; }
+.palette-card.selected { border-color:white; transform:scale(1.04); }
+.palette-card .p-name { font-size:12px; font-weight:700; color:white; margin-top:8px; text-shadow:0 1px 3px rgba(0,0,0,0.5); }
+.palette-card .p-dots { display:flex; gap:4px; justify-content:center; }
+.palette-card .p-dot { width:14px; height:14px; border-radius:50%; }
+.palette-check { position:absolute; top:6px; right:6px; font-size:14px; opacity:0; transition:opacity 0.2s; }
+.palette-card.selected .palette-check { opacity:1; }
+
+/* ── BODY PLAN RESULT ── */
+.plan-result { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-top:16px; }
+.plan-row { display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--border); }
+.plan-row:last-child { border-bottom:none; }
+.plan-lbl { font-size:13px; color:var(--text2); }
+.plan-val { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--accent); }
+.plan-tip { font-size:11px; color:var(--text2); line-height:1.5; margin-top:12px; padding:10px 12px; background:rgba(77,138,255,0.08); border-radius:8px; border-left:3px solid var(--accent); }
+
+/* ── ACTIVITY SELECTOR ── */
+.activity-opts { display:flex; flex-direction:column; gap:8px; margin-top:8px; }
+.activity-opt { padding:12px 14px; background:var(--bg3); border:1px solid var(--border); border-radius:10px; cursor:pointer; transition:all 0.2s; }
+.activity-opt.selected { border-color:var(--accent); background:rgba(77,138,255,0.1); }
+.activity-opt-title { font-size:13px; font-weight:600; color:var(--text); }
+.activity-opt-sub { font-size:11px; color:var(--text2); margin-top:2px; }
 </style>
 </head>
 <body>
@@ -322,38 +355,86 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     </div>
     <div class="setup-steps" id="setupDots"></div>
 
-    <!-- PASO 1: Nombre y objetivos -->
+    <!-- PASO 0: Paleta de colores -->
     <div class="setup-page active" id="sp-0">
-      <div class="setup-label">¡Hola! ¿Cuál es tu nombre?</div>
-      <div class="setup-hint">Lo usamos para personalizar tu experiencia.</div>
-      <div class="setup-field">
-        <label>Tu nombre</label>
-        <input class="inp" id="cfgName" placeholder="Ej: Laura" type="text">
-      </div>
-      <div class="setup-label" style="margin-top:20px">Objetivo calórico y macros</div>
-      <div class="setup-hint">Podés pedirle a tu nutricionista estos números. Si no sabés, usá los valores sugeridos.</div>
-      <div class="setup-field">
-        <label>Calorías diarias objetivo</label>
-        <input class="inp" id="cfgKcal" placeholder="Ej: 1800" type="number">
-      </div>
-      <div class="inp-row">
-        <div class="setup-field">
-          <label>Proteína (g)</label>
-          <input class="inp" id="cfgProt" placeholder="140" type="number">
+      <div class="setup-label">Elegí tu estilo 🎨</div>
+      <div class="setup-hint">Seleccioná el tema de colores que más te guste. Podés cambiarlo después desde configuración.</div>
+      <div class="palette-grid">
+        <div class="palette-card selected" data-theme="dark" onclick="selectPalette(this,'dark')" style="background:linear-gradient(135deg,#080d18,#1a2440)">
+          <div class="p-dots"><div class="p-dot" style="background:#4d8aff"></div><div class="p-dot" style="background:#4dffb4"></div><div class="p-dot" style="background:#ff6b4d"></div></div>
+          <div class="p-name">Noche</div><div class="palette-check">✓</div>
         </div>
-        <div class="setup-field">
-          <label>Carbos (g)</label>
-          <input class="inp" id="cfgCarb" placeholder="180" type="number">
+        <div class="palette-card" data-theme="rose" onclick="selectPalette(this,'rose')" style="background:linear-gradient(135deg,#180a0e,#3d1a24)">
+          <div class="p-dots"><div class="p-dot" style="background:#ff6b9d"></div><div class="p-dot" style="background:#4dffb4"></div><div class="p-dot" style="background:#ff9b6b"></div></div>
+          <div class="p-name">Rosa</div><div class="palette-check">✓</div>
         </div>
-        <div class="setup-field">
-          <label>Grasas (g)</label>
-          <input class="inp" id="cfgFat" placeholder="60" type="number">
+        <div class="palette-card" data-theme="lavender" onclick="selectPalette(this,'lavender')" style="background:linear-gradient(135deg,#0e0918,#2d1f4a)">
+          <div class="p-dots"><div class="p-dot" style="background:#a78bfa"></div><div class="p-dot" style="background:#4dffb4"></div><div class="p-dot" style="background:#f472b6"></div></div>
+          <div class="p-name">Lavanda</div><div class="palette-check">✓</div>
+        </div>
+        <div class="palette-card" data-theme="emerald" onclick="selectPalette(this,'emerald')" style="background:linear-gradient(135deg,#081812,#1a3d2a)">
+          <div class="p-dots"><div class="p-dot" style="background:#10d9a0"></div><div class="p-dot" style="background:#fbbf24"></div><div class="p-dot" style="background:#4dffb4"></div></div>
+          <div class="p-name">Esmeralda</div><div class="palette-check">✓</div>
+        </div>
+        <div class="palette-card" data-theme="sunset" onclick="selectPalette(this,'sunset')" style="background:linear-gradient(135deg,#180f00,#3d2a00)">
+          <div class="p-dots"><div class="p-dot" style="background:#f97316"></div><div class="p-dot" style="background:#eab308"></div><div class="p-dot" style="background:#4dffb4"></div></div>
+          <div class="p-name">Atardecer</div><div class="palette-check">✓</div>
+        </div>
+        <div class="palette-card" data-theme="ocean" onclick="selectPalette(this,'ocean')" style="background:linear-gradient(135deg,#000f18,#003040)">
+          <div class="p-dots"><div class="p-dot" style="background:#06b6d4"></div><div class="p-dot" style="background:#8b5cf6"></div><div class="p-dot" style="background:#4dffb4"></div></div>
+          <div class="p-name">Océano</div><div class="palette-check">✓</div>
         </div>
       </div>
     </div>
 
-    <!-- PASO 2: Rutina — días de entrenamiento -->
+    <!-- PASO 1: Nombre + plan nutricional -->
     <div class="setup-page" id="sp-1">
+      <div class="setup-label">¡Hola! Contame un poco de vos</div>
+      <div class="setup-hint">Con estos datos calculamos tu plan de alimentación personalizado para bajar de peso de forma saludable.</div>
+      <div class="setup-field">
+        <label>Tu nombre</label>
+        <input class="inp" id="cfgName" placeholder="Ej: Laura" type="text">
+      </div>
+      <div class="inp-row">
+        <div class="setup-field">
+          <label>Edad</label>
+          <input class="inp" id="cfgAge" placeholder="45" type="number" min="18" max="90" oninput="calcPlanLive()">
+        </div>
+        <div class="setup-field">
+          <label>Peso (kg)</label>
+          <input class="inp" id="cfgWeight" placeholder="75" type="number" step="0.1" oninput="calcPlanLive()">
+        </div>
+        <div class="setup-field">
+          <label>Altura (cm)</label>
+          <input class="inp" id="cfgHeight" placeholder="165" type="number" oninput="calcPlanLive()">
+        </div>
+      </div>
+      <div class="setup-field">
+        <label>Nivel de actividad</label>
+        <div class="activity-opts" id="activityOpts">
+          <div class="activity-opt selected" data-factor="1.2" onclick="selectActivity(this)">
+            <div class="activity-opt-title">🛋 Sedentaria</div>
+            <div class="activity-opt-sub">Trabajo de oficina, poco o nada de ejercicio</div>
+          </div>
+          <div class="activity-opt" data-factor="1.375" onclick="selectActivity(this)">
+            <div class="activity-opt-title">🚶 Ligeramente activa</div>
+            <div class="activity-opt-sub">Caminatas, ejercicio 1-3 días por semana</div>
+          </div>
+          <div class="activity-opt" data-factor="1.55" onclick="selectActivity(this)">
+            <div class="activity-opt-title">🏃 Moderadamente activa</div>
+            <div class="activity-opt-sub">Gym o cardio 3-5 días por semana</div>
+          </div>
+          <div class="activity-opt" data-factor="1.725" onclick="selectActivity(this)">
+            <div class="activity-opt-title">💪 Muy activa</div>
+            <div class="activity-opt-sub">Ejercicio intenso 6-7 días por semana</div>
+          </div>
+        </div>
+      </div>
+      <div id="planResult"></div>
+    </div>
+
+    <!-- PASO 2: Rutina — días de entrenamiento -->
+    <div class="setup-page" id="sp-2">
       <div class="setup-label">Tu rutina de entrenamiento</div>
       <div class="setup-hint">Creá tus días de entrenamiento. Podés agregar todos los que quieras.</div>
       <div id="trainDayTabs" class="ex-day-tab"></div>
@@ -375,7 +456,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     </div>
 
     <!-- PASO 3: Ciclo de entrenamiento -->
-    <div class="setup-page" id="sp-2">
+    <div class="setup-page" id="sp-3">
       <div class="setup-label">¿Qué días entrenás?</div>
       <div class="setup-hint">Asigná un día de rutina a cada día de la semana, o dejá "Descanso".</div>
       <div class="card" style="padding:12px">
@@ -384,7 +465,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     </div>
 
     <!-- PASO 4: Suplementos -->
-    <div class="setup-page" id="sp-3">
+    <div class="setup-page" id="sp-4">
       <div class="setup-label">Tus suplementos</div>
       <div class="setup-hint">Agregá los que tomás con su dosis y horario. Si no tomás ninguno, podés saltear este paso.</div>
       <div class="supp-builder" id="suppBuilder"></div>
@@ -392,7 +473,7 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
     </div>
 
     <!-- PASO 5: ¡Listo! -->
-    <div class="setup-page" id="sp-4">
+    <div class="setup-page" id="sp-5">
       <div style="text-align:center;padding:20px 0">
         <div style="font-size:60px;margin-bottom:16px">🎉</div>
         <div class="setup-label" style="text-align:center">¡Todo listo!</div>
@@ -671,6 +752,17 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeModal('settingsModal')">
   <div class="settings-modal" onclick="event.stopPropagation()">
     <div class="modal-title">⚙ Configuración <button class="modal-close" onclick="closeModal('settingsModal')">✕</button></div>
+    <div style="margin-bottom:16px">
+      <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px">🎨 Tema de color</label>
+      <div style="display:grid;grid-template-columns:repeat(6,1fr);gap:6px">
+        <div class="settings-palette" data-theme="dark" onclick="changeTheme('dark')" style="height:32px;border-radius:8px;background:linear-gradient(135deg,#080d18,#1a2440);border:2px solid transparent;cursor:pointer;transition:all 0.2s"></div>
+        <div class="settings-palette" data-theme="rose" onclick="changeTheme('rose')" style="height:32px;border-radius:8px;background:linear-gradient(135deg,#180a0e,#3d1a24);border:2px solid transparent;cursor:pointer;transition:all 0.2s"></div>
+        <div class="settings-palette" data-theme="lavender" onclick="changeTheme('lavender')" style="height:32px;border-radius:8px;background:linear-gradient(135deg,#0e0918,#2d1f4a);border:2px solid transparent;cursor:pointer;transition:all 0.2s"></div>
+        <div class="settings-palette" data-theme="emerald" onclick="changeTheme('emerald')" style="height:32px;border-radius:8px;background:linear-gradient(135deg,#081812,#1a3d2a);border:2px solid transparent;cursor:pointer;transition:all 0.2s"></div>
+        <div class="settings-palette" data-theme="sunset" onclick="changeTheme('sunset')" style="height:32px;border-radius:8px;background:linear-gradient(135deg,#180f00,#3d2a00);border:2px solid transparent;cursor:pointer;transition:all 0.2s"></div>
+        <div class="settings-palette" data-theme="ocean" onclick="changeTheme('ocean')" style="height:32px;border-radius:8px;background:linear-gradient(135deg,#000f18,#003040);border:2px solid transparent;cursor:pointer;transition:all 0.2s"></div>
+      </div>
+    </div>
     <div style="margin-bottom:12px">
       <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Nombre</label>
       <input class="inp" id="settingName" placeholder="Tu nombre">
@@ -703,18 +795,100 @@ let state = loadState();
 // ─── SETUP STATE ──────────────────────────────────────────────────
 // Setup wizard state
 let setupStep = 0;
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 6;
 
 // Temp training days for wizard
 let wizardDays = []; // [{name, exercises:[{name,sets,reps}]}]
 let currentWizardDay = 0; // index
 let wizardCycle = { Mon:null,Tue:null,Wed:null,Thu:null,Fri:null,Sat:null,Sun:null };
 let wizardSupps = []; // [{name,dose,time}]
+let wizardTheme = 'dark';
+let wizardPlan = null; // calculated nutrition plan
 
 const WEEK_DAYS = [
   { key:'Mon', label:'Lunes' }, { key:'Tue', label:'Martes' }, { key:'Wed', label:'Miércoles' },
   { key:'Thu', label:'Jueves' }, { key:'Fri', label:'Viernes' }, { key:'Sat', label:'Sábado' }, { key:'Sun', label:'Domingo' }
 ];
+
+
+// ─── PALETTE ─────────────────────────────────────────────────────
+function selectPalette(el, theme) {
+  document.querySelectorAll('.palette-card').forEach(c => c.classList.remove('selected'));
+  el.classList.add('selected');
+  wizardTheme = theme;
+  applyTheme(theme);
+}
+
+function applyTheme(theme) {
+  document.body.className = theme === 'dark' ? '' : 'theme-' + theme;
+}
+
+// ─── NUTRITION PLAN CALCULATOR ───────────────────────────────────
+function getActivityFactor() {
+  const sel = document.querySelector('.activity-opt.selected');
+  return sel ? +sel.dataset.factor : 1.2;
+}
+
+function selectActivity(el) {
+  document.querySelectorAll('.activity-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+  calcPlanLive();
+}
+
+function calcNutritionPlan() {
+  const age    = +document.getElementById('cfgAge')?.value    || 0;
+  const weight = +document.getElementById('cfgWeight')?.value || 0;
+  const height = +document.getElementById('cfgHeight')?.value || 0;
+  const factor = getActivityFactor();
+  if (!age || !weight || !height) return null;
+
+  // Mifflin-St Jeor para mujer
+  const bmr  = Math.round(10 * weight + 6.25 * height - 5 * age - 161);
+  const tdee = Math.round(bmr * factor);
+
+  // Déficit del 20% para pérdida de peso (saludable, no agresivo)
+  const kcal = Math.round(tdee * 0.80);
+
+  // Macros: alta proteína para preservar músculo al bajar
+  // Proteína: 1.6g por kg de peso corporal
+  const prot = Math.round(weight * 1.6);
+  // Grasa: 25% de las calorías
+  const fat  = Math.round((kcal * 0.25) / 9);
+  // Carbos: resto de calorías
+  const carbKcal = kcal - (prot * 4) - (fat * 9);
+  const carb = Math.round(carbKcal / 4);
+
+  return { bmr, tdee, kcal, prot, carb, fat,
+    deficit: tdee - kcal,
+    weightLossPerWeek: +((tdee - kcal) * 7 / 7700).toFixed(2)
+  };
+}
+
+function calcPlanLive() {
+  const plan = calcNutritionPlan();
+  const el = document.getElementById('planResult');
+  if (!el) return;
+  if (!plan) { el.innerHTML = ''; return; }
+
+  const lossKg = plan.weightLossPerWeek;
+  const lossMsg = lossKg >= 0.3 && lossKg <= 0.8
+    ? `✅ ${lossKg} kg/semana — ritmo ideal`
+    : lossKg < 0.3 ? `ℹ️ ${lossKg} kg/semana — pérdida lenta`
+    : `⚠️ ${lossKg} kg/semana — ritmo alto`;
+
+  el.innerHTML = \`
+    <div class="plan-result">
+      <div style="font-size:12px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:1px;margin-bottom:10px">📊 Tu plan calculado</div>
+      <div class="plan-row"><span class="plan-lbl">🔥 Metabolismo basal (BMR)</span><span class="plan-val">\${plan.bmr} kcal</span></div>
+      <div class="plan-row"><span class="plan-lbl">⚡ Gasto total (TDEE)</span><span class="plan-val">\${plan.tdee} kcal</span></div>
+      <div class="plan-row"><span class="plan-lbl">🎯 Objetivo diario</span><span class="plan-val" style="color:var(--green)">\${plan.kcal} kcal</span></div>
+      <div class="plan-row"><span class="plan-lbl">🍗 Proteína</span><span class="plan-val" style="color:var(--green)">\${plan.prot}g</span></div>
+      <div class="plan-row"><span class="plan-lbl">🍚 Carbohidratos</span><span class="plan-val">\${plan.carb}g</span></div>
+      <div class="plan-row"><span class="plan-lbl">🥑 Grasas</span><span class="plan-val" style="color:var(--yellow)">\${plan.fat}g</span></div>
+      <div class="plan-tip">\${lossMsg}<br><br>Estos números crean un déficit de <strong>\${plan.deficit} kcal/día</strong> sobre tu gasto real. Alta proteína para no perder músculo mientras bajás de peso.</div>
+    </div>\`;
+  wizardPlan = plan;
+}
 
 function initSetup() {
   // Prefill 1 day and 1 supp row
@@ -758,14 +932,21 @@ function setupPrev() {
 
 function validateSetupStep() {
   if (setupStep === 0) {
+    // palette — always valid
+    return true;
+  }
+  if (setupStep === 1) {
     const name = document.getElementById('cfgName').value.trim();
     if (!name) { showToast('⚠ Ingresá tu nombre'); return false; }
-    const kcal = +document.getElementById('cfgKcal').value;
-    if (!kcal || kcal < 500) { showToast('⚠ Ingresá un objetivo calórico válido'); return false; }
+    const age = +document.getElementById('cfgAge').value;
+    const weight = +document.getElementById('cfgWeight').value;
+    const height = +document.getElementById('cfgHeight').value;
+    if (!age || !weight || !height) { showToast('⚠ Completá edad, peso y altura'); return false; }
+    wizardPlan = calcNutritionPlan();
   }
-  if (setupStep === 1) { collectWizardExercises(); }
-  if (setupStep === 2) { collectWizardCycle(); }
-  if (setupStep === 3) { collectWizardSupps(); }
+  if (setupStep === 2) { collectWizardExercises(); }
+  if (setupStep === 3) { collectWizardCycle(); }
+  if (setupStep === 4) { collectWizardSupps(); }
   return true;
 }
 
@@ -773,9 +954,9 @@ function renderSetupPage() {
   document.querySelectorAll('.setup-page').forEach((p,i) => {
     p.classList.toggle('active', i === setupStep);
   });
-  if (setupStep === 1) renderExBuilder();
-  if (setupStep === 2) renderCycleBuilder();
-  if (setupStep === 3) renderSuppBuilder();
+  if (setupStep === 2) renderExBuilder();
+  if (setupStep === 3) renderCycleBuilder();
+  if (setupStep === 4) renderSuppBuilder();
 }
 
 // ─── STEP 1: EXERCISE BUILDER ─────────────────────────────────────
@@ -913,20 +1094,16 @@ function collectWizardSupps() {
 // ─── STEP 4: SUMMARY ─────────────────────────────────────────────
 function buildSetupSummary() {
   const name = document.getElementById('cfgName').value.trim();
-  const kcal = document.getElementById('cfgKcal').value;
-  const prot = document.getElementById('cfgProt').value;
-  const carb = document.getElementById('cfgCarb').value;
-  const fat = document.getElementById('cfgFat').value;
+  const plan = wizardPlan || calcNutritionPlan();
   const suppCount = wizardSupps.filter(s=>s.name).length;
   const exCount = wizardDays.reduce((a,d)=>a+d.exercises.filter(e=>e.name).length, 0);
-
-  document.getElementById('setupReadySub').textContent = `¡${name}, tu app está lista! Empezá a trackear hoy mismo.`;
+  document.getElementById('setupReadySub').textContent = `¡${name}, tu plan está listo! Empezá a trackear hoy mismo.`;
   document.getElementById('setupSummary').innerHTML = `
     <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🎯 Calorías objetivo</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)">${kcal} kcal</span></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🍗 Proteína</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--green)">${prot||'—'}g</span></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🍚 Carbos</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)">${carb||'—'}g</span></div>
-      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🥑 Grasas</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--yellow)">${fat||'—'}g</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🔥 Calorías objetivo</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)">${plan?.kcal||'—'} kcal</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🍗 Proteína</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--green)">${plan?.prot||'—'}g</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🍚 Carbos</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--accent)">${plan?.carb||'—'}g</span></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">🥑 Grasas</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--yellow)">${plan?.fat||'—'}g</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">💪 Días de rutina</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--text)">${wizardDays.length} días · ${exCount} ejercicios</span></div>
       <div style="display:flex;justify-content:space-between"><span style="color:var(--text2);font-size:12px">💊 Suplementos</span><span style="font-family:'Space Mono',monospace;font-size:12px;color:var(--text)">${suppCount}</span></div>
     </div>`;
@@ -934,12 +1111,17 @@ function buildSetupSummary() {
 
 function finishSetup() {
   // Save config
+  const plan = wizardPlan || calcNutritionPlan();
   const cfg = {
     name: document.getElementById('cfgName').value.trim(),
-    kcal: +document.getElementById('cfgKcal').value || 1800,
-    prot: +document.getElementById('cfgProt').value || 140,
-    carb: +document.getElementById('cfgCarb').value || 180,
-    fat:  +document.getElementById('cfgFat').value  || 60,
+    theme: wizardTheme,
+    age: +document.getElementById('cfgAge').value,
+    weight: +document.getElementById('cfgWeight').value,
+    height: +document.getElementById('cfgHeight').value,
+    kcal: plan?.kcal || 1600,
+    prot: plan?.prot || 120,
+    carb: plan?.carb || 160,
+    fat:  plan?.fat  || 55,
     training: wizardDays.map(d => ({
       name: d.name,
       exercises: d.exercises.filter(e => e.name.trim())
@@ -970,6 +1152,8 @@ function getTodayTrainDay() {
 
 // ─── LAUNCH APP ───────────────────────────────────────────────────
 function launchApp() {
+  // Apply saved theme
+  if (state.config?.theme) applyTheme(state.config.theme);
   document.getElementById('setupOverlay').style.display = 'none';
   document.getElementById('mainApp').style.display = 'flex';
   if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, kcal:{burned:0,active:0}, trainDay: getTodayTrainDay() };
@@ -992,7 +1176,20 @@ function openSettings() {
   document.getElementById('settingProt').value = cfg.prot || '';
   document.getElementById('settingCarb').value = cfg.carb || '';
   document.getElementById('settingFat').value = cfg.fat || '';
+  // Highlight active theme
+  const activeTheme = cfg.theme || 'dark';
+  document.querySelectorAll('.settings-palette').forEach(el => {
+    el.style.borderColor = el.dataset.theme === activeTheme ? 'white' : 'transparent';
+  });
   document.getElementById('settingsModal').classList.add('open');
+}
+
+function changeTheme(theme) {
+  document.querySelectorAll('.settings-palette').forEach(c => c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  if (state.config) state.config.theme = theme;
+  applyTheme(theme);
+  saveState(state);
 }
 
 function saveSettings() {
