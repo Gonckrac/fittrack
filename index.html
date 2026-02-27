@@ -2057,8 +2057,10 @@ async function sendAIMessage() {
     const data = await res.json();
     if (!res.ok) throw new Error(data.error?.message || 'HTTP ' + res.status);
     const text = data.choices?.[0]?.message?.content || '';
-    const clean = text.replace(/```json|```/g, '').trim();
-    const result = JSON.parse(clean);
+    // Extraer el primer bloque JSON válido del texto
+    const match = text.match(/\{[\s\S]*\}/);
+    if (!match) throw new Error('La IA no devolvió un formato válido. Intentá de nuevo.');
+    const result = JSON.parse(match[0]);
     loading.remove();
     lastAIResult = result;
     appendBubble(buildResultCard(result), 'bot');
