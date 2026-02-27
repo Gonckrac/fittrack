@@ -392,7 +392,10 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
   <div class="header">
     <div>
       <div class="header-title">FitTrack</div>
-      <div class="header-date" id="headerDate"></div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+        <div class="header-date" id="headerDate"></div>
+        <div style="background:var(--accent);color:white;font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;letter-spacing:0.3px">👋 Hola Gonza!</div>
+      </div>
     </div>
     <div class="header-right">
       <button id="themePickerBtn" onclick="toggleThemePicker(event)" style="background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:13px;cursor:pointer;color:var(--text2);display:flex;align-items:center;gap:5px;transition:all 0.2s">
@@ -2054,14 +2057,14 @@ async function sendAIMessage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ query })
     });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.error?.message || 'HTTP ' + res.status);
+    const rawText = await res.text();
+    if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + rawText.substring(0, 200));
+    let data;
+    try { data = JSON.parse(rawText); } catch(e) { throw new Error('Respuesta no es JSON: ' + rawText.substring(0, 200)); }
     const text = data.choices?.[0]?.message?.content || '';
-    // Mostrar respuesta cruda para debug
-    console.log('RAW GROQ RESPONSE:', text);
-    // Extraer el primer bloque JSON válido del texto
+    if (!text) throw new Error('Sin contenido. Data: ' + JSON.stringify(data).substring(0, 200));
     const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Sin JSON. Respuesta cruda: ' + text.substring(0, 200));
+    if (!match) throw new Error('Sin JSON en: ' + text.substring(0, 200));
     const result = JSON.parse(match[0]);
     loading.remove();
     lastAIResult = result;
