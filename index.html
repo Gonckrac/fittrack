@@ -1991,8 +1991,8 @@ function renderBodyChart() {
 }
 
 // ─── AI NUTRITION CHAT ────────────────────────────────────────────
-const GROQ_KEY = '';
-const GROQ_URL = '/api/chat';
+const GROQ_KEY = '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';
+const GROQ_URL = 'https://api.groq.com/openai/v1/chat/completions';
 let lastAIResult = null;
 
 function openAIChat() {
@@ -2054,8 +2054,19 @@ async function sendAIMessage() {
   try {
     const res = await fetch(GROQ_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query })
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + GROQ_KEY },
+      body: JSON.stringify({
+        model: 'llama-3.3-70b-versatile',
+        temperature: 0.1,
+        max_tokens: 512,
+        messages: [{
+          role: 'system',
+          content: 'Sos un nutricionista experto. Respondé SOLO con JSON válido, sin texto extra, sin markdown, sin backticks. Formato exacto: {"name":"nombre corto del plato","prot":25,"carb":40,"fat":8,"kcal":336,"notes":"tip nutricional breve","items":[{"food":"ingrediente","amount":"200g","prot":25,"carb":40,"fat":8}]}. Todos los números son enteros. kcal = prot*4 + carb*4 + fat*9.'
+        }, {
+          role: 'user',
+          content: 'Calculá los macros de: ' + query
+        }]
+      })
     });
     const rawText = await res.text();
     if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + rawText.substring(0, 200));
