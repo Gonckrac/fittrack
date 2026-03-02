@@ -242,6 +242,12 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .prog-target.success .prog-target-text { color:var(--green); }
 .pr-flash { animation: prFlash 0.6s ease; }
 @keyframes prFlash { 0%{background:rgba(77,255,180,0.25)} 100%{background:transparent} }
+/* SUPERSET STYLES */
+.ss-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; background:rgba(77,138,255,0.12); color:var(--accent); border:1px solid rgba(77,138,255,0.25); margin-right:6px; }
+.ss-divider { display:flex; align-items:center; gap:8px; padding:6px 14px; background:rgba(77,138,255,0.06); border-left:2px solid var(--accent); margin:0 0 6px 0; font-size:10px; color:var(--accent); font-weight:700; letter-spacing:0.5px; }
+.exercise-card.superset-a { border-top:2px solid var(--accent); }
+.exercise-card.superset-b { border-top:2px solid rgba(77,138,255,0.3); margin-top:-4px; border-radius:0 0 var(--radius-sm) var(--radius-sm); }
+.tope-badge { display:inline-block; margin-left:6px; padding:1px 7px; border-radius:20px; font-size:9px; font-weight:700; background:rgba(255,212,77,0.12); color:var(--yellow); border:1px solid rgba(255,212,77,0.25); }
 /* AI CHAT MODAL */
 .ai-modal { background:var(--bg2); border-radius:24px 24px 0 0; width:100%; max-width:430px; transform:translateY(100%); transition:transform 0.3s ease; height:85vh; display:flex; flex-direction:column; overflow:hidden; }
 .modal-overlay.open .ai-modal { transform:translateY(0); }
@@ -1047,52 +1053,101 @@ if (!state.exerciseHistory) state.exerciseHistory = {};
 
 // ─── TRAINING DATA ────────────────────────────────────────────────
 const TRAINING = {
-  1: { name:"DIA 1 — Push Pesado + Core", exercises:[
-    { name:"Press banca plano (barra)", muscle:"Pecho, Triceps", sets:4, reps:"5-6" },
-    { name:"Press inclinado (mancuernas)", muscle:"Pecho superior", sets:3, reps:"8-10" },
-    { name:"Fondos lastrados", muscle:"Pecho, Triceps", sets:3, reps:"6-8" },
-    { name:"Extension triceps (barra W)", muscle:"Triceps", sets:3, reps:"10-12" },
-    { name:"Ab wheel", muscle:"Core", sets:4, reps:"6-10" },
-    { name:"Dead hang", muscle:"Agarre", sets:3, reps:"max" },
-  ]},
-  2: { name:"DIA 2 — Pull Pesado + Agarre", exercises:[
-    { name:"Dominadas lastradas", muscle:"Dorsal, Biceps", sets:4, reps:"5-6" },
-    { name:"Remo con barra", muscle:"Dorsal, Trapecio", sets:4, reps:"6-8" },
-    { name:"Remo unilateral mancuerna", muscle:"Dorsal, Biceps", sets:3, reps:"8-10" },
-    { name:"Vuelo posterior", muscle:"Hombro posterior", sets:2, reps:"15-20" },
-    { name:"Curl biceps barra W", muscle:"Biceps", sets:3, reps:"8-10" },
-    { name:"Curl martillo", muscle:"Braquial", sets:2, reps:"10-12" },
-    { name:"Farmer's carry", muscle:"Agarre, Trapecio", sets:3, reps:"30-40m" },
-  ]},
-  3: { name:"DIA 3 — Hombros + Antebrazo", exercises:[
-    { name:"Press militar (barra)", muscle:"Hombros, Triceps", sets:4, reps:"6-8" },
-    { name:"Elevaciones laterales", muscle:"Hombro lateral", sets:5, reps:"15-20" },
-    { name:"Vuelo posterior", muscle:"Hombro posterior", sets:4, reps:"15-20" },
-    { name:"Curl de muneca normal", muscle:"Flexores antebrazo", sets:4, reps:"12-20" },
-    { name:"Curl invertido (barra)", muscle:"Extensores antebrazo", sets:3, reps:"10-15" },
-    { name:"Curl muneca invertido", muscle:"Dorso antebrazo", sets:3, reps:"12-15" },
-    { name:"Ab wheel", muscle:"Core", sets:2, reps:"8-12" },
-    { name:"Dead hang", muscle:"Agarre", sets:3, reps:"max" },
-  ]},
-  4: { name:"DIA 4 — Push Hipertrofia + Core", exercises:[
-    { name:"Press inclinado", muscle:"Pecho superior", sets:4, reps:"8-10" },
-    { name:"Press hombros mancuernas", muscle:"Hombros, Triceps", sets:3, reps:"10-12" },
-    { name:"Fondos normales", muscle:"Pecho, Triceps", sets:3, reps:"8-12" },
-    { name:"Extension triceps overhead", muscle:"Triceps", sets:3, reps:"10-12" },
-    { name:"Vuelo pecho plano", muscle:"Pecho medio", sets:3, reps:"12-15" },
-    { name:"Ab wheel", muscle:"Core", sets:3, reps:"8-12" },
-    { name:"Isometrico de agarre", muscle:"Agarre", sets:3, reps:"35-45s" },
-  ]},
-  5: { name:"DIA 5 — Pull Hipertrofia + Agarre", exercises:[
-    { name:"Dominadas agarre neutro", muscle:"Dorsal, Biceps", sets:3, reps:"8-12" },
-    { name:"Remo inclinado bilateral", muscle:"Dorsal, Trapecio", sets:3, reps:"8-12" },
-    { name:"Curl inclinado mancuernas", muscle:"Biceps", sets:3, reps:"10-12" },
-    { name:"Curl martillo", muscle:"Braquial", sets:2, reps:"10-12" },
-    { name:"Elevaciones laterales", muscle:"Hombro lateral", sets:3, reps:"15-20" },
-    { name:"Dead hang", muscle:"Agarre", sets:4, reps:"max" },
-    { name:"Pinch grip (discos)", muscle:"Dedos, Agarre", sets:3, reps:"30-40s" },
-    { name:"Curl de cuerda", muscle:"Antebrazo completo", sets:3, reps:"hasta agotar" },
-  ]},
+  1: {
+    name: "DÍA A — Pecho / Tríceps / Core / Grip",
+    supersets: [
+      { label: "SS1 — Press plano + Overhead extension (antagonistas tríceps)", id: "A_SS1" },
+      { label: "SS2 — Press inclinado + Extensión barra", id: "A_SS2" },
+      { label: "SS3 — Aperturas inclinadas + Ab wheel", id: "A_SS3" },
+    ],
+    exercises: [
+      { name:"Press banca plano (barra)",        muscle:"Pecho esternal, Tríceps",          sets:4, reps:"6",   topRep:8,  ssGroup:"A_SS1", ssPart:"a" },
+      { name:"Overhead extension mancuerna",     muscle:"Tríceps cabeza larga",             sets:4, reps:"10",  topRep:12, ssGroup:"A_SS1", ssPart:"b" },
+      { name:"Press inclinado mancuernas",       muscle:"Pecho clavicular, Tríceps",        sets:3, reps:"10",  topRep:12, ssGroup:"A_SS2", ssPart:"a" },
+      { name:"Extensión tríceps barra W",        muscle:"Tríceps cabezas lateral/medial",   sets:3, reps:"12",  topRep:15, ssGroup:"A_SS2", ssPart:"b" },
+      { name:"Aperturas inclinadas mancuernas",  muscle:"Pecho elongación máxima",          sets:3, reps:"12",  topRep:15, ssGroup:"A_SS3", ssPart:"a" },
+      { name:"Ab wheel",                         muscle:"Core — anti-extensión",            sets:3, reps:"10",  topRep:null, noTopRep:true, ssGroup:"A_SS3", ssPart:"b" },
+      { name:"Fondos en paralela",               muscle:"Pecho inferior, Tríceps",          sets:3, reps:"7",   topRep:10, ssGroup:null },
+      { name:"Dead hang",                        muscle:"Agarre isométrico, Antebrazo",     sets:3, reps:"MAX", topRep:null, noTopRep:true, ssGroup:null },
+    ]
+  },
+  2: {
+    name: "DÍA B — Espalda / Bíceps / Deltoides Posterior / Grip",
+    supersets: [
+      { label: "SS1 — Dominadas + Curl barra W (antagonistas clásico)", id: "B_SS1" },
+      { label: "SS2 — Remo con barra + Curl martillo", id: "B_SS2" },
+      { label: "SS3 — Remo unilateral + Vuelo posterior", id: "B_SS3" },
+      { label: "SS4 — Remo al mentón + Farmers carry", id: "B_SS4" },
+    ],
+    exercises: [
+      { name:"Dominadas",                            muscle:"Dorsal ancho, Bíceps",               sets:4, reps:"6",   topRep:8,  ssGroup:"B_SS1", ssPart:"a" },
+      { name:"Curl bíceps barra W",                  muscle:"Bíceps cabeza corta, Braquial",      sets:4, reps:"10",  topRep:12, ssGroup:"B_SS1", ssPart:"b" },
+      { name:"Remo con barra",                       muscle:"Dorsal, Romboides, Trapecio medio",  sets:4, reps:"8",   topRep:10, ssGroup:"B_SS2", ssPart:"a" },
+      { name:"Curl martillo",                        muscle:"Braquiorradial, Braquial anterior",  sets:3, reps:"12",  topRep:15, ssGroup:"B_SS2", ssPart:"b" },
+      { name:"Remo unilateral mancuerna",            muscle:"Dorsal, Redondo mayor",              sets:3, reps:"10",  topRep:12, ssGroup:"B_SS3", ssPart:"a" },
+      { name:"Vuelo posterior mancuernas",           muscle:"Deltoides posterior, Infraespinoso", sets:4, reps:"20",  topRep:25, ssGroup:"B_SS3", ssPart:"b" },
+      { name:"Remo al mentón barra (agarre ancho)",  muscle:"Trapecio superior, Deltoides medio", sets:3, reps:"12",  topRep:15, ssGroup:"B_SS4", ssPart:"a" },
+      { name:"Farmers carry",                        muscle:"Agarre dinámico, Trapecio, Core",    sets:3, reps:"40s", topRep:null, noTopRep:true, ssGroup:"B_SS4", ssPart:"b" },
+    ]
+  },
+  3: {
+    name: "DÍA C — Hombros / Antebrazos / Core / Grip",
+    supersets: [
+      { label: "SS1 — Press militar + Flexores muñeca", id: "C_SS1" },
+      { label: "SS2 — Elevaciones laterales + Extensores muñeca", id: "C_SS2" },
+      { label: "SS3 — Ab wheel (anti-ext) + Russian twist (anti-rot)", id: "C_SS3" },
+    ],
+    exercises: [
+      { name:"Press militar mancuernas",             muscle:"Deltoides anterior/medio, Tríceps",    sets:4, reps:"8",   topRep:10, ssGroup:"C_SS1", ssPart:"a" },
+      { name:"Curl de muñeca antebrazo",             muscle:"Flexores superficiales muñeca",        sets:4, reps:"20",  topRep:null, noTopRep:true, ssGroup:"C_SS1", ssPart:"b" },
+      { name:"Elevaciones laterales",                muscle:"Deltoides medio (fibras Tipo I)",      sets:5, reps:"15",  topRep:20, ssGroup:"C_SS2", ssPart:"a" },
+      { name:"Curl invertido antebrazo (barra W)",   muscle:"Extensores muñeca, Braquiorradial",    sets:3, reps:"18",  topRep:null, noTopRep:true, ssGroup:"C_SS2", ssPart:"b" },
+      { name:"Ab wheel",                             muscle:"Core — anti-extensión",                sets:2, reps:"12",  topRep:null, noTopRep:true, ssGroup:"C_SS3", ssPart:"a" },
+      { name:"Russian twist con peso",               muscle:"Oblicuos — anti-rotación",             sets:2, reps:"12c/lado", topRep:null, noTopRep:true, ssGroup:"C_SS3", ssPart:"b" },
+      { name:"Curl muñeca invertido",                muscle:"Extensores, dorso antebrazo",          sets:3, reps:"15",  topRep:null, noTopRep:true, ssGroup:null },
+      { name:"Dead hang",                            muscle:"Agarre isométrico, Antebrazo",         sets:3, reps:"MAX", topRep:null, noTopRep:true, ssGroup:null },
+    ]
+  },
+  4: {
+    name: "DÍA D — Pecho / Hombros / Tríceps / Core / Grip",
+    supersets: [
+      { label: "SS1 — Press inclinado + Overhead extension", id: "D_SS1" },
+      { label: "SS2 — Press hombro + Extensión barra W", id: "D_SS2" },
+      { label: "SS3 — Fondos + Aperturas inclinadas", id: "D_SS3" },
+      { label: "SS4 — Ab wheel + Isométrico agarre", id: "D_SS4" },
+    ],
+    exercises: [
+      { name:"Press inclinado mancuernas",           muscle:"Pecho clavicular, Tríceps",            sets:4, reps:"10",  topRep:12, ssGroup:"D_SS1", ssPart:"a" },
+      { name:"Overhead extension mancuerna",         muscle:"Tríceps cabeza larga (elongada)",      sets:3, reps:"12",  topRep:15, ssGroup:"D_SS1", ssPart:"b" },
+      { name:"Press hombro mancuernas",              muscle:"Deltoides anterior/medio, Tríceps",    sets:3, reps:"10",  topRep:12, ssGroup:"D_SS2", ssPart:"a" },
+      { name:"Extensión tríceps barra W",            muscle:"Tríceps cabezas lateral/medial",       sets:3, reps:"12",  topRep:15, ssGroup:"D_SS2", ssPart:"b" },
+      { name:"Fondos en paralela",                   muscle:"Pecho inferior, Tríceps",              sets:3, reps:"12",  topRep:15, ssGroup:"D_SS3", ssPart:"a" },
+      { name:"Aperturas inclinadas mancuernas",      muscle:"Pecho elongación máxima",              sets:2, reps:"15",  topRep:18, ssGroup:"D_SS3", ssPart:"b" },
+      { name:"Ab wheel",                             muscle:"Core — anti-extensión",                sets:3, reps:"12",  topRep:null, noTopRep:true, ssGroup:"D_SS4", ssPart:"a" },
+      { name:"Isométrico agarre barra",              muscle:"Support grip, Flexores dedos",         sets:3, reps:"45s", topRep:null, noTopRep:true, ssGroup:"D_SS4", ssPart:"b" },
+    ]
+  },
+  5: {
+    name: "DÍA E — Espalda / Bíceps / Hombros / Grip",
+    supersets: [
+      { label: "SS1 — Dominadas + Curl inclinado (bíceps elongado)", id: "E_SS1" },
+      { label: "SS2 — Remo en T + Curl martillo", id: "E_SS2" },
+      { label: "SS3 — Vuelo posterior + Elevaciones laterales", id: "E_SS3" },
+      { label: "SS4 — Pullover + Remo al mentón", id: "E_SS4" },
+    ],
+    exercises: [
+      { name:"Dominadas",                            muscle:"Dorsal ancho, Bíceps",                 sets:3, reps:"12",  topRep:15, ssGroup:"E_SS1", ssPart:"a" },
+      { name:"Curl inclinado mancuernas",            muscle:"Bíceps posición elongada (+ hipertrofia distal)", sets:4, reps:"12", topRep:15, ssGroup:"E_SS1", ssPart:"b" },
+      { name:"Remo en T mancuernas",                 muscle:"Dorsal, Romboides, Trapecio",          sets:3, reps:"12",  topRep:15, ssGroup:"E_SS2", ssPart:"a" },
+      { name:"Curl martillo",                        muscle:"Braquiorradial, Braquial anterior",    sets:3, reps:"12",  topRep:15, ssGroup:"E_SS2", ssPart:"b" },
+      { name:"Vuelo posterior mancuernas",           muscle:"Deltoides posterior, Infraespinoso",   sets:3, reps:"20",  topRep:25, ssGroup:"E_SS3", ssPart:"a" },
+      { name:"Elevaciones laterales",                muscle:"Deltoides medio (fibras Tipo I)",      sets:3, reps:"20",  topRep:25, ssGroup:"E_SS3", ssPart:"b" },
+      { name:"Pullover mancuerna",                   muscle:"Dorsal en posición elongada",          sets:2, reps:"12",  topRep:null, noTopRep:true, ssGroup:"E_SS4", ssPart:"a" },
+      { name:"Remo al mentón barra (agarre ancho)",  muscle:"Trapecio superior, Deltoides medio",   sets:2, reps:"15",  topRep:15, ssGroup:"E_SS4", ssPart:"b" },
+      { name:"Dead hang",                            muscle:"Agarre isométrico, Antebrazo",         sets:4, reps:"MAX", topRep:null, noTopRep:true, ssGroup:null },
+      { name:"Pinch grip (discos)",                  muscle:"Músculos tenares, Agarre pellizco",    sets:3, reps:"40s", topRep:null, noTopRep:true, ssGroup:null },
+    ]
+  },
 };
 
 // Martes 24 Feb 2026 = día ON para suplementos "día por medio"
@@ -1491,40 +1546,20 @@ function removeFood(id) {
 let trainingSets = {};
 
 // ─── DOUBLE PROGRESSION TARGET ───────────────────────────────────
-function getProgressionTarget(exName, repRange) {
-  const history = (state.exerciseHistory || {})[exName] || [];
-  if (history.length === 0) return null;
-
+function getProgressionTarget(exName, ex) {
+  const history = (state.exerciseHistory||{})[exName]||[];
+  if(history.length===0) return null;
   const latest = history[0];
-  const ex = findExByName(exName);
-  const parts = repRange ? repRange.split('-') : [];
-  const minReps = parts.length >= 1 ? +parts[0] : null;
-  const maxReps = parts.length >= 2 ? +parts[1] : null;
-
-  if (!minReps || !maxReps || !latest.maxKg) return {
-    type: 'info',
-    line1: `Última sesión: ${latest.maxKg}kg × ${latest.avgReps || '?'} reps`,
-    line2: 'Igualá o superá esa marca hoy.'
-  };
-
-  const avgReps = latest.avgReps || minReps;
-
-  if (avgReps >= maxReps) {
-    // Reached top of range — increase weight
-    const nextKg = (latest.maxKg + 2.5).toFixed(1);
-    return {
-      type: 'warn',
-      line1: `🔼 Subí a ${nextKg}kg × ${minReps} reps`,
-      line2: `Última vez: ${latest.maxKg}kg × ${avgReps} reps (tope del rango)`
-    };
+  if(ex.noTopRep) return {type:'info',line1:`Última: ${latest.maxKg||'—'} × ${latest.avgReps||'?'}`,line2:'Igualá o superá esa marca hoy.'};
+  const topRep = ex.topRep;
+  const avgReps = latest.avgReps||0;
+  if(!latest.maxKg) return null;
+  if(avgReps>=topRep){
+    const nextKg=(+latest.maxKg+2.5).toFixed(1);
+    return{type:'warn',line1:`🔼 Subí a ${nextKg}kg × ${ex.reps} reps`,line2:`Última: ${latest.maxKg}kg × ${avgReps} reps — TOPE ${topRep} ALCANZADO ✓`};
   } else {
-    // Add a rep
-    const nextReps = avgReps + 1;
-    return {
-      type: 'info',
-      line1: `🎯 Apuntá a ${latest.maxKg}kg × ${nextReps} reps`,
-      line2: `Última vez: ${latest.maxKg}kg × ${avgReps} reps`
-    };
+    const nextReps=avgReps+1;
+    return{type:'info',line1:`🎯 Apuntá a ${latest.maxKg}kg × ${nextReps} reps`,line2:`Última: ${latest.maxKg}kg × ${avgReps} reps | Tope para subir peso: ${topRep}`};
   }
 }
 
@@ -1556,88 +1591,83 @@ function setTrainDay(day) {
 function renderTraining() {
   const day = state[TODAY].trainDay;
   const list = document.getElementById('exerciseList');
-
-  // Style day buttons
-  for(let i=0;i<=5;i++) {
-    const b = document.getElementById('tbtn'+i);
-    if(b) b.className = 'btn btn-sm ' + (i===day?'btn-primary':'btn-ghost');
-  }
-
-  if (day === 0) {
-    list.innerHTML = `<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">🛋</div><div style="color:var(--text2);font-size:14px">Dia de descanso.<br>El cuerpo construye musculo mientras descansa.</div></div>`;
+  for(let i=0;i<=5;i++){const b=document.getElementById('tbtn'+i);if(b)b.className='btn btn-sm '+(i===day?'btn-primary':'btn-ghost');}
+  if(day===0){
+    list.innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">🛋</div><div style="color:var(--text2);font-size:14px">Dia de descanso.<br>El cuerpo construye músculo mientras descansa.</div></div>`;
     return;
   }
   const d = TRAINING[day];
-  if (!d) return;
-
-  // Load saved sets
+  if(!d) return;
   const savedSets = state[TODAY]['trainSets_'+day] || {};
-
   list.innerHTML = `<div class="section-div">${d.name}</div>`;
+  const renderedSS = new Set();
 
   d.exercises.forEach((ex, exIdx) => {
-    const card = document.createElement('div');
-    card.className = 'exercise-card';
-    card.id = 'excard-' + exIdx;
+    // Superset divider before first exercise of each group
+    if(ex.ssGroup && ex.ssPart==='a' && !renderedSS.has(ex.ssGroup)) {
+      renderedSS.add(ex.ssGroup);
+      const ssInfo = d.supersets?.find(s=>s.id===ex.ssGroup);
+      if(ssInfo) {
+        const div = document.createElement('div');
+        div.className='ss-divider';
+        div.innerHTML=`⚡ ${ssInfo.label}`;
+        list.appendChild(div);
+      }
+    }
 
-    const exSets = savedSets[exIdx] || Array.from({length:ex.sets}, () => ({kg:'',reps:'',done:false}));
+    const exSets = savedSets[exIdx] || Array.from({length:ex.sets},()=>({kg:'',reps:'',done:false}));
+    const lastSession = (state.exerciseHistory||{})[ex.name]?.[0];
+    const lastSetsLog = lastSession?.setsLog||[];
 
-    // Get last session's per-set data for placeholders
-    const lastSession = (state.exerciseHistory || {})[ex.name]?.[0];
-    const lastSetsLog = lastSession?.setsLog || [];
-
-    const setsHtml = exSets.map((s, sIdx) => {
+    const setsHtml = exSets.map((s,sIdx)=>{
       const prev = lastSetsLog[sIdx];
-      const kgPlaceholder = prev?.kg ? prev.kg + 'kg' : 'kg';
-      const repsPlaceholder = prev?.reps ? prev.reps + ' reps' : ex.reps;
-      return `
-      <div class="set-row">
+      const kgPH = prev?.kg ? prev.kg+'kg' : 'kg';
+      const repsPH = prev?.reps ? prev.reps+' reps' : ex.reps;
+      return `<div class="set-row">
         <div class="set-num">${sIdx+1}</div>
-        <input class="set-input" placeholder="${kgPlaceholder}" value="${s.kg||''}" oninput="updateSet(${exIdx},${sIdx},'kg',this.value)" ${!s.kg && prev?.kg ? 'style="color:var(--text3)"' : ''}>
-        <input class="set-input" placeholder="${repsPlaceholder}" value="${s.reps||''}" oninput="updateSet(${exIdx},${sIdx},'reps',this.value)" ${!s.reps && prev?.reps ? 'style="color:var(--text3)"' : ''}>
+        <input class="set-input" placeholder="${kgPH}" value="${s.kg||''}" oninput="updateSet(${exIdx},${sIdx},'kg',this.value)">
+        <input class="set-input" placeholder="${repsPH}" value="${s.reps||''}" oninput="updateSet(${exIdx},${sIdx},'reps',this.value)">
         <button class="set-check ${s.done?'done':''}" id="sc-${exIdx}-${sIdx}" onclick="toggleSet(${exIdx},${sIdx})">${s.done?'✓':''}</button>
       </div>`;
     }).join('');
 
     const doneCount = exSets.filter(s=>s.done).length;
-    const allDone = doneCount === exSets.length && exSets.length > 0;
-    const isPR = allDone && checkIfPR(ex.name, exSets);
+    const allDone = doneCount===exSets.length&&exSets.length>0;
+    const isPR = allDone&&checkIfPR(ex.name,exSets);
+    const target = getProgressionTarget(ex.name, ex);
+    const targetHtml = target ? `<div class="prog-target ${target.type}" style="margin-bottom:8px"><div class="prog-target-icon">${target.type==='warn'?'🔼':'🎯'}</div><div><div class="prog-target-text">${target.line1}</div><div class="prog-target-sub">${target.line2}</div></div></div>` : '';
+    const topeBadge = (!ex.noTopRep && ex.topRep) ? `<span class="tope-badge">tope ${ex.topRep}</span>` : '';
+    const ssBadge = ex.ssGroup ? `<span class="ss-badge">${ex.ssPart==='a'?'A':'B'}</span>` : '';
 
-    // Progression target banner
-    const target = getProgressionTarget(ex.name, ex.reps);
-    const targetHtml = target ? `
-      <div class="prog-target ${target.type}" style="margin-bottom:8px">
-        <div class="prog-target-icon">${target.type==='warn'?'🔼':target.type==='success'?'🏆':'🎯'}</div>
-        <div>
-          <div class="prog-target-text">${target.line1}</div>
-          <div class="prog-target-sub">${target.line2}</div>
-        </div>
-      </div>` : '';
-
+    const card = document.createElement('div');
+    card.className = `exercise-card${ex.ssGroup?(' superset-'+ex.ssPart):''}`;
+    card.id = 'excard-'+exIdx;
     card.innerHTML = `
       <div class="exercise-header" onclick="toggleExCard(${exIdx})">
-        <div>
-          <div class="exercise-name">${ex.name}</div>
-          <div class="exercise-muscle">${ex.muscle} · ${ex.sets}x${ex.reps}</div>
+        <div style="flex:1">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:2px">
+            ${ssBadge}<div class="exercise-name">${ex.name}</div>${topeBadge}
+          </div>
+          <div class="exercise-muscle">${ex.muscle} · ${ex.sets}×${ex.reps}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px">
-          ${isPR ? `<span class="tag tag-green">🏆 PR</span>` : doneCount > 0 ? `<span class="tag tag-green">${doneCount}/${ex.sets}</span>` : ''}
+          ${isPR?`<span class="tag tag-green">🏆 PR</span>`:doneCount>0?`<span class="tag tag-green">${doneCount}/${ex.sets}</span>`:''}
           <div class="exercise-chevron">▾</div>
         </div>
       </div>
       <div class="sets-container">
-        ${targetHtml}
-        ${setsHtml}
+        ${targetHtml}${setsHtml}
         <button class="add-set-btn" onclick="addSet(${exIdx})">+ Serie</button>
       </div>`;
     list.appendChild(card);
-    if (!savedSets[exIdx]) savedSets[exIdx] = exSets;
+    if(!savedSets[exIdx]) savedSets[exIdx]=exSets;
   });
 
-  if (!state[TODAY]['trainSets_'+day]) {
-    state[TODAY]['trainSets_'+day] = savedSets;
+  if(!state[TODAY]['trainSets_'+day]){
+    state[TODAY]['trainSets_'+day]=savedSets;
     saveState(state);
   }
+  renderTrainSuggestions();
 }
 
 function toggleExCard(idx) {
