@@ -242,9 +242,82 @@ html, body { height:100%; background:var(--bg); color:var(--text); font-family:'
 .prog-target.success .prog-target-text { color:var(--green); }
 .pr-flash { animation: prFlash 0.6s ease; }
 @keyframes prFlash { 0%{background:rgba(77,255,180,0.25)} 100%{background:transparent} }
+
+/* ── FEATURE 1: PROGRESSION BAR ── */
+.rep-prog-wrap { margin:6px 0 10px; }
+.rep-prog-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+.rep-prog-label { font-size:10px; color:var(--text2); font-weight:600; letter-spacing:0.3px; }
+.rep-prog-count { font-size:10px; font-family:'Space Mono',monospace; color:var(--text); }
+.rep-prog-track { height:8px; background:var(--bg4); border-radius:4px; overflow:hidden; position:relative; }
+.rep-prog-fill { height:100%; border-radius:4px; transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1); }
+.rep-prog-fill.near-max { background:var(--yellow); }
+.rep-prog-fill.at-max   { background:var(--green); animation:pulseBar 1.5s ease-in-out infinite; }
+.rep-prog-fill.normal   { background:var(--accent); }
+@keyframes pulseBar { 0%,100%{opacity:1} 50%{opacity:0.6} }
+.rep-prog-hint { font-size:9px; color:var(--text3); margin-top:3px; text-align:right; }
+.rep-prog-hint.upgrade { color:var(--green); font-weight:700; }
+
+/* ── FEATURE 2: WEIGHT SUGGESTION BOX ── */
+.weight-suggestion { border-radius:10px; padding:10px 12px; margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; }
+.weight-suggestion.upgrade  { background:rgba(77,255,180,0.08); border:1px solid rgba(77,255,180,0.3); }
+.weight-suggestion.keep     { background:rgba(77,138,255,0.08); border:1px solid rgba(77,138,255,0.25); }
+.weight-suggestion.deload   { background:rgba(255,107,77,0.08); border:1px solid rgba(255,107,77,0.3); }
+.weight-suggestion.aim-more { background:rgba(255,212,77,0.08); border:1px solid rgba(255,212,77,0.3); }
+.ws-icon { font-size:18px; flex-shrink:0; margin-top:1px; }
+.ws-body { flex:1; }
+.ws-title { font-size:11px; font-weight:700; color:var(--text); }
+.ws-detail { font-size:10px; color:var(--text2); margin-top:2px; line-height:1.4; }
+.ws-next { font-size:11px; font-weight:600; margin-top:4px; font-family:'Space Mono',monospace; }
+.ws-next.upgrade  { color:var(--green); }
+.ws-next.deload   { color:var(--red); }
+.ws-next.keep     { color:var(--accent); }
+.ws-next.aim-more { color:var(--yellow); }
+
+/* ── FEATURE 3: PR NOTIFICATION POPUP ── */
+.pr-popup { position:fixed; top:70px; left:50%; transform:translateX(-50%) translateY(-10px); z-index:300; background:linear-gradient(135deg,#0f2d1a,#0d2218); border:1px solid rgba(77,255,180,0.5); border-radius:16px; padding:14px 20px; min-width:240px; max-width:320px; text-align:center; opacity:0; pointer-events:none; transition:all 0.4s cubic-bezier(0.34,1.56,0.64,1); box-shadow:0 4px 30px rgba(77,255,180,0.2); }
+.pr-popup.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:all; }
+.pr-popup-trophy { font-size:28px; margin-bottom:4px; }
+.pr-popup-title { font-size:11px; font-weight:700; color:var(--green); text-transform:uppercase; letter-spacing:1.5px; }
+.pr-popup-main  { font-size:14px; font-weight:700; color:var(--text); margin-top:4px; font-family:'Space Mono',monospace; }
+.pr-popup-type  { font-size:10px; color:var(--text2); margin-top:3px; }
+
+/* ── PR HISTORY SECTION ── */
+.pr-history-card { background:var(--bg3); border:1px solid var(--border); border-radius:var(--radius-sm); padding:12px 14px; margin-bottom:8px; }
+.pr-history-exname { font-size:12px; font-weight:700; color:var(--text); margin-bottom:6px; display:flex; align-items:center; gap:6px; }
+.pr-row { display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid var(--border); }
+.pr-row:last-child { border-bottom:none; }
+.pr-row-type { font-size:10px; color:var(--text2); }
+.pr-row-val { font-size:11px; font-family:'Space Mono',monospace; color:var(--yellow); font-weight:700; }
+.pr-row-date { font-size:10px; color:var(--text3); }
+
+/* ── FEATURE 4: ADAPTIVE ROUTINE BANNER ── */
+.routine-shift-banner { background:rgba(255,212,77,0.08); border:1px solid rgba(255,212,77,0.3); border-radius:10px; padding:12px 14px; margin-bottom:10px; display:flex; align-items:flex-start; gap:10px; }
+.rsb-icon { font-size:20px; flex-shrink:0; }
+.rsb-body { flex:1; }
+.rsb-title { font-size:12px; font-weight:700; color:var(--yellow); }
+.rsb-sub { font-size:11px; color:var(--text2); margin-top:3px; line-height:1.4; }
+.rsb-action { display:inline-block; margin-top:8px; padding:5px 12px; background:rgba(255,212,77,0.15); border:1px solid rgba(255,212,77,0.4); border-radius:20px; font-size:11px; color:var(--yellow); font-weight:700; cursor:pointer; transition:all 0.2s; }
+.rsb-action:hover { background:rgba(255,212,77,0.3); }
 /* SUPERSET STYLES */
 .ss-badge { display:inline-flex; align-items:center; gap:4px; padding:2px 8px; border-radius:20px; font-size:9px; font-weight:700; text-transform:uppercase; letter-spacing:0.5px; background:rgba(77,138,255,0.12); color:var(--accent); border:1px solid rgba(77,138,255,0.25); margin-right:6px; }
 .ss-divider { display:flex; align-items:center; gap:8px; padding:6px 14px; background:rgba(77,138,255,0.06); border-left:2px solid var(--accent); margin:0 0 6px 0; font-size:10px; color:var(--accent); font-weight:700; letter-spacing:0.5px; }
+
+/* ── INLINE SUPERSET TIMER ── */
+.ss-timer-wrap { margin:0 0 4px 0; background:rgba(77,138,255,0.06); border-left:2px solid var(--accent); padding:0; overflow:hidden; border-radius:0 6px 6px 0; }
+.ss-divider-row { display:flex; align-items:center; gap:8px; padding:6px 14px; font-size:10px; color:var(--accent); font-weight:700; letter-spacing:0.5px; flex:1; }
+.ss-timer-bar-wrap { padding:0 14px 8px; display:none; }
+.ss-timer-bar-wrap.active { display:block; }
+.ss-timer-countdown { display:flex; align-items:center; justify-content:space-between; margin-bottom:5px; }
+.ss-timer-secs { font-family:'Space Mono',monospace; font-size:22px; font-weight:700; color:var(--accent); line-height:1; transition:color 0.3s; }
+.ss-timer-label { font-size:10px; color:var(--text2); text-align:right; line-height:1.4; }
+.ss-timer-track { height:5px; background:var(--bg4); border-radius:3px; overflow:hidden; }
+.ss-timer-fill { height:100%; border-radius:3px; transition:width 1s linear, background 0.3s; }
+.ss-timer-done-msg { font-size:11px; color:var(--green); font-weight:700; padding:4px 0 0; display:none; }
+.ss-timer-done-msg.show { display:block; }
+.ss-timer-btns { display:flex; gap:6px; margin-top:6px; }
+.ss-timer-btn { padding:4px 10px; border-radius:12px; border:none; font-size:10px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.15s; }
+.ss-timer-btn.add  { background:rgba(77,138,255,0.15); color:var(--accent); border:1px solid rgba(77,138,255,0.3); }
+.ss-timer-btn.skip { background:var(--bg3); color:var(--text3); border:1px solid var(--border); }
 .exercise-card.superset-a { border-top:2px solid var(--accent); }
 .exercise-card.superset-b { border-top:2px solid rgba(77,138,255,0.3); margin-top:-4px; border-radius:0 0 var(--radius-sm) var(--radius-sm); }
 .tope-badge { display:inline-block; margin-left:6px; padding:1px 7px; border-radius:20px; font-size:9px; font-weight:700; background:rgba(255,212,77,0.12); color:var(--yellow); border:1px solid rgba(255,212,77,0.25); }
@@ -293,6 +366,62 @@ body.theme-gold     { --accent:#f7b731; --accent2:#fd9644; --green:#26de81; --re
 body.theme-steel    { --accent:#94a3b8; --accent2:#64748b; --green:#4dffb4; --red:#f87171; --yellow:#fbbf24; --bg:#050507; --bg2:#08080c; --bg3:#0d0d14; --bg4:#12121e; --border:#1e1e2e; --card:#040407; --text2:#64748b; --text3:#334155; }
 body.theme-mint     { --accent:#2dd4bf; --accent2:#34d399; --green:#34d399; --red:#f87171; --yellow:#fbbf24; --bg:#030d0c; --bg2:#051210; --bg3:#081a18; --bg4:#0c2220; --border:#133d38; --card:#020b0a; --text2:#3d8a80; --text3:#1a4a45; }
 body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --red:#db2777; --yellow:#fbbf24; --bg:#060408; --bg2:#0a0710; --bg3:#100b18; --bg4:#160f20; --border:#2d1f45; --card:#040308; --text2:#6b5a8a; --text3:#3d2d5a; }
+
+/* ── REST TIMER ── */
+.rest-timer-overlay { position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:400; display:flex; align-items:center; justify-content:center; opacity:0; pointer-events:none; transition:opacity 0.3s; }
+.rest-timer-overlay.active { opacity:1; pointer-events:all; }
+.rest-timer-box { background:var(--bg2); border:1px solid var(--border); border-radius:28px; padding:32px 28px 24px; width:300px; text-align:center; transform:scale(0.9); transition:transform 0.3s cubic-bezier(0.34,1.56,0.64,1); }
+.rest-timer-overlay.active .rest-timer-box { transform:scale(1); }
+.rest-timer-exname { font-size:11px; color:var(--text2); font-weight:600; text-transform:uppercase; letter-spacing:1px; margin-bottom:4px; }
+.rest-timer-label { font-size:11px; color:var(--text3); margin-bottom:20px; }
+.rest-timer-ring { position:relative; width:160px; height:160px; margin:0 auto 20px; }
+.rest-timer-ring svg { transform:rotate(-90deg); }
+.rest-timer-num { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; flex-direction:column; }
+.rest-timer-secs { font-family:'Space Mono',monospace; font-size:52px; font-weight:700; line-height:1; }
+.rest-timer-unit { font-size:11px; color:var(--text2); margin-top:2px; }
+.rest-timer-reason { font-size:11px; color:var(--text3); margin-bottom:16px; line-height:1.5; }
+.rest-timer-btns { display:flex; gap:8px; justify-content:center; }
+.rest-timer-btn { padding:10px 20px; border-radius:20px; border:none; font-size:13px; font-weight:600; cursor:pointer; font-family:'DM Sans',sans-serif; transition:all 0.2s; }
+.rest-timer-btn.skip  { background:var(--bg3); color:var(--text2); border:1px solid var(--border); }
+.rest-timer-btn.add   { background:var(--bg3); color:var(--accent); border:1px solid rgba(77,138,255,0.3); }
+.rest-timer-btn.skip:active, .rest-timer-btn.add:active { transform:scale(0.95); }
+.rest-timer-done { background:rgba(77,255,180,0.1); border:1px solid rgba(77,255,180,0.3); border-radius:12px; padding:12px; margin-bottom:16px; font-size:13px; color:var(--green); font-weight:600; display:none; }
+.rest-timer-done.show { display:block; }
+
+/* ── CALENDAR ── */
+.cal-wrap { margin-bottom:4px; }
+.cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+.cal-month { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--text); }
+.cal-nav { width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+.cal-nav:hover { border-color:var(--accent); color:var(--accent); }
+.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
+.cal-dow { font-size:9px; font-weight:700; color:var(--text3); text-align:center; padding:2px 0 6px; text-transform:uppercase; letter-spacing:0.5px; }
+.cal-day { aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-family:'Space Mono',monospace; cursor:pointer; transition:all 0.15s; position:relative; border:1px solid transparent; }
+.cal-day.empty { pointer-events:none; }
+.cal-day.today { border-color:var(--accent); color:var(--accent); font-weight:700; }
+.cal-day.rest   { background:rgba(61,77,112,0.2); color:var(--text3); }
+.cal-day.trained { color:white; font-weight:700; }
+.cal-day.trained.d1 { background:rgba(77,138,255,0.7); }
+.cal-day.trained.d2 { background:rgba(77,255,180,0.5); color:#0a2a1a; }
+.cal-day.trained.d3 { background:rgba(168,139,250,0.6); }
+.cal-day.trained.d5 { background:rgba(255,107,77,0.6); }
+.cal-day.trained.d6 { background:rgba(251,191,36,0.6); color:#2a1a00; }
+.cal-day-dot { position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:var(--green); }
+.cal-legend { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+.cal-leg-item { display:flex; align-items:center; gap:4px; font-size:9px; color:var(--text2); }
+.cal-leg-dot { width:10px; height:10px; border-radius:3px; flex-shrink:0; }
+.cal-streak { display:flex; align-items:center; gap:12px; margin-top:12px; padding-top:12px; border-top:1px solid var(--border); }
+.cal-streak-item { text-align:center; flex:1; }
+.cal-streak-val { font-family:'Space Mono',monospace; font-size:20px; font-weight:700; color:var(--accent); }
+.cal-streak-lbl { font-size:9px; color:var(--text2); text-transform:uppercase; letter-spacing:0.5px; margin-top:2px; }
+
+/* ── DELOAD BANNER ── */
+.deload-banner { background:linear-gradient(135deg,rgba(255,107,77,0.1),rgba(255,212,77,0.08)); border:1px solid rgba(255,107,77,0.35); border-radius:14px; padding:14px 16px; margin-bottom:12px; }
+.deload-banner-title { font-size:13px; font-weight:700; color:var(--red); margin-bottom:4px; display:flex; align-items:center; gap:6px; }
+.deload-banner-sub { font-size:11px; color:var(--text2); line-height:1.5; margin-bottom:10px; }
+.deload-banner-pills { display:flex; gap:6px; flex-wrap:wrap; }
+.deload-pill { background:rgba(255,107,77,0.12); border:1px solid rgba(255,107,77,0.3); border-radius:20px; padding:4px 10px; font-size:10px; color:var(--red); font-weight:600; }
+.deload-dismiss { background:none; border:none; color:var(--text3); font-size:11px; cursor:pointer; margin-top:8px; font-family:'DM Sans',sans-serif; text-decoration:underline; }
 
 /* HYDRATION */
 .hydration-widget { display:flex; flex-direction:column; align-items:center; gap:16px; padding:8px 0; }
@@ -394,6 +523,38 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
 </head>
 <body>
 <div class="app">
+  <!-- PR POPUP (Feature 3) -->
+  <div id="prPopup" class="pr-popup">
+    <div class="pr-popup-trophy">🏆</div>
+    <div class="pr-popup-title">NUEVO RÉCORD</div>
+    <div class="pr-popup-main" id="prPopupMain"></div>
+    <div class="pr-popup-type" id="prPopupType"></div>
+  </div>
+
+  <!-- REST TIMER OVERLAY -->
+  <div id="restTimerOverlay" class="rest-timer-overlay">
+    <div class="rest-timer-box">
+      <div class="rest-timer-exname" id="rtExName"></div>
+      <div class="rest-timer-label" id="rtLabel"></div>
+      <div class="rest-timer-done" id="rtDone">✅ ¡Listo para la próxima serie!</div>
+      <div class="rest-timer-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bg4)" stroke-width="10"/>
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--accent)" stroke-width="10"
+            stroke-dasharray="427" stroke-dashoffset="0" stroke-linecap="round" id="rtRingFill"/>
+        </svg>
+        <div class="rest-timer-num">
+          <div class="rest-timer-secs" id="rtSecs" style="color:var(--accent)">90</div>
+          <div class="rest-timer-unit">seg</div>
+        </div>
+      </div>
+      <div class="rest-timer-reason" id="rtReason"></div>
+      <div class="rest-timer-btns">
+        <button class="rest-timer-btn add" onclick="addRestTime(30)">+30s</button>
+        <button class="rest-timer-btn skip" onclick="dismissRestTimer()">Saltar ✕</button>
+      </div>
+    </div>
+  </div>
   <!-- HEADER -->
   <div class="header">
     <div>
@@ -417,6 +578,7 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
     <button class="tab active" onclick="showPage('home')"><span class="tab-icon">📊</span>Resumen</button>
     <button class="tab" onclick="showPage('macros')"><span class="tab-icon">🍽</span>Macros</button>
     <button class="tab" onclick="showPage('training')"><span class="tab-icon">💪</span>Entreno</button>
+    <button class="tab" onclick="showPage('calendar')"><span class="tab-icon">📅</span>Calendario</button>
     <button class="tab" onclick="showPage('supps')"><span class="tab-icon">💊</span>Supls</button>
     <button class="tab" onclick="showPage('metrics')"><span class="tab-icon">📊</span>Metricas</button>
     <button class="tab" onclick="showPage('sleep')"><span class="tab-icon">🌙</span>Sueno</button>
@@ -547,14 +709,17 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
 
     <!-- ═══ TRAINING PAGE ═══ -->
     <div class="page" id="page-training">
+      <!-- DELOAD BANNER -->
+      <div id="deloadBanner" style="display:none"></div>
       <div class="card" style="margin-bottom:12px">
         <div class="card-title"><span>📅</span> Dia de hoy</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap" id="daySelector">
-          <button class="btn btn-sm" onclick="setTrainDay(1)" id="tbtn1">DIA 1 — Push</button>
-          <button class="btn btn-sm" onclick="setTrainDay(2)" id="tbtn2">DIA 2 — Pull</button>
-          <button class="btn btn-sm" onclick="setTrainDay(3)" id="tbtn3">DIA 3 — Hombros</button>
-          <button class="btn btn-sm" onclick="setTrainDay(4)" id="tbtn4">DIA 4 — Push H</button>
-          <button class="btn btn-sm" onclick="setTrainDay(5)" id="tbtn5">DIA 5 — Pull H</button>
+          <button class="btn btn-sm" onclick="setTrainDay(1)" id="tbtn1">D1 — Push+Pull</button>
+          <button class="btn btn-sm" onclick="setTrainDay(2)" id="tbtn2">D2 — Shoulders</button>
+          <button class="btn btn-sm" onclick="setTrainDay(3)" id="tbtn3">D3 — Pull</button>
+          <button class="btn btn-sm btn-ghost" onclick="setTrainDay(4)" id="tbtn4">D4 — Descanso</button>
+          <button class="btn btn-sm" onclick="setTrainDay(5)" id="tbtn5">D5 — Push</button>
+          <button class="btn btn-sm" onclick="setTrainDay(6)" id="tbtn6">D6 — Pull+Arms</button>
           <button class="btn btn-sm btn-ghost" onclick="setTrainDay(0)" id="tbtn0">Descanso</button>
         </div>
       </div>
@@ -563,6 +728,9 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
       <!-- SUGERENCIAS -->
       <div class="section-div" style="margin-top:4px">💡 Sugerencias</div>
       <div id="trainSuggestions"></div>
+
+      <!-- ADAPTIVE ROUTINE BANNER (Feature 4) -->
+      <div id="adaptiveRoutineBanner" style="display:none"></div>
 
       <!-- FUERZA POR EJERCICIO -->
       <div class="section-div">📈 Progreso por ejercicio</div>
@@ -577,6 +745,37 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
         </div>
         <div id="strengthChartStats"></div>
         <div id="exHistoryList"></div>
+      </div>
+
+
+    </div>
+
+    <!-- ═══ CALENDAR PAGE ═══ -->
+    <div class="page" id="page-calendar">
+      <div class="card">
+        <div class="card-title"><span>📅</span> Consistencia de entrenamiento</div>
+        <div class="cal-wrap">
+          <div class="cal-header">
+            <button class="cal-nav" onclick="calNav(-1)">‹</button>
+            <div class="cal-month" id="calMonthLabel"></div>
+            <button class="cal-nav" onclick="calNav(1)">›</button>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend" id="calLegend">
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(77,138,255,0.7)"></div>D1 Push+Pull</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(77,255,180,0.5)"></div>D2 Shoulders</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(168,139,250,0.6)"></div>D3 Pull</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(255,107,77,0.6)"></div>D5 Push</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(251,191,36,0.6)"></div>D6 Pull+Arms</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(61,77,112,0.4)"></div>Descanso</div>
+          </div>
+          <div class="cal-streak" id="calStreak"></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>📊</span> Resumen del mes</div>
+        <div id="calMonthStats"></div>
       </div>
     </div>
 
@@ -653,11 +852,7 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
           <div class="metric-unit">%</div>
           <div class="metric-label">% Muscular</div>
         </div>
-        <div class="metric-card">
-          <div class="metric-val" id="metricWaist" style="color:var(--accent2)">—</div>
-          <div class="metric-unit">cm</div>
-          <div class="metric-label">Cintura</div>
-        </div>
+
       </div>
 
       <div class="card">
@@ -676,10 +871,7 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
             <input class="inp" id="inpMuscle" type="number" step="0.1" placeholder="78.0">
           </div>
         </div>
-        <div class="input-group">
-          <label class="input-label">Cintura (cm)</label>
-          <input class="inp" id="inpWaist" type="number" step="0.5" placeholder="82">
-        </div>
+
         <button class="btn btn-primary" style="width:100%" onclick="saveMetrics()">Guardar medicion</button>
       </div>
 
@@ -690,7 +882,6 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
           <button class="prog-sel-btn active" onclick="selectBodyChart('weight',this)">⚖️ Peso</button>
           <button class="prog-sel-btn" onclick="selectBodyChart('bf',this)">🟡 % Grasa</button>
           <button class="prog-sel-btn" onclick="selectBodyChart('muscle',this)">🟢 % Muscular</button>
-          <button class="prog-sel-btn" onclick="selectBodyChart('waist',this)">📏 Cintura</button>
         </div>
         <div class="chart-wrap">
           <svg class="chart-svg" id="bodyChartSvg" viewBox="0 0 360 160" preserveAspectRatio="none"></svg>
@@ -1025,8 +1216,8 @@ function saveState(s) {
 
 // Ciclo automático: 1 → 2 → Descanso → 3 → 4 → 5 → Descanso → ...
 // Día 1 = Lunes 23 Feb 2026
-const CYCLE = [1, 2, 0, 3, 4, 5, 0]; // 0 = Descanso
-const CYCLE_START = new Date('2026-02-23'); // Día 1 del ciclo
+const CYCLE = [1, 2, 3, 4, 5, 6]; // D4 = descanso (manejado internamente)
+const CYCLE_START = new Date('2026-03-03'); // Mar 3 = D1, Mar 4 = D2
 
 function getAutoTrainDay() {
   const today = new Date(TODAY);
@@ -1054,98 +1245,93 @@ if (!state.exerciseHistory) state.exerciseHistory = {};
 // ─── TRAINING DATA ────────────────────────────────────────────────
 const TRAINING = {
   1: {
-    name: "DÍA A — Pecho / Tríceps / Core / Grip",
+    name: "D1 — Push + Pull",
     supersets: [
-      { label: "SS1 — Press plano + Overhead extension (antagonistas tríceps)", id: "A_SS1" },
-      { label: "SS2 — Press inclinado + Extensión barra", id: "A_SS2" },
-      { label: "SS3 — Aperturas inclinadas + Ab wheel", id: "A_SS3" },
+      { label: "SS1 — Bench press + Chest supported row", id: "A_SS1" },
+      { label: "SS2 — Incline dumbbell press + DB row unilateral", id: "A_SS2" },
+      { label: "SS3 — Incline dumbbell fly + Overhead triceps extension", id: "A_SS3" },
+      { label: "SS4 — EZ bar triceps extension + Ab wheel", id: "A_SS4" },
     ],
     exercises: [
-      { name:"Press banca plano (barra)",        muscle:"Pecho esternal, Tríceps",          sets:4, reps:"6",   topRep:8,  ssGroup:"A_SS1", ssPart:"a" },
-      { name:"Overhead extension mancuerna",     muscle:"Tríceps cabeza larga",             sets:4, reps:"10",  topRep:12, ssGroup:"A_SS1", ssPart:"b" },
-      { name:"Press inclinado mancuernas",       muscle:"Pecho clavicular, Tríceps",        sets:3, reps:"10",  topRep:12, ssGroup:"A_SS2", ssPart:"a" },
-      { name:"Extensión tríceps barra W",        muscle:"Tríceps cabezas lateral/medial",   sets:3, reps:"12",  topRep:15, ssGroup:"A_SS2", ssPart:"b" },
-      { name:"Aperturas inclinadas mancuernas",  muscle:"Pecho elongación máxima",          sets:3, reps:"12",  topRep:15, ssGroup:"A_SS3", ssPart:"a" },
-      { name:"Ab wheel",                         muscle:"Core — anti-extensión",            sets:3, reps:"10",  topRep:null, noTopRep:true, ssGroup:"A_SS3", ssPart:"b" },
-      { name:"Fondos en paralela",               muscle:"Pecho inferior, Tríceps",          sets:3, reps:"7",   topRep:10, ssGroup:null },
-      { name:"Dead hang",                        muscle:"Agarre isométrico, Antebrazo",     sets:3, reps:"MAX", topRep:null, noTopRep:true, ssGroup:null },
+      { name:"Bench press",                     muscle:"Pecho esternal, Tríceps",              sets:4, reps:"5-8",   noTopRep:false, ssGroup:"A_SS1", ssPart:"a" },
+      { name:"Chest supported row",             muscle:"Dorsal, Romboides, Trapecio medio",    sets:4, reps:"6-10",  noTopRep:false, ssGroup:"A_SS1", ssPart:"b" },
+      { name:"Incline dumbbell press",          muscle:"Pecho clavicular, Tríceps",            sets:3, reps:"8-12",  noTopRep:false, ssGroup:"A_SS2", ssPart:"a" },
+      { name:"DB row unilateral",               muscle:"Dorsal, Redondo mayor",                sets:3, reps:"8-12",  noTopRep:false, ssGroup:"A_SS2", ssPart:"b" },
+      { name:"Incline dumbbell fly",            muscle:"Pecho elongación máxima",              sets:3, reps:"10-15", noTopRep:false, ssGroup:"A_SS3", ssPart:"a" },
+      { name:"Overhead triceps extension",      muscle:"Tríceps cabeza larga",                 sets:3, reps:"10-12", noTopRep:false, ssGroup:"A_SS3", ssPart:"b" },
+      { name:"EZ bar triceps extension",        muscle:"Tríceps cabezas lateral/medial",       sets:2, reps:"10-12", noTopRep:false, ssGroup:"A_SS4", ssPart:"a" },
+      { name:"Ab wheel",                        muscle:"Core — anti-extensión",                sets:3, reps:"8-12",  noTopRep:false, ssGroup:"A_SS4", ssPart:"b" },
     ]
   },
   2: {
-    name: "DÍA B — Espalda / Bíceps / Deltoides Posterior / Grip",
+    name: "D2 — Shoulders + Core",
     supersets: [
-      { label: "SS1 — Dominadas + Curl barra W (antagonistas clásico)", id: "B_SS1" },
-      { label: "SS2 — Remo con barra + Curl martillo", id: "B_SS2" },
-      { label: "SS3 — Remo unilateral + Vuelo posterior", id: "B_SS3" },
-      { label: "SS4 — Remo al mentón + Farmers carry", id: "B_SS4" },
+      { label: "SS1 — Lateral raise + Rear delt fly", id: "B_SS1" },
+      { label: "SS2 — Reverse curl + Side plank", id: "B_SS2" },
     ],
     exercises: [
-      { name:"Dominadas",                            muscle:"Dorsal ancho, Bíceps",               sets:4, reps:"6",   topRep:8,  ssGroup:"B_SS1", ssPart:"a" },
-      { name:"Curl bíceps barra W",                  muscle:"Bíceps cabeza corta, Braquial",      sets:4, reps:"10",  topRep:12, ssGroup:"B_SS1", ssPart:"b" },
-      { name:"Remo con barra",                       muscle:"Dorsal, Romboides, Trapecio medio",  sets:4, reps:"8",   topRep:10, ssGroup:"B_SS2", ssPart:"a" },
-      { name:"Curl martillo",                        muscle:"Braquiorradial, Braquial anterior",  sets:3, reps:"12",  topRep:15, ssGroup:"B_SS2", ssPart:"b" },
-      { name:"Remo unilateral mancuerna",            muscle:"Dorsal, Redondo mayor",              sets:3, reps:"10",  topRep:12, ssGroup:"B_SS3", ssPart:"a" },
-      { name:"Vuelo posterior mancuernas",           muscle:"Deltoides posterior, Infraespinoso", sets:4, reps:"20",  topRep:25, ssGroup:"B_SS3", ssPart:"b" },
-      { name:"Remo al mentón barra (agarre ancho)",  muscle:"Trapecio superior, Deltoides medio", sets:3, reps:"12",  topRep:15, ssGroup:"B_SS4", ssPart:"a" },
-      { name:"Farmers carry",                        muscle:"Agarre dinámico, Trapecio, Core",    sets:3, reps:"40s", topRep:null, noTopRep:true, ssGroup:"B_SS4", ssPart:"b" },
+      { name:"External rotation",               muscle:"Manguito rotador, Infraespinoso",      sets:2, reps:"15-20", noTopRep:false, ssGroup:null },
+      { name:"Dumbbell shoulder press",         muscle:"Deltoides anterior/medio, Tríceps",    sets:4, reps:"6-10",  noTopRep:false, ssGroup:null },
+      { name:"Lateral raise",                   muscle:"Deltoides medio",                      sets:4, reps:"12-20", noTopRep:false, ssGroup:"B_SS1", ssPart:"a" },
+      { name:"Rear delt fly",                   muscle:"Deltoides posterior, Infraespinoso",   sets:3, reps:"12-15", noTopRep:false, ssGroup:"B_SS1", ssPart:"b" },
+      { name:"Reverse curl",                    muscle:"Braquiorradial, Extensores muñeca",    sets:3, reps:"10-12", noTopRep:false, ssGroup:"B_SS2", ssPart:"a" },
+      { name:"Side plank",                      muscle:"Oblicuos, Core lateral",               sets:3, reps:"30-45s",noTopRep:true,  ssGroup:"B_SS2", ssPart:"b" },
+      { name:"Bar hold",                        muscle:"Agarre isométrico, Antebrazos",        sets:3, reps:"20-30s",noTopRep:true,  ssGroup:null },
     ]
   },
   3: {
-    name: "DÍA C — Hombros / Antebrazos / Core / Grip",
+    name: "D3 — Pull (heavy)",
     supersets: [
-      { label: "SS1 — Press militar + Flexores muñeca", id: "C_SS1" },
-      { label: "SS2 — Elevaciones laterales + Extensores muñeca", id: "C_SS2" },
-      { label: "SS3 — Ab wheel (anti-ext) + Russian twist (anti-rot)", id: "C_SS3" },
+      { label: "SS1 — Pull-up pronado + Rear delt row", id: "C_SS1" },
+      { label: "SS2 — Barbell row + Hammer curl", id: "C_SS2" },
+      { label: "SS3 — Pull-up neutro + Lateral raise", id: "C_SS3" },
     ],
     exercises: [
-      { name:"Press militar mancuernas",             muscle:"Deltoides anterior/medio, Tríceps",    sets:4, reps:"8",   topRep:10, ssGroup:"C_SS1", ssPart:"a" },
-      { name:"Curl de muñeca antebrazo",             muscle:"Flexores superficiales muñeca",        sets:4, reps:"20",  topRep:null, noTopRep:true, ssGroup:"C_SS1", ssPart:"b" },
-      { name:"Elevaciones laterales",                muscle:"Deltoides medio (fibras Tipo I)",      sets:5, reps:"15",  topRep:20, ssGroup:"C_SS2", ssPart:"a" },
-      { name:"Curl invertido antebrazo (barra W)",   muscle:"Extensores muñeca, Braquiorradial",    sets:3, reps:"18",  topRep:null, noTopRep:true, ssGroup:"C_SS2", ssPart:"b" },
-      { name:"Ab wheel",                             muscle:"Core — anti-extensión",                sets:2, reps:"12",  topRep:null, noTopRep:true, ssGroup:"C_SS3", ssPart:"a" },
-      { name:"Russian twist con peso",               muscle:"Oblicuos — anti-rotación",             sets:2, reps:"12c/lado", topRep:null, noTopRep:true, ssGroup:"C_SS3", ssPart:"b" },
-      { name:"Curl muñeca invertido",                muscle:"Extensores, dorso antebrazo",          sets:3, reps:"15",  topRep:null, noTopRep:true, ssGroup:null },
-      { name:"Dead hang",                            muscle:"Agarre isométrico, Antebrazo",         sets:3, reps:"MAX", topRep:null, noTopRep:true, ssGroup:null },
+      { name:"Pull-up pronado",                 muscle:"Dorsal ancho, Bíceps",                 sets:5, reps:"5-8",   noTopRep:false, ssGroup:"C_SS1", ssPart:"a" },
+      { name:"Rear delt row",                   muscle:"Deltoides posterior, Romboides",       sets:3, reps:"10-12", noTopRep:false, ssGroup:"C_SS1", ssPart:"b" },
+      { name:"Barbell row",                     muscle:"Dorsal, Trapecio, Romboides",          sets:4, reps:"6-10",  noTopRep:false, ssGroup:"C_SS2", ssPart:"a" },
+      { name:"Hammer curl",                     muscle:"Braquiorradial, Braquial anterior",    sets:3, reps:"10-12", noTopRep:false, ssGroup:"C_SS2", ssPart:"b" },
+      { name:"Pull-up neutro",                  muscle:"Dorsal, Bíceps braquial",              sets:3, reps:"8-10",  noTopRep:false, ssGroup:"C_SS3", ssPart:"a" },
+      { name:"Lateral raise",                   muscle:"Deltoides medio",                      sets:3, reps:"15-20", noTopRep:false, ssGroup:"C_SS3", ssPart:"b" },
+      { name:"Farmer carry",                    muscle:"Agarre dinámico, Trapecio, Core",      sets:3, reps:"30-40m",noTopRep:true,  ssGroup:null },
     ]
   },
   4: {
-    name: "DÍA D — Pecho / Hombros / Tríceps / Core / Grip",
-    supersets: [
-      { label: "SS1 — Press inclinado + Overhead extension", id: "D_SS1" },
-      { label: "SS2 — Press hombro + Extensión barra W", id: "D_SS2" },
-      { label: "SS3 — Fondos + Aperturas inclinadas", id: "D_SS3" },
-      { label: "SS4 — Ab wheel + Isométrico agarre", id: "D_SS4" },
-    ],
-    exercises: [
-      { name:"Press inclinado mancuernas",           muscle:"Pecho clavicular, Tríceps",            sets:4, reps:"10",  topRep:12, ssGroup:"D_SS1", ssPart:"a" },
-      { name:"Overhead extension mancuerna",         muscle:"Tríceps cabeza larga (elongada)",      sets:3, reps:"12",  topRep:15, ssGroup:"D_SS1", ssPart:"b" },
-      { name:"Press hombro mancuernas",              muscle:"Deltoides anterior/medio, Tríceps",    sets:3, reps:"10",  topRep:12, ssGroup:"D_SS2", ssPart:"a" },
-      { name:"Extensión tríceps barra W",            muscle:"Tríceps cabezas lateral/medial",       sets:3, reps:"12",  topRep:15, ssGroup:"D_SS2", ssPart:"b" },
-      { name:"Fondos en paralela",                   muscle:"Pecho inferior, Tríceps",              sets:3, reps:"12",  topRep:15, ssGroup:"D_SS3", ssPart:"a" },
-      { name:"Aperturas inclinadas mancuernas",      muscle:"Pecho elongación máxima",              sets:2, reps:"15",  topRep:18, ssGroup:"D_SS3", ssPart:"b" },
-      { name:"Ab wheel",                             muscle:"Core — anti-extensión",                sets:3, reps:"12",  topRep:null, noTopRep:true, ssGroup:"D_SS4", ssPart:"a" },
-      { name:"Isométrico agarre barra",              muscle:"Support grip, Flexores dedos",         sets:3, reps:"45s", topRep:null, noTopRep:true, ssGroup:"D_SS4", ssPart:"b" },
-    ]
+    name: "D4 — Descanso",
+    supersets: [],
+    exercises: []
   },
   5: {
-    name: "DÍA E — Espalda / Bíceps / Hombros / Grip",
+    name: "D5 — Push",
     supersets: [
-      { label: "SS1 — Dominadas + Curl inclinado (bíceps elongado)", id: "E_SS1" },
-      { label: "SS2 — Remo en T + Curl martillo", id: "E_SS2" },
-      { label: "SS3 — Vuelo posterior + Elevaciones laterales", id: "E_SS3" },
-      { label: "SS4 — Pullover + Remo al mentón", id: "E_SS4" },
+      { label: "SS1 — Incline DB press + Lateral raise", id: "E_SS1" },
+      { label: "SS2 — Dips + Overhead triceps extension", id: "E_SS2" },
+      { label: "SS3 — EZ bar triceps extension + Ab wheel", id: "E_SS3" },
     ],
     exercises: [
-      { name:"Dominadas",                            muscle:"Dorsal ancho, Bíceps",                 sets:3, reps:"12",  topRep:15, ssGroup:"E_SS1", ssPart:"a" },
-      { name:"Curl inclinado mancuernas",            muscle:"Bíceps posición elongada (+ hipertrofia distal)", sets:4, reps:"12", topRep:15, ssGroup:"E_SS1", ssPart:"b" },
-      { name:"Remo en T mancuernas",                 muscle:"Dorsal, Romboides, Trapecio",          sets:3, reps:"12",  topRep:15, ssGroup:"E_SS2", ssPart:"a" },
-      { name:"Curl martillo",                        muscle:"Braquiorradial, Braquial anterior",    sets:3, reps:"12",  topRep:15, ssGroup:"E_SS2", ssPart:"b" },
-      { name:"Vuelo posterior mancuernas",           muscle:"Deltoides posterior, Infraespinoso",   sets:3, reps:"20",  topRep:25, ssGroup:"E_SS3", ssPart:"a" },
-      { name:"Elevaciones laterales",                muscle:"Deltoides medio (fibras Tipo I)",      sets:3, reps:"20",  topRep:25, ssGroup:"E_SS3", ssPart:"b" },
-      { name:"Pullover mancuerna",                   muscle:"Dorsal en posición elongada",          sets:2, reps:"12",  topRep:null, noTopRep:true, ssGroup:"E_SS4", ssPart:"a" },
-      { name:"Remo al mentón barra (agarre ancho)",  muscle:"Trapecio superior, Deltoides medio",   sets:2, reps:"15",  topRep:15, ssGroup:"E_SS4", ssPart:"b" },
-      { name:"Dead hang",                            muscle:"Agarre isométrico, Antebrazo",         sets:4, reps:"MAX", topRep:null, noTopRep:true, ssGroup:null },
-      { name:"Pinch grip (discos)",                  muscle:"Músculos tenares, Agarre pellizco",    sets:3, reps:"40s", topRep:null, noTopRep:true, ssGroup:null },
+      { name:"Incline DB press",                muscle:"Pecho clavicular, Tríceps",            sets:4, reps:"6-10",  noTopRep:false, ssGroup:"E_SS1", ssPart:"a" },
+      { name:"Lateral raise",                   muscle:"Deltoides medio",                      sets:4, reps:"12-20", noTopRep:false, ssGroup:"E_SS1", ssPart:"b" },
+      { name:"Dips",                            muscle:"Pecho inferior, Tríceps",              sets:3, reps:"8-12",  noTopRep:false, ssGroup:"E_SS2", ssPart:"a" },
+      { name:"Overhead triceps extension",      muscle:"Tríceps cabeza larga",                 sets:3, reps:"10-12", noTopRep:false, ssGroup:"E_SS2", ssPart:"b" },
+      { name:"EZ bar triceps extension",        muscle:"Tríceps cabezas lateral/medial",       sets:2, reps:"10-12", noTopRep:false, ssGroup:"E_SS3", ssPart:"a" },
+      { name:"Ab wheel",                        muscle:"Core — anti-extensión",                sets:3, reps:"8-12",  noTopRep:false, ssGroup:"E_SS3", ssPart:"b" },
+    ]
+  },
+  6: {
+    name: "D6 — Pull + Arms",
+    supersets: [
+      { label: "SS1 — Pull-up supino + Incline curl", id: "F_SS1" },
+      { label: "SS2 — Chest supported row + EZ bar curl", id: "F_SS2" },
+      { label: "SS3 — Pull-up neutro + Rear delt fly", id: "F_SS3" },
+    ],
+    exercises: [
+      { name:"Pull-up supino",                  muscle:"Dorsal, Bíceps supinado",              sets:5, reps:"6-10",  noTopRep:false, ssGroup:"F_SS1", ssPart:"a" },
+      { name:"Incline curl",                    muscle:"Bíceps posición elongada",             sets:4, reps:"10-12", noTopRep:false, ssGroup:"F_SS1", ssPart:"b" },
+      { name:"Chest supported row",             muscle:"Dorsal, Romboides, Trapecio medio",    sets:4, reps:"8-12",  noTopRep:false, ssGroup:"F_SS2", ssPart:"a" },
+      { name:"EZ bar curl",                     muscle:"Bíceps cabeza corta, Braquial",        sets:3, reps:"10-12", noTopRep:false, ssGroup:"F_SS2", ssPart:"b" },
+      { name:"Pull-up neutro",                  muscle:"Dorsal, Bíceps braquial",              sets:3, reps:"8-10",  noTopRep:false, ssGroup:"F_SS3", ssPart:"a" },
+      { name:"Rear delt fly",                   muscle:"Deltoides posterior, Infraespinoso",   sets:3, reps:"12-15", noTopRep:false, ssGroup:"F_SS3", ssPart:"b" },
+      { name:"Dead hang",                       muscle:"Agarre isométrico, Antebrazos",        sets:2, reps:"30-45s",noTopRep:true,  ssGroup:null },
     ]
   },
 };
@@ -1222,6 +1408,8 @@ function init() {
   renderWater(false);
   renderGoalBars();
   populateExSelect();
+  renderCalendar();
+  checkDeloadWeek();
   syncOura();
 }
 
@@ -1582,7 +1770,7 @@ function setTrainDay(day) {
   saveState(state);
   updateHeader();
   renderTraining();
-  for(let i=0;i<=5;i++) {
+  for(let i=0;i<=6;i++) {
     const b = document.getElementById('tbtn'+i);
     if(b) b.className = 'btn btn-sm ' + (i===day?'btn-primary':'btn-ghost');
   }
@@ -1591,9 +1779,9 @@ function setTrainDay(day) {
 function renderTraining() {
   const day = state[TODAY].trainDay;
   const list = document.getElementById('exerciseList');
-  for(let i=0;i<=5;i++){const b=document.getElementById('tbtn'+i);if(b)b.className='btn btn-sm '+(i===day?'btn-primary':'btn-ghost');}
-  if(day===0){
-    list.innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">🛋</div><div style="color:var(--text2);font-size:14px">Dia de descanso.<br>El cuerpo construye músculo mientras descansa.</div></div>`;
+  for(let i=0;i<=6;i++){const b=document.getElementById('tbtn'+i);if(b)b.className='btn btn-sm '+(i===day||((i===4)&&day===4)?'btn-ghost':(i===day?'btn-primary':'btn-ghost'));}
+  if(day===0||day===4){
+    list.innerHTML=`<div class="card" style="text-align:center;padding:40px 20px"><div style="font-size:40px;margin-bottom:12px">🛋</div><div style="color:var(--text2);font-size:14px">Día de descanso.<br>El cuerpo construye músculo mientras descansa.</div></div>`;
     return;
   }
   const d = TRAINING[day];
@@ -1609,8 +1797,22 @@ function renderTraining() {
       const ssInfo = d.supersets?.find(s=>s.id===ex.ssGroup);
       if(ssInfo) {
         const div = document.createElement('div');
-        div.className='ss-divider';
-        div.innerHTML=`⚡ ${ssInfo.label}`;
+        div.className='ss-timer-wrap';
+        div.id='ss-timer-'+ex.ssGroup;
+        div.innerHTML=
+          '<div class="ss-divider-row">⚡ '+ssInfo.label+'</div>'+
+          '<div class="ss-timer-bar-wrap" id="ss-bar-'+ex.ssGroup+'">'+
+            '<div class="ss-timer-countdown">'+
+              '<div class="ss-timer-secs" id="ss-secs-'+ex.ssGroup+'">—</div>'+
+              '<div class="ss-timer-label" id="ss-lbl-'+ex.ssGroup+'"></div>'+
+            '</div>'+
+            '<div class="ss-timer-track"><div class="ss-timer-fill" id="ss-fill-'+ex.ssGroup+'" style="width:100%;background:var(--accent)"></div></div>'+
+            '<div class="ss-timer-done-msg" id="ss-done-'+ex.ssGroup+'">✅ ¡Listo para la próxima serie de '+ex.name+'!</div>'+
+            '<div class="ss-timer-btns">'+
+              '<button class="ss-timer-btn add" onclick="ssAddTime(\''+ex.ssGroup+'\',30)">+30s</button>'+
+              '<button class="ss-timer-btn skip" onclick="ssDismiss(\''+ex.ssGroup+'\')">Saltar</button>'+
+            '</div>'+
+          '</div>';
         list.appendChild(div);
       }
     }
@@ -1636,8 +1838,13 @@ function renderTraining() {
     const isPR = allDone&&checkIfPR(ex.name,exSets);
     const target = getProgressionTarget(ex.name, ex);
     const targetHtml = target ? `<div class="prog-target ${target.type}" style="margin-bottom:8px"><div class="prog-target-icon">${target.type==='warn'?'🔼':'🎯'}</div><div><div class="prog-target-text">${target.line1}</div><div class="prog-target-sub">${target.line2}</div></div></div>` : '';
-    const topeBadge = (!ex.noTopRep && ex.topRep) ? `<span class="tope-badge">tope ${ex.topRep}</span>` : '';
+    const topeBadge = '';
     const ssBadge = ex.ssGroup ? `<span class="ss-badge">${ex.ssPart==='a'?'A':'B'}</span>` : '';
+
+    // Feature 1: Progression bar
+    const progBarHtml = buildProgressionBar(exSets, ex);
+    // Feature 2: Weight suggestion (show if any set is done)
+    const weightSuggHtml = doneCount > 0 ? buildWeightSuggestion(ex.name, ex, exSets) : '';
 
     const card = document.createElement('div');
     card.className = `exercise-card${ex.ssGroup?(' superset-'+ex.ssPart):''}`;
@@ -1657,6 +1864,8 @@ function renderTraining() {
       </div>
       <div class="sets-container">
         ${targetHtml}${setsHtml}
+        ${progBarHtml}
+        ${weightSuggHtml}
         <button class="add-set-btn" onclick="addSet(${exIdx})">+ Serie</button>
       </div>`;
     list.appendChild(card);
@@ -1668,6 +1877,10 @@ function renderTraining() {
     saveState(state);
   }
   renderTrainSuggestions();
+  checkAdaptiveRoutine();
+  renderPRHistory();
+  // Reattach any active SS timers whose DOM was just rebuilt
+  _reattachSSTimers();
 }
 
 function toggleExCard(idx) {
@@ -1688,28 +1901,41 @@ function toggleSet(exIdx, sIdx) {
   const s = state[TODAY]['trainSets_'+day][exIdx][sIdx];
   s.done = !s.done;
   saveState(state);
-  const btn = document.getElementById(`sc-${exIdx}-${sIdx}`);
-  btn.className = 'set-check ' + (s.done ? 'done' : '');
-  btn.textContent = s.done ? '✓' : '';
   const allSets = state[TODAY]['trainSets_'+day][exIdx];
   const allDone = allSets.every(s => s.done);
+  const ex = TRAINING[day]?.exercises[exIdx];
+
+  if (allDone) saveExerciseHistory(day, exIdx, allSets);
+
+  // Re-render DOM first so timer elements exist
+  renderTraining();
+  renderTrainSuggestions();
+  renderHome();
+  populateExSelect();
+
+  // Restore open state on the card
+  const card = document.getElementById('excard-'+exIdx);
+  if (card) card.classList.add('open');
+
   if (s.done) {
+    if (ex && !allDone) {
+      if (ex.ssGroup && ex.ssPart === 'a') {
+        // Superset part A → inline timer on the ss-divider (DOM already rebuilt)
+        startSSTimer(ex, allSets, sIdx);
+      } else if (!ex.ssGroup) {
+        // Regular exercise → overlay timer
+        startRestTimer(ex, allSets, sIdx);
+      }
+      // ssGroup part B → no timer
+    }
     if (allDone) {
-      const ex = TRAINING[day]?.exercises[exIdx];
       if (ex && checkIfPR(ex.name, allSets)) {
         showToast('🏆 ¡NUEVO PR en ' + ex.name + '!');
       } else {
         showToast('✓ Ejercicio completado');
       }
-    } else {
-      showToast('Serie completada ✓');
     }
   }
-  if (allDone) saveExerciseHistory(day, exIdx, allSets);
-  renderTraining();
-  renderTrainSuggestions();
-  renderHome();
-  populateExSelect();
 }
 
 function addSet(exIdx) {
@@ -1769,17 +1995,17 @@ function saveMetrics() {
   const w = document.getElementById('inpWeight').value;
   const bf = document.getElementById('inpBF').value;
   const mu = document.getElementById('inpMuscle').value;
-  const wa = document.getElementById('inpWaist').value;
   if (!w && !bf) return;
-  const entry = { date: TODAY, weight: +w||null, bf: +bf||null, muscle: +mu||null, waist: +wa||null };
+  const entry = { date: TODAY, weight: +w||null, bf: +bf||null, muscle: +mu||null };
   state.metricsHistory.unshift(entry);
   if (state.metricsHistory.length > 30) state.metricsHistory = state.metricsHistory.slice(0,30);
   saveState(state);
   renderMetrics();
   showToast('Medicion guardada ✓');
+  renderGoalBars();
   renderBodyChart();
   document.getElementById('inpWeight').value=''; document.getElementById('inpBF').value='';
-  document.getElementById('inpMuscle').value=''; document.getElementById('inpWaist').value='';
+  document.getElementById('inpMuscle').value='';
 }
 
 function renderMetrics() {
@@ -1791,7 +2017,6 @@ function renderMetrics() {
     document.getElementById('metricWeight').textContent = latest.weight || '—';
     document.getElementById('metricBF').textContent = latest.bf || '—';
     document.getElementById('metricMuscle').textContent = latest.muscle || '—';
-    document.getElementById('metricWaist').textContent = latest.waist || '—';
 
     if (prev && latest.weight && prev.weight) {
       const diff = (latest.weight - prev.weight).toFixed(1);
@@ -1999,7 +2224,6 @@ function renderBodyChart() {
     weight: { key:'weight', color:'var(--accent)',   unit:'kg', best:'max' },
     bf:     { key:'bf',     color:'var(--yellow)',   unit:'%',  best:'min' },
     muscle: { key:'muscle', color:'var(--green)',    unit:'%',  best:'max' },
-    waist:  { key:'waist',  color:'var(--accent2)',  unit:'cm', best:'min' },
   };
   const cfg = configs[currentBodyMetric];
   const hist = (state.metricsHistory||[]).slice().reverse();
@@ -2322,12 +2546,13 @@ function renderWater(animate) {
 // ─── GOAL BARS ────────────────────────────────────────────────────
 function renderGoalBars() {
   const hist = state.metricsHistory || [];
-  const last = hist.length > 0 ? hist[hist.length - 1] : null;
-  const bf = last?.bf ?? null;
-  const musc = last?.muscle ?? null;
+  // hist[0] = most recent (unshift prepends), hist[last] = oldest
+  const latest = hist.length > 0 ? hist[0] : null;
+  const bf = latest?.bf ?? null;
+  const musc = latest?.muscle ?? null;
 
-  // BF goal: target 12%, assume starting point ~20% (or use oldest record)
-  const BF_START = hist.length > 0 ? (hist[0].bf || 20) : 20;
+  // BF goal: fixed start at 18% (user's actual starting point), target 12%
+  const BF_START = 18;
   const BF_GOAL = 12;
 
   const bfBarEl = document.getElementById('goalBfBar');
@@ -2359,13 +2584,16 @@ function renderGoalBars() {
     bfStatusEl.className = 'goal-status far';
   }
 
-  // Muscle goal: maintain or increase from first record
-  const MUSC_BASE = hist.length > 0 ? (hist[0].muscle || 75) : 75;
+  // Muscle goal: maintain or increase from first recorded value (oldest entry)
+  const oldest = hist.length > 0 ? hist[hist.length - 1] : null;
+  const MUSC_BASE = oldest?.muscle || 75;
   const muscBarEl = document.getElementById('goalMuscBar');
   const muscCurrEl = document.getElementById('goalMuscCurrent');
   const muscStatusEl = document.getElementById('goalMuscStatus');
 
-  if (musc !== null) {
+  const muscLatest = latest?.muscle ?? null;
+  if (muscLatest !== null) {
+    const musc = muscLatest;
     muscCurrEl.textContent = musc + '%';
     // Progress bar: % relative to baseline, cap at 105%
     const pct = Math.min(100, Math.max(0, Math.round(musc / MUSC_BASE * 100)));
@@ -2388,6 +2616,760 @@ function renderGoalBars() {
     muscStatusEl.className = 'goal-status far';
   }
 }
+
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 5 — PROGRESSION DATA STRUCTURE HELPERS
+// ═══════════════════════════════════════════════════════════════
+
+function parseRepRange(repsStr) {
+  if (!repsStr || repsStr === 'MAX') return null;
+  const str = String(repsStr).replace(/c\/lado|s$/,'').trim();
+  const parts = str.split('-');
+  if (parts.length === 2) return { min: +parts[0], max: +parts[1] };
+  const n = +str;
+  return isNaN(n) ? null : { min: n, max: n };
+}
+
+function computeVolume(sets) {
+  return sets.reduce((sum, s) => {
+    const kg = parseFloat(s.kg) || 0;
+    const reps = parseFloat(String(s.reps || '').replace(/[^0-9]/g,'')) || 0;
+    return sum + (kg * reps);
+  }, 0);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 1 — PROGRESSION BAR
+// ═══════════════════════════════════════════════════════════════
+function buildProgressionBar(exSets, ex) {
+  const repRange = parseRepRange(ex.reps);
+  if (!repRange || ex.noTopRep) return '';
+  const numSets = ex.sets || exSets.length;
+  const doneSets = exSets.filter(s => s.done);
+  if (doneSets.length === 0) return '';
+  const doneReps = doneSets.map(s => {
+    const v = parseFloat(String(s.reps || '').replace(/[^0-9]/g,''));
+    return isNaN(v) ? 0 : v;
+  });
+  const totalReps = doneReps.reduce((a, b) => a + b, 0);
+  const maxReps   = numSets * repRange.max;
+  const pct = maxReps > 0 ? Math.min(100, Math.round(totalReps / maxReps * 100)) : 0;
+  let fillClass = 'normal', hint = totalReps + ' / ' + maxReps + ' reps', hintClass = '';
+  if (totalReps >= maxReps) {
+    fillClass = 'at-max';
+    hint = '\u2705 ' + totalReps + '/' + maxReps + ' \u2014 \u00a1Sub\u00ed el peso la pr\u00f3xima!';
+    hintClass = 'upgrade';
+  } else if (pct >= 75) {
+    fillClass = 'near-max';
+    hint = totalReps + ' / ' + maxReps + ' \u2014 falta poco para subir peso';
+  }
+  return '<div class="rep-prog-wrap">' +
+    '<div class="rep-prog-header">' +
+      '<div class="rep-prog-label">Progresion ' + repRange.min + '\u2013' + repRange.max + ' reps</div>' +
+      '<div class="rep-prog-count">' + totalReps + '/' + maxReps + '</div>' +
+    '</div>' +
+    '<div class="rep-prog-track"><div class="rep-prog-fill ' + fillClass + '" style="width:' + pct + '%"></div></div>' +
+    '<div class="rep-prog-hint ' + hintClass + '">' + hint + '</div>' +
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 2 — AUTOMATIC WEIGHT SUGGESTION
+// ═══════════════════════════════════════════════════════════════
+function buildWeightSuggestion(exName, ex, currentSets) {
+  const history = (state.exerciseHistory || {})[exName] || [];
+  if (history.length < 1) return '';
+  const repRange = parseRepRange(ex.reps);
+  if (!repRange || ex.noTopRep) return '';
+  const numSets = ex.sets || 4;
+  const maxReps = numSets * repRange.max;
+  const minReps = numSets * repRange.min;
+  const doneSets = currentSets.filter(s => s.done);
+  const isLive = doneSets.length > 0;
+  let weight, totalReps;
+  if (isLive) {
+    const kgVals = currentSets.map(s=>parseFloat(s.kg)).filter(v=>!isNaN(v)&&v>0);
+    const repsVals = doneSets.map(s=>parseFloat(String(s.reps||'').replace(/[^0-9]/g,''))).filter(v=>!isNaN(v)&&v>0);
+    weight = kgVals.length ? Math.max(...kgVals) : (history[0].maxKg || 0);
+    totalReps = repsVals.reduce((a,b)=>a+b,0);
+  } else {
+    weight = history[0].maxKg || 0;
+    totalReps = (history[0].avgReps || 0) * numSets;
+  }
+  const nextWeight = (weight + 2.5).toFixed(1);
+  // Deload check: 3+ sessions declining
+  if (history.length >= 3) {
+    const last3 = history.slice(0,3).map(h=>h.avgReps||0);
+    if (last3[0] < last3[1] && last3[1] < last3[2]) {
+      const deloadKg = (weight * 0.85).toFixed(1);
+      return '<div class="weight-suggestion deload"><div class="ws-icon">\ud83d\udcc9</div><div class="ws-body">' +
+        '<div class="ws-title">Deload recomendado \u2014 ' + exName + '</div>' +
+        '<div class="ws-detail">Reps declinando 3 sesiones: ' + last3[2] + '\u2192' + last3[1] + '\u2192' + last3[0] + '. El cuerpo pide recuperaci\u00f3n.</div>' +
+        '<div class="ws-next deload">\u2193 Baj\u00e1 a ' + deloadKg + 'kg \u00d7 ' + repRange.min + '\u2013' + repRange.max + ' reps</div>' +
+      '</div></div>';
+    }
+  }
+  // Rule 1: hit max reps
+  if (totalReps >= maxReps) {
+    return '<div class="weight-suggestion upgrade"><div class="ws-icon">\ud83d\udd3c</div><div class="ws-body">' +
+      '<div class="ws-title">\u00a1Sub\u00ed el peso! \u2014 ' + exName + '</div>' +
+      '<div class="ws-detail">Alcanzaste el m\u00e1ximo de reps (' + totalReps + '/' + maxReps + '). Hora de progresar.</div>' +
+      '<div class="ws-next upgrade">Pr\u00f3xima sesi\u00f3n: ' + nextWeight + 'kg \u00d7 ' + repRange.min + '\u2013' + repRange.max + '</div>' +
+    '</div></div>';
+  }
+  // Rule 2: improved but not max
+  if (history.length >= 2) {
+    const prevReps = (history[1].avgReps || 0) * numSets;
+    if (totalReps > prevReps) {
+      const needed = maxReps - totalReps;
+      return '<div class="weight-suggestion aim-more"><div class="ws-icon">\ud83c\udfaf</div><div class="ws-body">' +
+        '<div class="ws-title">Mejorando \u2014 ' + exName + '</div>' +
+        '<div class="ws-detail">+' + (totalReps - prevReps) + ' reps vs \u00faltima sesi\u00f3n. Manten\u00e9 ' + weight + 'kg.</div>' +
+        '<div class="ws-next aim-more">Objetivo: ' + weight + 'kg \u00d7 ' + repRange.min + '\u2013' + repRange.max + ' (faltan ' + needed + ' reps)</div>' +
+      '</div></div>';
+    }
+  }
+  // Rule 3: keep weight
+  if (totalReps >= minReps) {
+    return '<div class="weight-suggestion keep"><div class="ws-icon">\ud83d\udccc</div><div class="ws-body">' +
+      '<div class="ws-title">Manten\u00e9 el peso \u2014 ' + exName + '</div>' +
+      '<div class="ws-detail">Reps dentro del rango. Apunt\u00e1 a completar ' + maxReps + ' reps totales.</div>' +
+      '<div class="ws-next keep">Mismo peso: ' + weight + 'kg \u00d7 ' + repRange.min + '\u2013' + repRange.max + '</div>' +
+    '</div></div>';
+  }
+  return '';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 3 — PR DETECTION + DISPLAY
+// ═══════════════════════════════════════════════════════════════
+function detectPRTypes(exName, newSets) {
+  const history = (state.exerciseHistory || {})[exName] || [];
+  const prs = [];
+  const kgVals = newSets.map(s=>parseFloat(s.kg)).filter(v=>!isNaN(v)&&v>0);
+  const repsVals = newSets.map(s=>parseFloat(String(s.reps||'').replace(/[^0-9]/g,''))).filter(v=>!isNaN(v)&&v>0);
+  if (!kgVals.length) return prs;
+  const newMaxKg   = Math.max(...kgVals);
+  const newMaxReps = repsVals.length ? Math.max(...repsVals) : 0;
+  const newVol     = computeVolume(newSets);
+  const prevMaxKg  = history.length ? Math.max(...history.map(h=>h.maxKg||0)) : 0;
+  const prevBestRepAtKg = history.reduce((best, h) => (h.maxKg===newMaxKg) ? Math.max(best, h.avgReps||0) : best, 0);
+  const prevBestVol = history.length ? Math.max(...history.map(h=>h.volume||0)) : 0;
+  if (newMaxKg > prevMaxKg)
+    prs.push({ type:'weight', label:'M\u00e1ximo peso', value: newMaxKg + 'kg' });
+  if (newMaxReps > prevBestRepAtKg && newMaxKg > 0)
+    prs.push({ type:'reps', label:'M\u00e1s reps con ' + newMaxKg + 'kg', value: newMaxKg + 'kg \u00d7 ' + newMaxReps });
+  if (newVol > prevBestVol && newVol > 0)
+    prs.push({ type:'volume', label:'Volumen total', value: Math.round(newVol) + 'kg' });
+  return prs;
+}
+
+function showPRPopup(exName, prs) {
+  if (!prs.length) return;
+  const pr = prs[0];
+  document.getElementById('prPopupMain').textContent = exName + ' \u2014 ' + pr.value;
+  document.getElementById('prPopupType').textContent = pr.label;
+  const popup = document.getElementById('prPopup');
+  popup.classList.add('show');
+  setTimeout(() => popup.classList.remove('show'), 4000);
+}
+
+function renderPRHistory() {
+  const container = document.getElementById('prHistoryContainer');
+  if (!container) return;
+  const hist = state.exerciseHistory || {};
+  const entries = [];
+  Object.entries(hist).forEach(([name, sessions]) => {
+    if (!sessions.length) return;
+    const maxKg = Math.max(...sessions.map(h=>h.maxKg||0));
+    const maxVol = Math.max(...sessions.map(h=>h.volume||0));
+    const bestRepsEntry = sessions.reduce((best, h) => (!best||(h.avgReps||0)>(best.avgReps||0))?h:best, null);
+    const prKgEntry = sessions.find(h=>h.maxKg===maxKg);
+    if (!prKgEntry) return;
+    entries.push({ name, maxKg, prKgDate:prKgEntry.date, bestReps:bestRepsEntry?.avgReps, bestRepsDate:bestRepsEntry?.date, maxVol:maxVol>0?Math.round(maxVol):null, prVolDate:sessions.find(h=>(h.volume||0)===maxVol)?.date });
+  });
+  if (!entries.length) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:14px 0">Complet\u00e1 ejercicios para ver tus PRs aqu\u00ed.</div>';
+    return;
+  }
+  container.innerHTML = entries.map(e =>
+    '<div class="pr-history-card">' +
+      '<div class="pr-history-exname">\ud83c\udfc6 ' + e.name + '</div>' +
+      '<div class="pr-row"><div class="pr-row-type">\u2696 Peso m\u00e1ximo</div><div class="pr-row-val">' + e.maxKg + 'kg</div><div class="pr-row-date">' + (e.prKgDate||'\u2014') + '</div></div>' +
+      (e.bestReps ? '<div class="pr-row"><div class="pr-row-type">\ud83d\udd01 Mejor serie</div><div class="pr-row-val">' + e.maxKg + 'kg \u00d7 ' + e.bestReps + '</div><div class="pr-row-date">' + (e.bestRepsDate||'\u2014') + '</div></div>' : '') +
+      (e.maxVol ? '<div class="pr-row"><div class="pr-row-type">\ud83d\udce6 Volumen m\u00e1x</div><div class="pr-row-val">' + e.maxVol + 'kg vol</div><div class="pr-row-date">' + (e.prVolDate||'\u2014') + '</div></div>' : '') +
+    '</div>'
+  ).join('');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// FEATURE 4 — ADAPTIVE ROUTINE LOGIC
+// ═══════════════════════════════════════════════════════════════
+function getLastTrainingDate() {
+  const keys = Object.keys(state).filter(k => /^\d{4}-\d{2}-\d{2}$/.test(k));
+  const sorted = keys.sort().reverse();
+  for (const dateKey of sorted) {
+    if (dateKey === TODAY) continue;
+    const day = state[dateKey]?.trainDay;
+    if (day && day > 0) return { date: dateKey, day };
+  }
+  return null;
+}
+
+function checkAdaptiveRoutine() {
+  const banner = document.getElementById('adaptiveRoutineBanner');
+  if (!banner) return;
+  const last = getLastTrainingDate();
+  if (!last) { banner.style.display = 'none'; return; }
+  const lastDate = new Date(last.date + 'T00:00:00');
+  const todayDate = new Date(TODAY + 'T00:00:00');
+  const daysDiff = Math.round((todayDate - lastDate) / (1000*60*60*24));
+  if (daysDiff < 2) { banner.style.display = 'none'; return; }
+  const DAYS_TOTAL = 6;
+  let nextDay = (last.day % DAYS_TOTAL) + 1;
+  if (nextDay === 4) nextDay = 5; // Skip rest day in sequence
+  const nextDayName = (TRAINING[nextDay]?.name || 'D\u00eda ' + nextDay).replace(/D\u00cdA [A-Z] \u2014 /,'').replace(/DÍA [A-Z] — /,'');
+  const skippedCount = daysDiff - 1;
+  const currentDay = state[TODAY].trainDay;
+  if (currentDay === nextDay) { banner.style.display = 'none'; return; }
+  banner.style.display = 'block';
+  banner.innerHTML = '<div class="routine-shift-banner">' +
+    '<div class="rsb-icon">\ud83d\udcc5</div>' +
+    '<div class="rsb-body">' +
+      '<div class="rsb-title">Rutina adaptada \u2014 ' + skippedCount + ' d\u00eda' + (skippedCount>1?'s':'') + ' sin entrenar</div>' +
+      '<div class="rsb-sub">\u00daltima sesi\u00f3n: ' + last.date + ' (D\u00eda ' + last.day + '). Siguiente en secuencia: <strong>D\u00eda ' + nextDay + '</strong> \u2014 ' + nextDayName + '</div>' +
+      '<div class="rsb-action" onclick="setTrainDay(' + nextDay + ');document.getElementById(\'adaptiveRoutineBanner\').style.display=\'none\'">' +
+        '\u2192 Ir a D\u00eda ' + nextDay +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════
+// OVERRIDE saveExerciseHistory — adds volume tracking + PR detection
+// ═══════════════════════════════════════════════════════════════
+function saveExerciseHistory(day, exIdx, sets) {
+  const ex = TRAINING[day]?.exercises[exIdx];
+  if (!ex) return;
+  const key = ex.name;
+  if (!state.exerciseHistory[key]) state.exerciseHistory[key] = [];
+  if (state.exerciseHistory[key].find(h => h.date === TODAY)) return;
+  const kgVals = sets.map(s=>parseFloat(s.kg)).filter(v=>!isNaN(v)&&v>0);
+  const repsVals = sets.map(s=>parseFloat(String(s.reps||'').replace(/[^0-9]/g,''))).filter(v=>!isNaN(v)&&v>0);
+  if (kgVals.length === 0) return;
+  const maxKg   = Math.max(...kgVals);
+  const avgReps = repsVals.length ? Math.round(repsVals.reduce((a,b)=>a+b,0)/repsVals.length) : null;
+  const oneRM   = avgReps ? Math.round(maxKg * (1 + avgReps/30)) : maxKg;
+  const volume  = computeVolume(sets);
+  const setsLog = sets.map(s => ({ kg: s.kg||'', reps: s.reps||'' }));
+  // Detect PRs before saving
+  const prs = detectPRTypes(key, sets);
+  if (prs.length) showPRPopup(key, prs);
+  state.exerciseHistory[key].unshift({ date:TODAY, maxKg, avgReps, oneRM, volume, sets:sets.length, setsLog });
+  if (state.exerciseHistory[key].length > 40) state.exerciseHistory[key] = state.exerciseHistory[key].slice(0,40);
+  saveState(state);
+  renderPRHistory();
+}
+
+
+
+// ═══════════════════════════════════════════════════════════════
+// REST TIMER
+// Smart rest time: compound vs isolation, rep range, set number
+// ═══════════════════════════════════════════════════════════════
+
+let _rtInterval = null;
+let _rtRemaining = 0;
+let _rtTotal = 0;
+
+// Classify exercise: 'compound' | 'push_isolation' | 'pull_isolation' | 'core' | 'iso_hold'
+function classifyExercise(ex) {
+  const name = (ex.name || '').toLowerCase();
+  const repsStr = String(ex.reps || '');
+  if (repsStr.includes('s') || repsStr.includes('m') || name.includes('hold') || name.includes('hang') || name.includes('plank') || name.includes('carry')) return 'iso_hold';
+  if (name.includes('ab wheel') || name.includes('russian') || name.includes('plank')) return 'core';
+  if (name.includes('bench') || name.includes('press banca') || name.includes('barbell row') || name.includes('pull-up') || name.includes('pullup') || name.includes('dominada') || name.includes('squat') || name.includes('deadlift') || name.includes('dips') || name.includes('fondos')) return 'compound';
+  if (name.includes('shoulder press') || name.includes('press militar') || (name.includes('overhead') && name.includes('press'))) return 'compound';
+  if (name.includes('row') || name.includes('remo') || name.includes('chest supported')) return 'compound';
+  if (name.includes('incline') && (name.includes('press') || name.includes('fly'))) return 'push_isolation';
+  if (name.includes('tricep') || name.includes('extension') || name.includes('fly') || name.includes('apertura')) return 'push_isolation';
+  if (name.includes('curl') || name.includes('rear delt') || name.includes('lateral raise') || name.includes('elevacion') || name.includes('vuelo') || name.includes('external rotation')) return 'pull_isolation';
+  return 'push_isolation';
+}
+
+/**
+ * Estimate how long (seconds) it takes to perform one set of an exercise.
+ * Used for superset timing: total timer = rest + time(exercise B)
+ */
+function estimateSetDuration(ex) {
+  if (!ex) return 30;
+  const type = classifyExercise(ex);
+  const repsStr = String(ex.reps || '');
+  const repRange = parseRepRange(repsStr);
+  const avgReps = repRange ? Math.round((repRange.min + repRange.max) / 2) : 10;
+
+  if (type === 'iso_hold') return 40;  // hold + transition
+  if (type === 'core') return 35;
+
+  // Seconds per rep varies by type and load
+  const secsPerRep = type === 'compound' ? 3.5 : 2.5;
+  const setTime = Math.round(avgReps * secsPerRep);
+  return Math.min(Math.max(setTime, 20), 60); // clamp 20–60s
+}
+
+/**
+ * Pure rest time for regular (non-superset) exercises.
+ * Compound heavy → 3:30, compound hypertrophy → 2:30, isolation → 60–90s
+ */
+function calcRestTime(ex, completedSets, setIdx) {
+  const type = classifyExercise(ex);
+  const repsStr = String(ex.reps || '');
+  const repRange = parseRepRange(repsStr);
+  const maxReps = repRange ? repRange.max : 12;
+  const setNum = setIdx + 1;
+
+  let base, reason;
+
+  if (type === 'iso_hold') return { secs: 60, reason: 'Isométrico — 60s' };
+  if (type === 'core')     return { secs: 60, reason: 'Core — 60s' };
+
+  if (type === 'compound') {
+    if (maxReps <= 6)       { base = 210; reason = 'Compuesto pesado (≤6 reps) — 3:30'; }
+    else if (maxReps <= 10) { base = 150; reason = 'Compuesto hipertrofia — 2:30'; }
+    else                    { base = 120; reason = 'Compuesto volumen — 2:00'; }
+  } else {
+    if (maxReps <= 10)      { base = 90;  reason = 'Aislamiento fuerza — 1:30'; }
+    else if (maxReps <= 15) { base = 75;  reason = 'Aislamiento hipertrofia — 1:15'; }
+    else                    { base = 60;  reason = 'Aislamiento alto rep — 1:00'; }
+  }
+
+  // Later sets: +8% per set after 2nd
+  if (setNum >= 3) base = Math.round(base * (1 + (setNum - 2) * 0.08));
+
+  return { secs: base, reason };
+}
+
+/**
+ * SS timer = real rest after B + time to perform B
+ * So when it rings, you just finished B and you're ready for A again.
+ *
+ * Pairing rules:
+ *   compound + compound   → 90–120s rest
+ *   compound + isolation  → 75–90s rest
+ *   isolation + isolation → 45–60s rest
+ */
+function calcSSRestTime(exA, exB, setIdx) {
+  const typeA = classifyExercise(exA);
+  const typeB = exB ? classifyExercise(exB) : 'push_isolation';
+  const repsA = parseRepRange(String(exA.reps || ''));
+  const maxRepsA = repsA ? repsA.max : 12;
+  const setNum = setIdx + 1;
+
+  const aIsCompound = typeA === 'compound';
+  const bIsCompound = typeB === 'compound';
+
+  let restAfterB; // pure rest seconds after finishing exercise B
+
+  if (aIsCompound && bIsCompound) {
+    // compound + compound: 90–120s based on rep range of A
+    restAfterB = maxRepsA <= 8 ? 110 : 90;
+  } else if (aIsCompound && !bIsCompound) {
+    // compound + isolation: 75–90s
+    restAfterB = maxRepsA <= 8 ? 90 : 75;
+  } else {
+    // isolation + isolation: 45–60s
+    restAfterB = maxRepsA <= 12 ? 60 : 45;
+  }
+
+  // Later sets get a bit more rest
+  if (setNum >= 3) restAfterB = Math.round(restAfterB * (1 + (setNum - 2) * 0.08));
+
+  const bDuration = estimateSetDuration(exB); // time to perform exercise B
+  const total = restAfterB + bDuration;
+
+  return {
+    total,
+    restAfterB,
+    bDuration,
+    label: `~${bDuration}s ${exB ? exB.name : 'ej B'} + ${restAfterB}s descanso`
+  };
+}
+
+function startRestTimer(ex, completedSets, setIdx) {
+  const { secs, reason } = calcRestTime(ex, completedSets, setIdx);
+  _rtTotal = secs;
+  _rtRemaining = secs;
+
+  const overlay = document.getElementById('restTimerOverlay');
+  document.getElementById('rtExName').textContent = ex.name;
+  document.getElementById('rtLabel').textContent = 'Serie ' + (setIdx + 1) + ' completada';
+  document.getElementById('rtReason').textContent = reason;
+  document.getElementById('rtDone').classList.remove('show');
+  overlay.classList.add('active');
+
+  _updateRtDisplay();
+  clearInterval(_rtInterval);
+  _rtInterval = setInterval(() => {
+    _rtRemaining--;
+    _updateRtDisplay();
+    if (_rtRemaining <= 0) {
+      clearInterval(_rtInterval);
+      _rtFinished();
+    }
+  }, 1000);
+}
+
+function _updateRtDisplay() {
+  const s = Math.max(0, _rtRemaining);
+  const el = document.getElementById('rtSecs');
+  if (!el) return;
+  el.textContent = s;
+  // Color: green when done, yellow when <10s, accent otherwise
+  if (s <= 0) el.style.color = 'var(--green)';
+  else if (s <= 10) el.style.color = 'var(--yellow)';
+  else el.style.color = 'var(--accent)';
+  // Ring animation
+  const ring = document.getElementById('rtRingFill');
+  if (ring) {
+    const pct = s / _rtTotal;
+    const circumference = 427;
+    ring.style.strokeDashoffset = circumference * (1 - pct);
+    ring.style.stroke = s <= 0 ? 'var(--green)' : s <= 10 ? 'var(--yellow)' : 'var(--accent)';
+  }
+}
+
+function _rtFinished() {
+  document.getElementById('rtDone').classList.add('show');
+  document.getElementById('rtSecs').textContent = '0';
+  // Vibrate if supported
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  // Auto dismiss after 3s
+  setTimeout(() => dismissRestTimer(), 3000);
+}
+
+function addRestTime(extra) {
+  _rtRemaining += extra;
+  _rtTotal += extra;
+  _updateRtDisplay();
+  // Restart interval if it had stopped
+  if (_rtRemaining > 0) {
+    clearInterval(_rtInterval);
+    _rtInterval = setInterval(() => {
+      _rtRemaining--;
+      _updateRtDisplay();
+      if (_rtRemaining <= 0) { clearInterval(_rtInterval); _rtFinished(); }
+    }, 1000);
+  }
+}
+
+function dismissRestTimer() {
+  clearInterval(_rtInterval);
+  document.getElementById('restTimerOverlay').classList.remove('active');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// INLINE SUPERSET TIMER — runs inside the ss-divider strip
+// One timer object per active ssGroup
+// ═══════════════════════════════════════════════════════════════
+const _ssTimers = {}; // ssGroup → { interval, remaining, total }
+
+function startSSTimer(ex, completedSets, setIdx) {
+  const ssGroup = ex.ssGroup;
+  const exB = _findSSPartB(ex);
+  const { total, restAfterB, bDuration, label } = calcSSRestTime(ex, exB, setIdx);
+
+  if (_ssTimers[ssGroup]) clearInterval(_ssTimers[ssGroup].interval);
+  _ssTimers[ssGroup] = { remaining: total, total };
+
+  const barWrap = document.getElementById('ss-bar-'+ssGroup);
+  const secsEl  = document.getElementById('ss-secs-'+ssGroup);
+  const lblEl   = document.getElementById('ss-lbl-'+ssGroup);
+  const fillEl  = document.getElementById('ss-fill-'+ssGroup);
+  const doneEl  = document.getElementById('ss-done-'+ssGroup);
+  if (!barWrap) return;
+
+  barWrap.classList.add('active');
+  if (doneEl) doneEl.classList.remove('show');
+  if (lblEl) lblEl.innerHTML =
+    'hasta próximo <strong>' + ex.name + '</strong>' +
+    (exB ? '<br>→ hacé ' + exB.name + ' (~' + bDuration + 's) + ' + restAfterB + 's descanso' : '');
+
+  function tick() {
+    _ssTimers[ssGroup].remaining--;
+    const r = Math.max(0, _ssTimers[ssGroup].remaining);
+    const pct = r / _ssTimers[ssGroup].total * 100;
+    const inBPhase = r > restAfterB; // still performing exercise B
+
+    if (secsEl) {
+      secsEl.textContent = r;
+      secsEl.style.color = r <= 0 ? 'var(--green)' : r <= 10 ? 'var(--yellow)' : inBPhase ? 'var(--text2)' : 'var(--accent)';
+    }
+    if (fillEl) {
+      fillEl.style.width = pct + '%';
+      fillEl.style.background = r <= 0 ? 'var(--green)' : inBPhase ? 'var(--text3)' : r <= 10 ? 'var(--yellow)' : 'var(--accent)';
+    }
+
+    if (r <= 0) {
+      clearInterval(_ssTimers[ssGroup].interval);
+      if (doneEl) doneEl.classList.add('show');
+      if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+      setTimeout(() => ssDismiss(ssGroup), 4000);
+    }
+  }
+
+  _ssTimers[ssGroup].interval = setInterval(tick, 1000);
+  tick();
+}
+
+function _findSSPartB(exA) {
+  const day = state[TODAY].trainDay;
+  const d = TRAINING[day];
+  if (!d) return null;
+  return d.exercises.find(e => e.ssGroup === exA.ssGroup && e.ssPart === 'b') || null;
+}
+
+function ssAddTime(ssGroup, extra) {
+  if (!_ssTimers[ssGroup]) return;
+  _ssTimers[ssGroup].remaining += extra;
+  _ssTimers[ssGroup].total += extra;
+  // Restart if it had stopped
+  if (!_ssTimers[ssGroup].interval || _ssTimers[ssGroup].remaining === extra) {
+    clearInterval(_ssTimers[ssGroup].interval);
+    _ssTimers[ssGroup].interval = setInterval(() => {
+      _ssTimers[ssGroup].remaining--;
+      const r = Math.max(0, _ssTimers[ssGroup].remaining);
+      const secsEl = document.getElementById('ss-secs-'+ssGroup);
+      const fillEl = document.getElementById('ss-fill-'+ssGroup);
+      const doneEl = document.getElementById('ss-done-'+ssGroup);
+      if (secsEl) { secsEl.textContent = r; secsEl.style.color = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
+      if (fillEl) { fillEl.style.width = (r/_ssTimers[ssGroup].total*100)+'%'; fillEl.style.background = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
+      if (r <= 0) {
+        clearInterval(_ssTimers[ssGroup].interval);
+        if (doneEl) doneEl.classList.add('show');
+        if (navigator.vibrate) navigator.vibrate([150,80,150]);
+        setTimeout(() => ssDismiss(ssGroup), 4000);
+      }
+    }, 1000);
+  }
+}
+
+function ssDismiss(ssGroup) {
+  if (_ssTimers[ssGroup]) { clearInterval(_ssTimers[ssGroup].interval); delete _ssTimers[ssGroup]; }
+  const barWrap = document.getElementById('ss-bar-'+ssGroup);
+  if (barWrap) barWrap.classList.remove('active');
+}
+
+// After renderTraining() rebuilds the DOM, restore any timers that were running
+function _reattachSSTimers() {
+  Object.keys(_ssTimers).forEach(ssGroup => {
+    const t = _ssTimers[ssGroup];
+    if (!t) return;
+    const barWrap = document.getElementById('ss-bar-'+ssGroup);
+    if (!barWrap) return;
+    const r = Math.max(0, t.remaining);
+    // Show bar with current remaining value
+    barWrap.classList.add('active');
+    const secsEl = document.getElementById('ss-secs-'+ssGroup);
+    const fillEl = document.getElementById('ss-fill-'+ssGroup);
+    const doneEl = document.getElementById('ss-done-'+ssGroup);
+    if (secsEl) { secsEl.textContent = r; secsEl.style.color = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
+    if (fillEl) { fillEl.style.width = (t.total>0?r/t.total*100:0)+'%'; fillEl.style.background = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
+    if (r <= 0 && doneEl) doneEl.classList.add('show');
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════
+// CALENDAR OF SESSIONS
+// ═══════════════════════════════════════════════════════════════
+
+let calViewYear  = new Date().getFullYear();
+let calViewMonth = new Date().getMonth(); // 0-indexed
+
+const DAY_COLORS = { 1:'d1', 2:'d2', 3:'d3', 5:'d5', 6:'d6' };
+const DAY_NAMES_SHORT = { 1:'Push+Pull', 2:'Shoulders', 3:'Pull heavy', 5:'Push', 6:'Pull+Arms' };
+const MONTHS_ES = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+const DOWS = ['L','M','X','J','V','S','D'];
+
+function calNav(dir) {
+  calViewMonth += dir;
+  if (calViewMonth > 11) { calViewMonth = 0; calViewYear++; }
+  if (calViewMonth < 0)  { calViewMonth = 11; calViewYear--; }
+  renderCalendar();
+}
+
+function renderCalendar() {
+  const grid = document.getElementById('calGrid');
+  const label = document.getElementById('calMonthLabel');
+  const streakEl = document.getElementById('calStreak');
+  const statsEl = document.getElementById('calMonthStats');
+  if (!grid) return;
+
+  label.textContent = MONTHS_ES[calViewMonth] + ' ' + calViewYear;
+
+  // Day-of-week headers (Mon first)
+  let html = DOWS.map(d => `<div class="cal-dow">${d}</div>`).join('');
+
+  // First day of month (0=Sun, adjust to Mon=0)
+  const firstDay = new Date(calViewYear, calViewMonth, 1).getDay();
+  const startOffset = (firstDay === 0) ? 6 : firstDay - 1;
+  const daysInMonth = new Date(calViewYear, calViewMonth + 1, 0).getDate();
+
+  // Empty cells before month start
+  for (let i = 0; i < startOffset; i++) html += '<div class="cal-day empty"></div>';
+
+  const todayStr = TODAY;
+  let monthTrained = 0, monthRest = 0;
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = calViewYear + '-' + String(calViewMonth+1).padStart(2,'0') + '-' + String(d).padStart(2,'0');
+    const dayData = state[dateStr];
+    const trainDay = dayData?.trainDay;
+    const isToday = dateStr === todayStr;
+    const isFuture = dateStr > todayStr;
+
+    let cls = 'cal-day';
+    let title = '';
+
+    if (isToday) cls += ' today';
+
+    if (!isFuture && dayData !== undefined) {
+      if (trainDay === 0 || trainDay === 4) {
+        cls += ' rest';
+        monthRest++;
+      } else if (trainDay > 0) {
+        // Check if they actually logged any sets
+        const hasSets = Object.keys(dayData).some(k => k.startsWith('trainSets_'));
+        if (hasSets) {
+          cls += ' trained ' + (DAY_COLORS[trainDay] || '');
+          title = 'D' + trainDay + ' — ' + (DAY_NAMES_SHORT[trainDay] || '');
+          monthTrained++;
+        }
+      }
+    }
+
+    html += `<div class="${cls}" title="${title}">${d}</div>`;
+  }
+
+  grid.innerHTML = html;
+
+  // Streak calculation
+  let currentStreak = 0, longestStreak = 0, tempStreak = 0;
+  const today = new Date(todayStr);
+  // Walk backwards from today
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const ds = d.toISOString().split('T')[0];
+    const dd = state[ds];
+    const td = dd?.trainDay;
+    const hasSets = dd && Object.keys(dd).some(k => k.startsWith('trainSets_'));
+    if (hasSets && td > 0 && td !== 4) {
+      tempStreak++;
+      if (i === 0 || currentStreak > 0) currentStreak = tempStreak;
+    } else if (td === 0 || td === 4) {
+      // rest day doesn't break streak
+    } else {
+      if (i === 0) currentStreak = 0;
+      if (tempStreak > longestStreak) longestStreak = tempStreak;
+      tempStreak = 0;
+    }
+  }
+  if (tempStreak > longestStreak) longestStreak = tempStreak;
+
+  const pct = daysInMonth > 0 ? Math.round(monthTrained / (daysInMonth - startOffset) * 100) : 0;
+
+  streakEl.innerHTML =
+    `<div class="cal-streak-item"><div class="cal-streak-val" style="color:var(--green)">${currentStreak}</div><div class="cal-streak-lbl">Racha actual</div></div>` +
+    `<div class="cal-streak-item"><div class="cal-streak-val" style="color:var(--yellow)">${longestStreak}</div><div class="cal-streak-lbl">Racha máxima</div></div>` +
+    `<div class="cal-streak-item"><div class="cal-streak-val" style="color:var(--accent)">${monthTrained}</div><div class="cal-streak-lbl">Sesiones</div></div>`;
+
+  // Month stats
+  const totalWorkDays = daysInMonth - startOffset;
+  statsEl.innerHTML =
+    `<div class="stat-trio" style="margin-top:0">` +
+    `<div class="stat-pill"><div class="stat-pill-val" style="color:var(--green)">${monthTrained}</div><div class="stat-pill-lbl">Entrenamientos</div></div>` +
+    `<div class="stat-pill"><div class="stat-pill-val" style="color:var(--text2)">${monthRest}</div><div class="stat-pill-lbl">Descansos</div></div>` +
+    `<div class="stat-pill"><div class="stat-pill-val" style="color:var(--accent)">${monthTrained > 0 ? Math.round(monthTrained / (monthTrained + monthRest) * 100) : 0}%</div><div class="stat-pill-lbl">Adherencia</div></div>` +
+    `</div>`;
+}
+
+// ═══════════════════════════════════════════════════════════════
+// DELOAD WEEK — every 4 weeks, auto-reduce volume
+// ═══════════════════════════════════════════════════════════════
+
+const DELOAD_INTERVAL_WEEKS = 4; // Every 4th week
+const PROGRAM_START = '2026-03-03'; // When the training program started
+
+function getWeekNumber(dateStr) {
+  const start = new Date(PROGRAM_START + 'T00:00:00');
+  const target = new Date(dateStr + 'T00:00:00');
+  const diffDays = Math.round((target - start) / (1000 * 60 * 60 * 24));
+  return Math.floor(diffDays / 7); // 0-indexed week number
+}
+
+function isDeloadWeek(dateStr) {
+  const week = getWeekNumber(dateStr);
+  return week > 0 && (week + 1) % DELOAD_INTERVAL_WEEKS === 0; // Weeks 3, 7, 11...
+}
+
+function checkDeloadWeek() {
+  const banner = document.getElementById('deloadBanner');
+  if (!banner) return;
+
+  const week = getWeekNumber(TODAY);
+  // Show deload banner starting from week 3 (0-indexed)
+  if (!isDeloadWeek(TODAY)) {
+    banner.style.display = 'none';
+
+    // Preview: warn 3 days before deload week
+    const nextDeloadWeek = (Math.floor(week / DELOAD_INTERVAL_WEEKS) + 1) * DELOAD_INTERVAL_WEEKS - 1;
+    const nextDeloadStart = new Date(PROGRAM_START + 'T00:00:00');
+    nextDeloadStart.setDate(nextDeloadStart.getDate() + nextDeloadWeek * 7);
+    const daysUntil = Math.round((nextDeloadStart - new Date(TODAY + 'T00:00:00')) / (1000*60*60*24));
+
+    if (daysUntil <= 3 && daysUntil > 0) {
+      banner.style.display = 'block';
+      banner.innerHTML = `<div class="deload-banner">
+        <div class="deload-banner-title">📅 Semana de deload en ${daysUntil} día${daysUntil>1?'s':''}</div>
+        <div class="deload-banner-sub">En ${daysUntil} días empieza tu semana de descarga. Prepará los pesos reducidos.</div>
+        <div class="deload-banner-pills">
+          <div class="deload-pill">Semana ${week + 1}</div>
+          <div class="deload-pill">Deload en semana ${nextDeloadWeek + 1}</div>
+        </div>
+      </div>`;
+    }
+    return;
+  }
+
+  // It IS deload week
+  if (state.deloadDismissed === TODAY.slice(0,7)) {
+    banner.style.display = 'none';
+    return;
+  }
+
+  banner.style.display = 'block';
+  banner.innerHTML = `<div class="deload-banner">
+    <div class="deload-banner-title">🔄 Semana de Deload — Semana ${week + 1}</div>
+    <div class="deload-banner-sub">
+      Llevás ${week + 1} semanas entrenando. Esta semana reducí el volumen para supercompensar y llegar más fuerte la próxima.
+    </div>
+    <div class="deload-banner-pills">
+      <div class="deload-pill">🏋️ Bajar 40% el peso</div>
+      <div class="deload-pill">📉 50% del volumen</div>
+      <div class="deload-pill">✅ Mismos ejercicios</div>
+      <div class="deload-pill">😴 Priorizá el sueño</div>
+    </div>
+    <button class="deload-dismiss" onclick="dismissDeload()">Entendido, no mostrar esta semana</button>
+  </div>`;
+}
+
+function dismissDeload() {
+  state.deloadDismissed = TODAY.slice(0,7); // store YYYY-MM
+  saveState(state);
+  document.getElementById('deloadBanner').style.display = 'none';
+}
+
 
 // ─── START ───────────────────────────────────────────────────────
 init();
