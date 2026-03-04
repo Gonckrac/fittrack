@@ -725,9 +725,6 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
       </div>
       <div id="exerciseList"></div>
 
-      <!-- SUGERENCIAS -->
-      <div class="section-div" style="margin-top:4px">💡 Sugerencias</div>
-      <div id="trainSuggestions"></div>
 
       <!-- ADAPTIVE ROUTINE BANNER (Feature 4) -->
       <div id="adaptiveRoutineBanner" style="display:none"></div>
@@ -1876,7 +1873,6 @@ function renderTraining() {
     state[TODAY]['trainSets_'+day]=savedSets;
     saveState(state);
   }
-  renderTrainSuggestions();
   checkAdaptiveRoutine();
   renderPRHistory();
   // Reattach any active SS timers whose DOM was just rebuilt
@@ -1909,7 +1905,6 @@ function toggleSet(exIdx, sIdx) {
 
   // Re-render DOM first so timer elements exist
   renderTraining();
-  renderTrainSuggestions();
   renderHome();
   populateExSelect();
 
@@ -2064,62 +2059,6 @@ function findExByName(name) {
 }
 
 // ─── SUGGESTIONS ─────────────────────────────────────────────────
-function renderTrainSuggestions() {
-  const container = document.getElementById('trainSuggestions');
-  if (!container) return;
-  const hist = state.exerciseHistory || {};
-  const suggestions = [];
-
-  Object.entries(hist).forEach(([name, history]) => {
-    if (history.length < 2) return;
-    const recent = history.slice(0, 6);
-    const latest = recent[0];
-
-    // Stalled: same kg 3+ sessions
-    if (recent.length >= 3) {
-      const last3 = recent.slice(0,3).map(h => h.maxKg);
-      if (last3.every(v => v === last3[0])) {
-        suggestions.push({ type:'warn', icon:'⚠️',
-          title:'Estancamiento — ' + name,
-          sub: last3.length + ' sesiones con ' + last3[0] + 'kg. Subí a ' + (last3[0]+2.5).toFixed(1) + 'kg o sumá 1 rep.'
-        });
-      }
-    }
-
-    // Ready to progress: at top of rep range
-    const ex = findExByName(name);
-    if (ex && latest.avgReps) {
-      const parts = ex.reps.split('-');
-      const topReps = parts.length > 1 ? +parts[1] : null;
-      if (topReps && latest.avgReps >= topReps) {
-        suggestions.push({ type:'info', icon:'⬆️',
-          title:'Subir peso — ' + name,
-          sub: 'Llegaste a ' + latest.avgReps + ' reps con ' + latest.maxKg + 'kg. Probá ' + (latest.maxKg+2.5).toFixed(1) + 'kg.'
-        });
-      }
-    }
-
-    // New PR
-    const allOneRM = history.map(h => h.oneRM || h.maxKg);
-    if (history.length >= 2 && latest.oneRM === Math.max(...allOneRM)) {
-      suggestions.push({ type:'success', icon:'🏆',
-        title:'PR — ' + name,
-        sub: '1RM estimado: ' + latest.oneRM + 'kg (' + latest.maxKg + 'kg × ' + (latest.avgReps||'?') + ' reps)'
-      });
-    }
-  });
-
-  if (suggestions.length === 0) {
-    container.innerHTML = '<div style="color:var(--text3);font-size:12px;text-align:center;padding:14px 0">Aparecen después de completar algunas sesiones ✓</div>';
-    return;
-  }
-  container.innerHTML = suggestions.slice(0,5).map(s =>
-    '<div class="suggestion-card ' + s.type + '">' +
-    '<div class="suggestion-icon">' + s.icon + '</div>' +
-    '<div><div class="suggestion-title">' + s.title + '</div>' +
-    '<div class="suggestion-sub">' + s.sub + '</div></div></div>'
-  ).join('');
-}
 
 // ─── STRENGTH CHART ───────────────────────────────────────────────
 function populateExSelect() {
