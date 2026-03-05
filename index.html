@@ -2254,11 +2254,7 @@ const rawText = await res.text();
     if (!res.ok) throw new Error('HTTP ' + res.status + ': ' + rawText.substring(0, 200));
     let data;
     try { data = JSON.parse(rawText); } catch(e) { throw new Error('Respuesta no es JSON: ' + rawText.substring(0, 200)); }
-    const text = data.choices?.[0]?.message?.content || '';
-    if (!text) throw new Error('Sin contenido. Data: ' + JSON.stringify(data).substring(0, 200));
-    const match = text.match(/\{[\s\S]*\}/);
-    if (!match) throw new Error('Sin JSON en: ' + text.substring(0, 200));
-    const result = JSON.parse(match[0]);
+    const result = data;
     loading.remove();
     lastAIResult = result;
     appendBubble(buildResultCard(result), 'bot');
