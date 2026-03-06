@@ -3093,77 +3093,24 @@ function _playBeepCtx() {
   } catch(e) {}
 }
 
-// ── Service Worker inline (como blob, no necesita archivo externo) ─
+// ── Service Worker externo (sw.js) ───────────────────────────────
 let _swReg = null;
 
-const _swCode = `
-const CACHE_NAME = 'fittrack-v4';
-self.addEventListener('install', e => { self.skipWaiting(); });
-self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
-
-self.addEventListener('message', event => {
-  const data = event.data;
-  if (!data) return;
-
-  // Mostrar notificación inmediata
-  if (data.type === 'SHOW_NOTIF') {
-    event.waitUntil(
-      self.registration.showNotification(data.title, {
-        body: data.body,
-        vibrate: [300,100,300,100,300],
-        requireInteraction: false,
-        tag: 'fittrack-timer'
-      })
-    );
-  }
-
-  // Programar notificación futura: el SW espera hasta endTime
-  // Esto funciona aunque la página esté suspendida por iOS
-  if (data.type === 'SCHEDULE_NOTIF') {
-    const { title, body, endTime } = data;
-    const delay = Math.max(0, endTime - Date.now());
-    event.waitUntil(
-      new Promise(resolve => setTimeout(resolve, delay)).then(() =>
-        self.registration.showNotification(title, {
-          body,
-          vibrate: [300,100,300,100,300],
-          requireInteraction: true,
-          tag: 'fittrack-timer',
-          silent: false
-        })
-      )
-    );
-  }
-
-  // Cancelar notificación programada (timer descartado manualmente)
-  if (data.type === 'CANCEL_NOTIF') {
-    event.waitUntil(
-      self.registration.getNotifications({ tag: 'fittrack-timer' })
-        .then(notifs => notifs.forEach(n => n.close()))
-    );
-  }
-});
-
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(clients.matchAll({ type:'window' }).then(list => {
-    if (list.length > 0) return list[0].focus();
-    return clients.openWindow('./');
-  }));
-});
-`;
-
 if ('serviceWorker' in navigator) {
-  const blob = new Blob([_swCode], { type: 'application/javascript' });
-  const swUrl = URL.createObjectURL(blob);
-  navigator.serviceWorker.register(swUrl, { scope: './' })
-    .then(reg => { _swReg = reg; console.log('[FitTrack] SW registrado'); })
-    .catch(() => {
-      // Fallback: intentar con archivo externo si existe
-      navigator.serviceWorker.register('./sw.js')
-        .then(reg => { _swReg = reg; })
-        .catch(() => {});
-    });
+  navigator.serviceWorker.register('./sw.js')
+    .then(reg => {
+      _swReg = reg;
+      console.log('[FitTrack] SW registrado:', reg.scope);
+      // Si hay un SW esperando, activarlo ya
+      if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+      reg.addEventListener('updatefound', () => {
+        const newSW = reg.installing;
+        newSW?.addEventListener('statechange', () => {
+          if (newSW.state === 'installed') newSW.postMessage({ type: 'SKIP_WAITING' });
+        });
+      });
+    })
+    .catch(e => console.warn('[FitTrack] SW error:', e));
 }
 
 
