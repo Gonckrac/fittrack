@@ -2,7 +2,7 @@
   "name": "FitTrack — Gonza",
   "short_name": "FitTrack",
   "description": "Tu app de entrenamiento y nutrición",
-  "start_url": "./index38.html",
+  "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#05080f",
   "theme_color": "#05080f",
