@@ -1446,11 +1446,18 @@ async function dbCheckAll() {
   dbLog('Notification: ' + (typeof Notification !== 'undefined' ? Notification.permission : 'NO'));
   dbLog('ServiceWorker: ' + ('serviceWorker' in navigator ? 'SI' : 'NO'));
   dbLog('PushManager: ' + ('PushManager' in window ? 'SI' : 'NO'));
-  dbLog('_swReg: ' + (_swReg ? 'OK' : 'NULL'));
-  dbLog('_swReg.active: ' + (_swReg?.active ? 'OK' : 'NULL'));
+  dbLog('_swReg: ' + (_swReg ? 'OK scope=' + _swReg.scope : 'NULL'));
+  dbLog('_swReg.active: ' + (_swReg?.active ? 'OK url=' + _swReg.active.scriptURL?.split('/').pop() : 'NULL'));
   dbLog('_pushDeviceId: ' + (_pushDeviceId || 'NULL'));
   dbLog('_pushSubscription: ' + (_pushSubscription ? 'OK' : 'NULL'));
   dbLog('_audioUnlocked: ' + _audioUnlocked);
+
+  // Listar todos los SW registrados
+  if ('serviceWorker' in navigator) {
+    const regs = await navigator.serviceWorker.getRegistrations();
+    dbLog('SW registrados: ' + regs.length);
+    regs.forEach((r, i) => dbLog('  SW' + i + ': ' + r.active?.scriptURL?.slice(-30)));
+  }
 
   // Test backend
   try {
@@ -1503,8 +1510,6 @@ function init() {
   renderCalendar();
   checkDeloadWeek();
   syncOura();
-  // Pedir permiso de notificaciones para que funcione con pantalla bloqueada
-  setTimeout(requestNotifPermission, 2000);
 }
 
 function updateHeader() {
@@ -3097,20 +3102,32 @@ function _playBeepCtx() {
 let _swReg = null;
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js')
-    .then(reg => {
-      _swReg = reg;
-      console.log('[FitTrack] SW registrado:', reg.scope);
-      // Si hay un SW esperando, activarlo ya
-      if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
-      reg.addEventListener('updatefound', () => {
-        const newSW = reg.installing;
-        newSW?.addEventListener('statechange', () => {
-          if (newSW.state === 'installed') newSW.postMessage({ type: 'SKIP_WAITING' });
-        });
+  // Primero desregistrar TODOS los SW viejos (incluyendo blobs)
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    const unregisterPromises = regs
+      .filter(r => !r.active?.scriptURL?.includes('sw.js'))
+      .map(r => { console.log('[FitTrack] Desregistrando SW viejo:', r.scope); return r.unregister(); });
+    return Promise.all(unregisterPromises);
+  }).then(() => {
+    // Ahora registrar el SW correcto
+    return navigator.serviceWorker.register('./sw.js');
+  }).then(reg => {
+    _swReg = reg;
+    console.log('[FitTrack] SW registrado:', reg.scope);
+    dbLog('[SW] Registrado OK: ' + reg.scope);
+    if (reg.waiting) reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+    reg.addEventListener('updatefound', () => {
+      const newSW = reg.installing;
+      newSW?.addEventListener('statechange', () => {
+        if (newSW.state === 'installed') newSW.postMessage({ type: 'SKIP_WAITING' });
       });
-    })
-    .catch(e => console.warn('[FitTrack] SW error:', e));
+    });
+    // Pedir permiso de notificaciones ahora que el SW está listo
+    setTimeout(requestNotifPermission, 1500);
+  }).catch(e => {
+    console.warn('[FitTrack] SW error:', e);
+    dbLog('[SW] Error: ' + e.message);
+  });
 }
 
 
