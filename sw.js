@@ -1,10 +1,15 @@
-// FitTrack Service Worker v4
-const CACHE_NAME = 'fittrack-v4';
+// FitTrack Service Worker v5
+const CACHE_NAME = 'fittrack-v5';
 
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
 
 self.addEventListener('fetch', event => {
+  // No interceptar llamadas al backend ni a otras APIs externas
+  const url = event.request.url;
+  if (url.includes('vercel.app') || url.includes('oura') || !url.startsWith('https://gonckrac.github.io')) {
+    return; // dejar pasar sin interceptar
+  }
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );
