@@ -552,6 +552,7 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
       <div class="rest-timer-reason" id="rtReason"></div>
       <div class="rest-timer-btns">
         <button class="rest-timer-btn add" onclick="addRestTime(30)">+30s</button>
+        <button class="rest-timer-btn add" onclick="playBeep()" style="background:rgba(77,255,180,0.1);color:var(--green);border-color:rgba(77,255,180,0.3)">🔔 Test</button>
         <button class="rest-timer-btn skip" onclick="dismissRestTimer()">Saltar ✕</button>
       </div>
     </div>
@@ -2864,55 +2865,64 @@ function _scheduleTimerNotif(exName, secs) {
 }
 
 // ── Web Audio beep ────────────────────────────────────────────────
-// ── Audio: contexto persistente desbloqueado por el primer toque ──
+// ── Audio: iOS Safari requiere crear AudioContext dentro de un toque
 let _audioCtx = null;
+let _audioUnlocked = false;
 
-function _getAudioCtx() {
-  if (!_audioCtx) {
-    _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  // iOS suspende el contexto si no hubo interacción — resumirlo
-  if (_audioCtx.state === 'suspended') {
-    _audioCtx.resume();
-  }
-  return _audioCtx;
-}
-
-// Desbloquear AudioContext con el primer toque del usuario
 function _unlockAudio() {
-  const ctx = _getAudioCtx();
-  // Crear y reproducir un buffer silencioso — esto desbloquea iOS
-  const buf = ctx.createBuffer(1, 1, 22050);
-  const src = ctx.createBufferSource();
-  src.buffer = buf;
-  src.connect(ctx.destination);
-  src.start(0);
-  src.onended = () => src.disconnect();
-  document.removeEventListener('touchstart', _unlockAudio);
-  document.removeEventListener('touchend', _unlockAudio);
-  document.removeEventListener('click', _unlockAudio);
+  if (_audioUnlocked) return;
+  try {
+    // CRÍTICO: crear el contexto DENTRO del event handler del toque
+    if (!_audioCtx) {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    if (_audioCtx.state === 'suspended') {
+      _audioCtx.resume().then(() => { _audioUnlocked = true; });
+    } else {
+      _audioUnlocked = true;
+    }
+    // Buffer silencioso para desbloquear
+    const buf = _audioCtx.createBuffer(1, 1, 22050);
+    const src = _audioCtx.createBufferSource();
+    src.buffer = buf;
+    src.connect(_audioCtx.destination);
+    src.start(0);
+  } catch(e) {}
 }
-document.addEventListener('touchstart', _unlockAudio, { once: true });
-document.addEventListener('touchend',   _unlockAudio, { once: true });
-document.addEventListener('click',      _unlockAudio, { once: true });
+
+// Escuchar en fase de captura para máxima compatibilidad iOS
+document.addEventListener('touchstart', _unlockAudio, { capture: true, passive: true });
+document.addEventListener('touchend',   _unlockAudio, { capture: true, passive: true });
 
 function playBeep() {
   try {
-    const ctx = _getAudioCtx();
-    const now = ctx.currentTime;
-    const beepSeq = [[880, 0, 0.18], [880, 0.22, 0.40], [1320, 0.46, 0.80]];
-    beepSeq.forEach(([freq, start, end]) => {
-      const osc  = ctx.createOscillator();
-      const gain = ctx.createGain();
-      osc.connect(gain);
-      gain.connect(ctx.destination);
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.setValueAtTime(0.4, now + start);
-      gain.gain.exponentialRampToValueAtTime(0.001, now + end);
-      osc.start(now + start);
-      osc.stop(now + end + 0.05);
-    });
+    if (!_audioCtx) {
+      _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const ctx = _audioCtx;
+
+    const doPlay = () => {
+      const now = ctx.currentTime;
+      // Triple beep ascendente bien audible
+      [[880, 0, 0.15], [880, 0.2, 0.35], [1320, 0.4, 0.75]].forEach(([freq, start, end]) => {
+        const osc  = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.type = 'triangle'; // más audible que sine en parlantes pequeños
+        osc.frequency.value = freq;
+        gain.gain.setValueAtTime(0.5, now + start);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + end);
+        osc.start(now + start);
+        osc.stop(now + end + 0.05);
+      });
+    };
+
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(doPlay).catch(e => console.warn('audio resume error:', e));
+    } else {
+      doPlay();
+    }
   } catch(e) { console.warn('playBeep error:', e); }
 }
 
@@ -2951,7 +2961,7 @@ document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
     // Resumir AudioContext — iOS lo suspende en background
     if (_audioCtx && _audioCtx.state === 'suspended') {
-      _audioCtx.resume();
+      _audioCtx.resume().then(() => { _audioUnlocked = true; });
     }
     // Rest timer: check if it expired while screen was off
     if (_rtEndTime && _rtEndTime > 0) {
