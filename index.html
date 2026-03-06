@@ -593,6 +593,17 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
 
     <!-- ═══ HOME PAGE ═══ -->
     <div class="page active" id="page-home">
+      <!-- DEBUG PANEL — borralo cuando todo funcione -->
+      <div id="debugPanel" style="margin:12px;background:#0a1628;border:1px solid #ff4444;border-radius:10px;padding:12px;font-size:11px;font-family:monospace">
+        <div style="color:#ff4444;font-weight:700;margin-bottom:8px">🔧 DEBUG PANEL</div>
+        <div id="dbLog" style="color:#aaa;line-height:1.8;white-space:pre-wrap;max-height:200px;overflow-y:auto"></div>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
+          <button onclick="dbCheckAll()" style="background:#1a2a4a;color:#4d8aff;border:1px solid #4d8aff;padding:5px 10px;border-radius:6px;font-size:10px">🔍 Check todo</button>
+          <button onclick="playBeep()" style="background:#1a2a4a;color:#4dffb4;border:1px solid #4dffb4;padding:5px 10px;border-radius:6px;font-size:10px">🔔 Test beep</button>
+          <button onclick="dbTestNotif()" style="background:#1a2a4a;color:#ffb84d;border:1px solid #ffb84d;padding:5px 10px;border-radius:6px;font-size:10px">📲 Test notif 5s</button>
+          <button onclick="document.getElementById('debugPanel').remove()" style="background:#1a2a4a;color:#ff4444;border:1px solid #ff4444;padding:5px 10px;border-radius:6px;font-size:10px">✕ Cerrar</button>
+        </div>
+      </div>
       <div style="padding-top:20px">
         <div style="text-align:center;margin-bottom:8px">
           <div style="font-size:28px;font-weight:700;color:var(--accent);letter-spacing:-0.5px">📊 RESUMEN DEL DÍA</div>
@@ -1415,6 +1426,64 @@ appendBubble(buildResultCard(data), 'bot');
     if (st) { st.textContent = '● Sin conexion'; st.style.color = 'var(--red)'; }
   } finally {
     if (syncBtn) { syncBtn.textContent = '↻ Sync Oura'; syncBtn.disabled = false; }
+  }
+}
+
+// ── DEBUG ─────────────────────────────────────────────────────────
+function dbLog(msg) {
+  console.log(msg);
+  const el = document.getElementById('dbLog');
+  if (el) {
+    el.textContent += new Date().toLocaleTimeString() + ' ' + msg + '\n';
+    el.scrollTop = el.scrollHeight;
+  }
+}
+
+async function dbCheckAll() {
+  const el = document.getElementById('dbLog');
+  if (el) el.textContent = '';
+  dbLog('--- CHECK ---');
+  dbLog('Notification: ' + (typeof Notification !== 'undefined' ? Notification.permission : 'NO'));
+  dbLog('ServiceWorker: ' + ('serviceWorker' in navigator ? 'SI' : 'NO'));
+  dbLog('PushManager: ' + ('PushManager' in window ? 'SI' : 'NO'));
+  dbLog('_swReg: ' + (_swReg ? 'OK' : 'NULL'));
+  dbLog('_swReg.active: ' + (_swReg?.active ? 'OK' : 'NULL'));
+  dbLog('_pushDeviceId: ' + (_pushDeviceId || 'NULL'));
+  dbLog('_pushSubscription: ' + (_pushSubscription ? 'OK' : 'NULL'));
+  dbLog('_audioUnlocked: ' + _audioUnlocked);
+
+  // Test backend
+  try {
+    const r = await fetch('https://fittrack-backend-mu.vercel.app/api/push?action=vapid-public-key');
+    const d = await r.json();
+    dbLog('Backend: OK key=' + (d.key ? d.key.slice(0,10)+'...' : 'NO KEY'));
+  } catch(e) {
+    dbLog('Backend ERROR: ' + e.message);
+  }
+}
+
+async function dbTestNotif() {
+  dbLog('Programando notif en 5s...');
+  if (!_pushDeviceId) {
+    dbLog('ERROR: no hay _pushDeviceId, intentando setup...');
+    await _setupWebPush();
+    dbLog('Después setup: deviceId=' + (_pushDeviceId || 'NULL'));
+  }
+  if (_pushDeviceId) {
+    try {
+      const r = await fetch('https://fittrack-backend-mu.vercel.app/api/push', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'schedule', deviceId: _pushDeviceId, title: '⏱ Test', body: 'Si ves esto funciona!', delayMs: 5000 })
+      });
+      const d = await r.json();
+      dbLog('Schedule resp: ' + JSON.stringify(d));
+      dbLog('Bloqueá la pantalla ahora!');
+    } catch(e) {
+      dbLog('ERROR schedule: ' + e.message);
+    }
+  } else {
+    dbLog('ERROR: sigue sin deviceId');
   }
 }
 
@@ -2889,11 +2958,13 @@ async function _setupWebPush() {
     _pushSubscription = sub;
 
     // Registrar la suscripción en el backend
-    await fetch(PUSH_BACKEND, {
+    const resp = await fetch(PUSH_BACKEND, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'subscribe', subscription: sub, deviceId })
     });
+    const respData = await resp.json();
+    dbLog('[Push] Backend subscribe: ' + JSON.stringify(respData));
     console.log('[Push] Suscripción registrada en backend');
   } catch(e) {
     console.warn('[Push] Error setup:', e);
