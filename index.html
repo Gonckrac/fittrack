@@ -389,23 +389,20 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
 .rest-timer-done.show { display:block; }
 
 /* ── CALENDAR ── */
-.cal-wrap { margin-bottom:4px; }
+.cal-wrap { margin-bottom:4px; width:100%; overflow:visible; }
 .cal-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
 .cal-month { font-family:'Space Mono',monospace; font-size:14px; font-weight:700; color:var(--text); }
 .cal-nav { width:28px; height:28px; border-radius:8px; border:1px solid var(--border); background:var(--bg3); color:var(--text2); cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
 .cal-nav:hover { border-color:var(--accent); color:var(--accent); }
-.cal-grid { display:grid; grid-template-columns:repeat(7,1fr); gap:4px; }
-.cal-dow { font-size:9px; font-weight:700; color:var(--text3); text-align:center; padding:2px 0 6px; text-transform:uppercase; letter-spacing:0.5px; }
-.cal-day { aspect-ratio:1; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:11px; font-family:'Space Mono',monospace; cursor:pointer; transition:all 0.15s; position:relative; border:1px solid transparent; }
+.cal-grid { display:grid; grid-template-columns:repeat(7, minmax(0,1fr)); gap:3px; width:100%; box-sizing:border-box; }
+.cal-dow { font-size:9px; font-weight:700; color:var(--text3); text-align:center; padding:2px 0 6px; text-transform:uppercase; letter-spacing:0.5px; min-width:0; }
+.cal-day { aspect-ratio:1; min-height:32px; border-radius:6px; display:flex; align-items:center; justify-content:center; font-size:10px; font-family:'Space Mono',monospace; cursor:pointer; transition:all 0.15s; position:relative; border:1px solid transparent; min-width:0; overflow:hidden; line-height:1; }
 .cal-day.empty { pointer-events:none; }
 .cal-day.today { border-color:var(--accent); color:var(--accent); font-weight:700; }
-.cal-day.rest   { background:rgba(61,77,112,0.2); color:var(--text3); }
-.cal-day.trained { color:white; font-weight:700; }
-.cal-day.trained.d1 { background:rgba(77,138,255,0.7); }
-.cal-day.trained.d2 { background:rgba(77,255,180,0.5); color:#0a2a1a; }
-.cal-day.trained.d3 { background:rgba(168,139,250,0.6); }
-.cal-day.trained.d5 { background:rgba(255,107,77,0.6); }
-.cal-day.trained.d6 { background:rgba(251,191,36,0.6); color:#2a1a00; }
+.cal-day.rest   { background:rgba(61,77,112,0.25); color:var(--text3); }
+.cal-day.trained { background:rgba(77,200,120,0.55); color:#fff; font-weight:700; }
+.cal-day.today.trained { border-color:#4dc878; }
+.cal-day.missed { background:rgba(231,76,60,0.25); color:rgba(255,120,100,0.8); }
 .cal-day-dot { position:absolute; bottom:2px; left:50%; transform:translateX(-50%); width:4px; height:4px; border-radius:50%; background:var(--green); }
 .cal-legend { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
 .cal-leg-item { display:flex; align-items:center; gap:4px; font-size:9px; color:var(--text2); }
@@ -759,11 +756,8 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
           </div>
           <div class="cal-grid" id="calGrid"></div>
           <div class="cal-legend" id="calLegend">
-            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(77,138,255,0.7)"></div>D1 Push+Pull</div>
-            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(77,255,180,0.5)"></div>D2 Shoulders</div>
-            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(168,139,250,0.6)"></div>D3 Pull</div>
-            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(255,107,77,0.6)"></div>D5 Push</div>
-            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(251,191,36,0.6)"></div>D6 Pull+Arms</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(77,200,120,0.55)"></div>Entrenado</div>
+            <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(231,76,60,0.35)"></div>No entrenado</div>
             <div class="cal-leg-item"><div class="cal-leg-dot" style="background:rgba(61,77,112,0.4)"></div>Descanso</div>
           </div>
           <div class="cal-streak" id="calStreak"></div>
@@ -1204,12 +1198,51 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
 // ─── STATE ────────────────────────────────────────────────────────
 const TODAY = new Date().toLocaleDateString('en-CA', { timeZone: 'America/Argentina/Buenos_Aires' });
 
-function loadState() {
-  try { return JSON.parse(localStorage.getItem('fittrack') || '{}'); } catch(e) { return {}; }
+// ── Persistent storage: IndexedDB (persiste en Safari PWA) ──────
+const STORE_KEY = 'fittrack_v2';
+const IDB_NAME  = 'FitTrackDB';
+const IDB_STORE = 'kv';
+let _idb = null;
+
+function _openIDB() {
+  return new Promise((res, rej) => {
+    if (_idb) { res(_idb); return; }
+    const req = indexedDB.open(IDB_NAME, 1);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(IDB_STORE);
+    req.onsuccess = e => { _idb = e.target.result; res(_idb); };
+    req.onerror   = e => rej(e);
+  });
 }
+
+async function loadStateAsync() {
+  try {
+    const db   = await _openIDB();
+    const tx   = db.transaction(IDB_STORE, 'readonly');
+    const data = await new Promise((res, rej) => {
+      const req = tx.objectStore(IDB_STORE).get(STORE_KEY);
+      req.onsuccess = e => res(e.target.result);
+      req.onerror   = e => rej(e);
+    });
+    if (data) return data;
+    try {
+      const legacy = localStorage.getItem(STORE_KEY) || localStorage.getItem('fittrack');
+      if (legacy) { const parsed = JSON.parse(legacy); saveState(parsed); return parsed; }
+    } catch(_) {}
+    return {};
+  } catch(e) {
+    try { return JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch(_) { return {}; }
+  }
+}
+
 function saveState(s) {
-  localStorage.setItem('fittrack', JSON.stringify(s));
+  _openIDB().then(db => {
+    const tx = db.transaction(IDB_STORE, 'readwrite');
+    tx.objectStore(IDB_STORE).put(s, STORE_KEY);
+  }).catch(() => {});
+  try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(_) {}
 }
+
+function loadState() { return {}; }
 
 // Ciclo automático: 1 → 2 → Descanso → 3 → 4 → 5 → Descanso → ...
 // Día 1 = Lunes 23 Feb 2026
@@ -1224,20 +1257,7 @@ function getAutoTrainDay() {
   return CYCLE[idx];
 }
 
-let state = loadState();
-
-// Limpiar días viejos (guardar solo últimos 30 días)
-const allKeys = Object.keys(state).filter(k => k.match(/^\d{4}-\d{2}-\d{2}$/));
-allKeys.sort();
-if (allKeys.length > 30) {
-  allKeys.slice(0, allKeys.length - 30).forEach(k => delete state[k]);
-  saveState(state);
-}
-
-if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: getAutoTrainDay() };
-if (!state.metricsHistory) state.metricsHistory = [];
-if (!state.kcalHistory) state.kcalHistory = [];
-if (!state.exerciseHistory) state.exerciseHistory = {};
+let state = {}; // populated async by bootstrap()
 
 // ─── TRAINING DATA ────────────────────────────────────────────────
 const TRAINING = {
@@ -2806,6 +2826,35 @@ function saveExerciseHistory(day, exIdx, sets) {
 let _rtInterval = null;
 let _rtRemaining = 0;
 let _rtTotal = 0;
+let _rtEndTime = 0; // absolute timestamp when timer ends
+
+// ── Web Audio beep ────────────────────────────────────────────────
+function playBeep() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const beepSeq = [[880, 0, 0.18], [0, 0.2, 0.22], [880, 0.22, 0.40], [0, 0.42, 0.46], [1320, 0.46, 0.80]];
+    beepSeq.forEach(([freq, start, end]) => {
+      if (!freq) return;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.35, ctx.currentTime + start);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + end);
+      osc.start(ctx.currentTime + start);
+      osc.stop(ctx.currentTime + end + 0.05);
+    });
+  } catch(e) {}
+}
+
+// ── Resync timers when page becomes visible again ─────────────────
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    _resyncRtTimer();
+    _resyncSSTimers();
+  }
+});
 
 // Classify exercise: 'compound' | 'push_isolation' | 'pull_isolation' | 'core' | 'iso_hold'
 function classifyExercise(ex) {
@@ -2924,6 +2973,7 @@ function startRestTimer(ex, completedSets, setIdx) {
   const { secs, reason } = calcRestTime(ex, completedSets, setIdx);
   _rtTotal = secs;
   _rtRemaining = secs;
+  _rtEndTime = Date.now() + secs * 1000;
 
   const overlay = document.getElementById('restTimerOverlay');
   document.getElementById('rtExName').textContent = ex.name;
@@ -2935,13 +2985,25 @@ function startRestTimer(ex, completedSets, setIdx) {
   _updateRtDisplay();
   clearInterval(_rtInterval);
   _rtInterval = setInterval(() => {
-    _rtRemaining--;
+    _rtRemaining = Math.round((_rtEndTime - Date.now()) / 1000);
     _updateRtDisplay();
     if (_rtRemaining <= 0) {
       clearInterval(_rtInterval);
       _rtFinished();
     }
-  }, 1000);
+  }, 500);
+}
+
+function _resyncRtTimer() {
+  if (!_rtEndTime || _rtEndTime <= Date.now()) return;
+  _rtRemaining = Math.round((_rtEndTime - Date.now()) / 1000);
+  _updateRtDisplay();
+  clearInterval(_rtInterval);
+  _rtInterval = setInterval(() => {
+    _rtRemaining = Math.round((_rtEndTime - Date.now()) / 1000);
+    _updateRtDisplay();
+    if (_rtRemaining <= 0) { clearInterval(_rtInterval); _rtFinished(); }
+  }, 500);
 }
 
 function _updateRtDisplay() {
@@ -2966,29 +3028,33 @@ function _updateRtDisplay() {
 function _rtFinished() {
   document.getElementById('rtDone').classList.add('show');
   document.getElementById('rtSecs').textContent = '0';
-  // Vibrate if supported
+  _rtEndTime = 0;
+  // Vibrate + beep
   if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  playBeep();
   // Auto dismiss after 3s
   setTimeout(() => dismissRestTimer(), 3000);
 }
 
 function addRestTime(extra) {
-  _rtRemaining += extra;
+  _rtEndTime += extra * 1000;
   _rtTotal += extra;
+  _rtRemaining = Math.round((_rtEndTime - Date.now()) / 1000);
   _updateRtDisplay();
   // Restart interval if it had stopped
   if (_rtRemaining > 0) {
     clearInterval(_rtInterval);
     _rtInterval = setInterval(() => {
-      _rtRemaining--;
+      _rtRemaining = Math.round((_rtEndTime - Date.now()) / 1000);
       _updateRtDisplay();
       if (_rtRemaining <= 0) { clearInterval(_rtInterval); _rtFinished(); }
-    }, 1000);
+    }, 500);
   }
 }
 
 function dismissRestTimer() {
   clearInterval(_rtInterval);
+  _rtEndTime = 0;
   document.getElementById('restTimerOverlay').classList.remove('active');
 }
 
@@ -2996,7 +3062,7 @@ function dismissRestTimer() {
 // INLINE SUPERSET TIMER — runs inside the ss-divider strip
 // One timer object per active ssGroup
 // ═══════════════════════════════════════════════════════════════
-const _ssTimers = {}; // ssGroup → { interval, remaining, total }
+const _ssTimers = {}; // ssGroup → { interval, remaining, total, endTime, restAfterB }
 
 function startSSTimer(ex, completedSets, setIdx) {
   const ssGroup = ex.ssGroup;
@@ -3004,7 +3070,8 @@ function startSSTimer(ex, completedSets, setIdx) {
   const { total, restAfterB, bDuration, label } = calcSSRestTime(ex, exB, setIdx);
 
   if (_ssTimers[ssGroup]) clearInterval(_ssTimers[ssGroup].interval);
-  _ssTimers[ssGroup] = { remaining: total, total };
+  const endTime = Date.now() + total * 1000;
+  _ssTimers[ssGroup] = { remaining: total, total, endTime, restAfterB };
 
   const barWrap = document.getElementById('ss-bar-'+ssGroup);
   const secsEl  = document.getElementById('ss-secs-'+ssGroup);
@@ -3020,10 +3087,10 @@ function startSSTimer(ex, completedSets, setIdx) {
     (exB ? '<br>→ hacé ' + exB.name + ' (~' + bDuration + 's) + ' + restAfterB + 's descanso' : '');
 
   function tick() {
-    _ssTimers[ssGroup].remaining--;
-    const r = Math.max(0, _ssTimers[ssGroup].remaining);
+    const r = Math.max(0, Math.round((_ssTimers[ssGroup].endTime - Date.now()) / 1000));
+    _ssTimers[ssGroup].remaining = r;
     const pct = r / _ssTimers[ssGroup].total * 100;
-    const inBPhase = r > restAfterB; // still performing exercise B
+    const inBPhase = r > _ssTimers[ssGroup].restAfterB;
 
     if (secsEl) {
       secsEl.textContent = r;
@@ -3038,11 +3105,12 @@ function startSSTimer(ex, completedSets, setIdx) {
       clearInterval(_ssTimers[ssGroup].interval);
       if (doneEl) doneEl.classList.add('show');
       if (navigator.vibrate) navigator.vibrate([150, 80, 150]);
+      playBeep();
       setTimeout(() => ssDismiss(ssGroup), 4000);
     }
   }
 
-  _ssTimers[ssGroup].interval = setInterval(tick, 1000);
+  _ssTimers[ssGroup].interval = setInterval(tick, 500);
   tick();
 }
 
@@ -3055,27 +3123,27 @@ function _findSSPartB(exA) {
 
 function ssAddTime(ssGroup, extra) {
   if (!_ssTimers[ssGroup]) return;
-  _ssTimers[ssGroup].remaining += extra;
+  _ssTimers[ssGroup].endTime += extra * 1000;
   _ssTimers[ssGroup].total += extra;
-  // Restart if it had stopped
-  if (!_ssTimers[ssGroup].interval || _ssTimers[ssGroup].remaining === extra) {
-    clearInterval(_ssTimers[ssGroup].interval);
-    _ssTimers[ssGroup].interval = setInterval(() => {
-      _ssTimers[ssGroup].remaining--;
-      const r = Math.max(0, _ssTimers[ssGroup].remaining);
-      const secsEl = document.getElementById('ss-secs-'+ssGroup);
-      const fillEl = document.getElementById('ss-fill-'+ssGroup);
-      const doneEl = document.getElementById('ss-done-'+ssGroup);
-      if (secsEl) { secsEl.textContent = r; secsEl.style.color = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
-      if (fillEl) { fillEl.style.width = (r/_ssTimers[ssGroup].total*100)+'%'; fillEl.style.background = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
-      if (r <= 0) {
-        clearInterval(_ssTimers[ssGroup].interval);
-        if (doneEl) doneEl.classList.add('show');
-        if (navigator.vibrate) navigator.vibrate([150,80,150]);
-        setTimeout(() => ssDismiss(ssGroup), 4000);
-      }
-    }, 1000);
-  }
+  const r = Math.max(0, Math.round((_ssTimers[ssGroup].endTime - Date.now()) / 1000));
+  _ssTimers[ssGroup].remaining = r;
+  clearInterval(_ssTimers[ssGroup].interval);
+  _ssTimers[ssGroup].interval = setInterval(() => {
+    const r2 = Math.max(0, Math.round((_ssTimers[ssGroup].endTime - Date.now()) / 1000));
+    _ssTimers[ssGroup].remaining = r2;
+    const secsEl = document.getElementById('ss-secs-'+ssGroup);
+    const fillEl = document.getElementById('ss-fill-'+ssGroup);
+    const doneEl = document.getElementById('ss-done-'+ssGroup);
+    if (secsEl) { secsEl.textContent = r2; secsEl.style.color = r2<=0?'var(--green)':r2<=10?'var(--yellow)':'var(--accent)'; }
+    if (fillEl) { fillEl.style.width = (r2/_ssTimers[ssGroup].total*100)+'%'; fillEl.style.background = r2<=0?'var(--green)':r2<=10?'var(--yellow)':'var(--accent)'; }
+    if (r2 <= 0) {
+      clearInterval(_ssTimers[ssGroup].interval);
+      if (doneEl) doneEl.classList.add('show');
+      if (navigator.vibrate) navigator.vibrate([150,80,150]);
+      playBeep();
+      setTimeout(() => ssDismiss(ssGroup), 4000);
+    }
+  }, 500);
 }
 
 function ssDismiss(ssGroup) {
@@ -3091,17 +3159,38 @@ function _reattachSSTimers() {
     if (!t) return;
     const barWrap = document.getElementById('ss-bar-'+ssGroup);
     if (!barWrap) return;
-    const r = Math.max(0, t.remaining);
-    // Show bar with current remaining value
+    const r = Math.max(0, Math.round((t.endTime - Date.now()) / 1000));
+    t.remaining = r;
     barWrap.classList.add('active');
     const secsEl = document.getElementById('ss-secs-'+ssGroup);
     const fillEl = document.getElementById('ss-fill-'+ssGroup);
     const doneEl = document.getElementById('ss-done-'+ssGroup);
     if (secsEl) { secsEl.textContent = r; secsEl.style.color = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
     if (fillEl) { fillEl.style.width = (t.total>0?r/t.total*100:0)+'%'; fillEl.style.background = r<=0?'var(--green)':r<=10?'var(--yellow)':'var(--accent)'; }
-    if (r <= 0 && doneEl) doneEl.classList.add('show');
+    if (r <= 0 && doneEl) { doneEl.classList.add('show'); return; }
+    // Restart tick interval
+    clearInterval(t.interval);
+    t.interval = setInterval(() => {
+      const r2 = Math.max(0, Math.round((t.endTime - Date.now()) / 1000));
+      t.remaining = r2;
+      const s2 = document.getElementById('ss-secs-'+ssGroup);
+      const f2 = document.getElementById('ss-fill-'+ssGroup);
+      const d2 = document.getElementById('ss-done-'+ssGroup);
+      const inB = r2 > t.restAfterB;
+      if (s2) { s2.textContent = r2; s2.style.color = r2<=0?'var(--green)':r2<=10?'var(--yellow)':inB?'var(--text2)':'var(--accent)'; }
+      if (f2) { f2.style.width=(t.total>0?r2/t.total*100:0)+'%'; f2.style.background=r2<=0?'var(--green)':inB?'var(--text3)':r2<=10?'var(--yellow)':'var(--accent)'; }
+      if (r2 <= 0) {
+        clearInterval(t.interval);
+        if (d2) d2.classList.add('show');
+        if (navigator.vibrate) navigator.vibrate([150,80,150]);
+        playBeep();
+        setTimeout(() => ssDismiss(ssGroup), 4000);
+      }
+    }, 500);
   });
 }
+
+function _resyncSSTimers() { _reattachSSTimers(); }
 
 // ═══════════════════════════════════════════════════════════════
 // CALENDAR OF SESSIONS
@@ -3157,18 +3246,24 @@ function renderCalendar() {
 
     if (isToday) cls += ' today';
 
-    if (!isFuture && dayData !== undefined) {
-      if (trainDay === 0 || trainDay === 4) {
-        cls += ' rest';
-        monthRest++;
-      } else if (trainDay > 0) {
-        // Check if they actually logged any sets
-        const hasSets = Object.keys(dayData).some(k => k.startsWith('trainSets_'));
-        if (hasSets) {
-          cls += ' trained ' + (DAY_COLORS[trainDay] || '');
-          title = 'D' + trainDay + ' — ' + (DAY_NAMES_SHORT[trainDay] || '');
-          monthTrained++;
+    if (!isFuture) {
+      if (dayData !== undefined) {
+        if (trainDay === 0 || trainDay === 4) {
+          cls += ' rest';
+          monthRest++;
+        } else if (trainDay > 0) {
+          const hasSets = Object.keys(dayData).some(k => k.startsWith('trainSets_'));
+          if (hasSets) {
+            cls += ' trained';
+            title = 'D' + trainDay + ' — ' + (DAY_NAMES_SHORT[trainDay] || '');
+            monthTrained++;
+          } else if (!isToday) {
+            cls += ' missed';
+          }
         }
+      } else if (!isToday) {
+        // Past day with no data at all — show as missed
+        cls += ' missed';
       }
     }
 
@@ -3296,7 +3391,25 @@ function dismissDeload() {
 
 
 // ─── START ───────────────────────────────────────────────────────
-init();
+async function bootstrap() {
+  state = await loadStateAsync();
+
+  // Limpiar días viejos (guardar solo últimos 30 días)
+  const allKeys = Object.keys(state).filter(k => k.match(/^\d{4}-\d{2}-\d{2}$/));
+  allKeys.sort();
+  if (allKeys.length > 30) {
+    allKeys.slice(0, allKeys.length - 30).forEach(k => delete state[k]);
+    saveState(state);
+  }
+
+  if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: getAutoTrainDay() };
+  if (!state.metricsHistory) state.metricsHistory = [];
+  if (!state.kcalHistory) state.kcalHistory = [];
+  if (!state.exerciseHistory) state.exerciseHistory = {};
+
+  init();
+}
+bootstrap();
 </script>
 </body>
 </html>
