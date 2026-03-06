@@ -2873,46 +2873,38 @@ function _scheduleTimerNotif(exName, secs) {
 let _audioCtx = null;
 let _audioUnlocked = false;
 
-// Beep corto en base64 (WAV 440hz generado, ~1KB)
+// Beep WAV embebido
 const BEEP_B64 = 'data:audio/wav;base64,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';
 
-function _makeBeepAudio() {
-  const a = new Audio(BEEP_B64);
-  a.volume = 1.0;
-  return a;
-}
+// Pool de 3 elementos pre-creados — se desbloquean con el primer tap
+const _audioPool = [new Audio(BEEP_B64), new Audio(BEEP_B64), new Audio(BEEP_B64)];
+_audioPool.forEach(a => { a.volume = 1.0; a.preload = 'auto'; });
 
-// Desbloquear audio con primer toque
 function _unlockAudio() {
   if (_audioUnlocked) return;
   _audioUnlocked = true;
-  // Reproducir silencio para desbloquear iOS
-  const a = new Audio(BEEP_B64);
-  a.volume = 0.01;
-  a.play().catch(() => {});
-  // También desbloquear AudioContext
-  try {
-    if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    if (_audioCtx.state === 'suspended') _audioCtx.resume();
-  } catch(e) {}
+  _audioPool.forEach((a, i) => {
+    setTimeout(() => {
+      a.volume = 0.001;
+      a.play().then(() => { a.pause(); a.currentTime = 0; a.volume = 1.0; }).catch(() => {});
+    }, i * 30);
+  });
 }
 document.addEventListener('touchstart', _unlockAudio, { capture: true, passive: true });
 document.addEventListener('touchend',   _unlockAudio, { capture: true, passive: true });
 document.addEventListener('click',      _unlockAudio, { capture: true, passive: true });
 
 function playBeep() {
-  // Método 1: Audio element (más confiable en iOS Safari)
-  try {
-    for (let i = 0; i < 3; i++) {
-      setTimeout(() => {
-        const a = _makeBeepAudio();
-        a.play().catch(() => {});
-      }, i * 250);
-    }
-    return;
-  } catch(e) {}
+  _audioPool.forEach((a, i) => {
+    setTimeout(() => {
+      a.currentTime = 0;
+      a.volume = 1.0;
+      a.play().catch(() => { _playBeepCtx(); });
+    }, i * 250);
+  });
+}
 
-  // Método 2: AudioContext fallback
+function _playBeepCtx() {
   try {
     if (!_audioCtx) _audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     const ctx = _audioCtx;
@@ -2932,7 +2924,7 @@ function playBeep() {
     };
     if (ctx.state === 'suspended') ctx.resume().then(doPlay);
     else doPlay();
-  } catch(e) { console.warn('playBeep error:', e); }
+  } catch(e) {}
 }
 
 // ── Service Worker inline (como blob, no necesita archivo externo) ─
