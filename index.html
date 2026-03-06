@@ -600,6 +600,7 @@ body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --re
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap">
           <button onclick="dbCheckAll()" style="background:#1a2a4a;color:#4d8aff;border:1px solid #4d8aff;padding:5px 10px;border-radius:6px;font-size:10px">🔍 Check todo</button>
           <button onclick="playBeep()" style="background:#1a2a4a;color:#4dffb4;border:1px solid #4dffb4;padding:5px 10px;border-radius:6px;font-size:10px">🔔 Test beep</button>
+          <button onclick="requestNotifPermission()" style="background:#1a2a4a;color:#ff9f4d;border:1px solid #ff9f4d;padding:5px 10px;border-radius:6px;font-size:10px">🔔 Activar notis</button>
           <button onclick="dbTestNotif()" style="background:#1a2a4a;color:#ffb84d;border:1px solid #ffb84d;padding:5px 10px;border-radius:6px;font-size:10px">📲 Test notif 5s</button>
           <button onclick="document.getElementById('debugPanel').remove()" style="background:#1a2a4a;color:#ff4444;border:1px solid #ff4444;padding:5px 10px;border-radius:6px;font-size:10px">✕ Cerrar</button>
         </div>
@@ -2942,18 +2943,19 @@ function _urlBase64ToUint8Array(base64String) {
 }
 
 async function _setupWebPush() {
-  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
-  if (Notification.permission !== 'granted') return;
-  if (!_swReg) return;
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) { dbLog('[Push] No soportado'); return; }
+  if (Notification.permission !== 'granted') { dbLog('[Push] Sin permiso'); return; }
+  if (!_swReg) { dbLog('[Push] Sin SW'); return; }
 
   try {
-    // Generar un ID de dispositivo persistente
+    // Generar ID persistente
     let deviceId = localStorage.getItem('_pushDeviceId');
     if (!deviceId) {
       deviceId = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
       localStorage.setItem('_pushDeviceId', deviceId);
     }
     _pushDeviceId = deviceId;
+    dbLog('[Push] deviceId: ' + deviceId.slice(0,12) + '...');
 
     // Suscribirse al push
     const sub = await _swReg.pushManager.subscribe({
@@ -2961,17 +2963,23 @@ async function _setupWebPush() {
       applicationServerKey: _urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
     });
     _pushSubscription = sub;
+    dbLog('[Push] Suscripción OK');
 
-    // Registrar la suscripción en el backend
-    const resp = await fetch(PUSH_BACKEND, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ action: 'subscribe', subscription: sub, deviceId })
-    });
-    const respData = await resp.json();
-    dbLog('[Push] Backend subscribe: ' + JSON.stringify(respData));
-    console.log('[Push] Suscripción registrada en backend');
+    // Registrar en backend (no crítico si falla)
+    try {
+      const resp = await fetch(PUSH_BACKEND, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'subscribe', subscription: sub, deviceId })
+      });
+      const respData = await resp.json();
+      dbLog('[Push] Backend: ' + JSON.stringify(respData));
+    } catch(e) {
+      dbLog('[Push] Backend no disponible: ' + e.message);
+      dbLog('[Push] Usando SW local como fallback');
+    }
   } catch(e) {
+    dbLog('[Push] Error subscribe: ' + e.message);
     console.warn('[Push] Error setup:', e);
   }
 }
@@ -2979,7 +2987,9 @@ async function _setupWebPush() {
 function requestNotifPermission() {
   if (!('Notification' in window)) return;
   if (Notification.permission === 'default') {
+    dbLog('[Notif] Pidiendo permiso...');
     Notification.requestPermission().then(perm => {
+      dbLog('[Notif] Permiso: ' + perm);
       if (perm === 'granted') {
         showToast('🔔 Notificaciones activadas');
         _setupWebPush();
@@ -2987,6 +2997,8 @@ function requestNotifPermission() {
     });
   } else if (Notification.permission === 'granted') {
     _setupWebPush();
+  } else {
+    dbLog('[Notif] Permiso denegado — activalo en Configuración');
   }
 }
 
