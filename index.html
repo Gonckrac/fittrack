@@ -2835,7 +2835,6 @@ let _rtRemaining = 0;
 let _rtTotal = 0;
 let _rtEndTime = 0; // absolute timestamp when timer ends
 let _wakeLock = null;
-let _notifTimeout = null;
 
 // ── Screen Wake Lock (mantiene pantalla activa mientras entrenás) ──
 async function _acquireWakeLock() {
@@ -2854,14 +2853,22 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// ── Notificación nativa cuando termina el timer ───────────────────
-// En iOS 16.4+ PWA funciona aunque la pantalla esté bloqueada
+// ── Notificación: mandar al SW al inicio del timer con el endTime ─
+// El SW espera internamente — funciona aunque iOS suspenda la página
 function _scheduleTimerNotif(exName, secs) {
-  clearTimeout(_notifTimeout);
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  _notifTimeout = setTimeout(() => {
-    sendNotif('⏱ ¡Descanso terminado!', exName + ' — listo para la próxima serie 💪');
-  }, secs * 1000);
+  if (!_swReg?.active || Notification.permission !== 'granted') return;
+  const endTime = Date.now() + secs * 1000;
+  _swReg.active.postMessage({
+    type: 'SCHEDULE_NOTIF',
+    title: '⏱ ¡Descanso terminado!',
+    body: exName + ' — listo para la próxima serie 💪',
+    endTime
+  });
+}
+
+function _cancelTimerNotif() {
+  if (!_swReg?.active) return;
+  _swReg.active.postMessage({ type: 'CANCEL_NOTIF' });
 }
 
 // ── Web Audio beep ────────────────────────────────────────────────
@@ -2931,20 +2938,53 @@ function _playBeepCtx() {
 let _swReg = null;
 
 const _swCode = `
-const CACHE_NAME = 'fittrack-v3';
+const CACHE_NAME = 'fittrack-v4';
 self.addEventListener('install', e => { self.skipWaiting(); });
 self.addEventListener('activate', e => { e.waitUntil(self.clients.claim()); });
+
 self.addEventListener('message', event => {
-  if (event.data && event.data.type === 'SHOW_NOTIF') {
-    const { title, body } = event.data;
+  const data = event.data;
+  if (!data) return;
+
+  // Mostrar notificación inmediata
+  if (data.type === 'SHOW_NOTIF') {
     event.waitUntil(
-      self.registration.showNotification(title, {
-        body, vibrate: [300,100,300,100,300],
-        requireInteraction: false, tag: 'fittrack-timer'
+      self.registration.showNotification(data.title, {
+        body: data.body,
+        vibrate: [300,100,300,100,300],
+        requireInteraction: false,
+        tag: 'fittrack-timer'
       })
     );
   }
+
+  // Programar notificación futura: el SW espera hasta endTime
+  // Esto funciona aunque la página esté suspendida por iOS
+  if (data.type === 'SCHEDULE_NOTIF') {
+    const { title, body, endTime } = data;
+    const delay = Math.max(0, endTime - Date.now());
+    event.waitUntil(
+      new Promise(resolve => setTimeout(resolve, delay)).then(() =>
+        self.registration.showNotification(title, {
+          body,
+          vibrate: [300,100,300,100,300],
+          requireInteraction: true,
+          tag: 'fittrack-timer',
+          silent: false
+        })
+      )
+    );
+  }
+
+  // Cancelar notificación programada (timer descartado manualmente)
+  if (data.type === 'CANCEL_NOTIF') {
+    event.waitUntil(
+      self.registration.getNotifications({ tag: 'fittrack-timer' })
+        .then(notifs => notifs.forEach(n => n.close()))
+    );
+  }
 });
+
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(clients.matchAll({ type:'window' }).then(list => {
@@ -3192,7 +3232,7 @@ function _updateRtDisplay() {
 }
 
 function _rtFinished() {
-  clearTimeout(_notifTimeout); // ya terminó en primer plano, cancelar notif pendiente
+  _cancelTimerNotif(); // terminó en primer plano, cancelar notif del SW
   document.getElementById('rtDone').classList.add('show');
   document.getElementById('rtSecs').textContent = '0';
   _rtEndTime = 0;
@@ -3221,7 +3261,7 @@ function addRestTime(extra) {
 
 function dismissRestTimer() {
   clearInterval(_rtInterval);
-  clearTimeout(_notifTimeout);
+  _cancelTimerNotif();
   _rtEndTime = 0;
   if (_wakeLock) { _wakeLock.release().catch(()=>{}); _wakeLock = null; }
   document.getElementById('restTimerOverlay').classList.remove('active');
