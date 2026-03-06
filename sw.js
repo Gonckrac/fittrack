@@ -8,7 +8,7 @@ self.addEventListener('install', event => {
   self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(['./index38.html']).catch(() => {});
+      return cache.addAll(['./index.html']).catch(() => {});
     })
   );
 });
@@ -53,7 +53,7 @@ self.addEventListener('notificationclick', event => {
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
       if (list.length > 0) return list[0].focus();
-      return clients.openWindow('./index38.html');
+      return clients.openWindow('./index.html');
     })
   );
 });
