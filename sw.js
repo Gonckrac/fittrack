@@ -10,6 +10,22 @@ self.addEventListener('fetch', event => {
   );
 });
 
+// Recibir push del backend (esto funciona con pantalla bloqueada)
+self.addEventListener('push', event => {
+  let data = { title: '⏱ FitTrack', body: '¡Descanso terminado!' };
+  try { data = event.data.json(); } catch(e) {}
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      vibrate: [300, 100, 300, 100, 300],
+      requireInteraction: true,
+      tag: 'fittrack-timer',
+      silent: false
+    })
+  );
+});
+
+// Mensajes desde la página (fallback local)
 self.addEventListener('message', event => {
   const data = event.data;
   if (!data) return;
@@ -25,18 +41,14 @@ self.addEventListener('message', event => {
     );
   }
 
-  // SW espera hasta endTime y muestra la notif — funciona con pantalla bloqueada
   if (data.type === 'SCHEDULE_NOTIF') {
     const { title, body, endTime } = data;
     const delay = Math.max(0, endTime - Date.now());
     event.waitUntil(
       new Promise(resolve => setTimeout(resolve, delay)).then(() =>
         self.registration.showNotification(title, {
-          body,
-          vibrate: [300,100,300,100,300],
-          requireInteraction: true,
-          tag: 'fittrack-timer',
-          silent: false
+          body, vibrate: [300,100,300,100,300],
+          requireInteraction: true, tag: 'fittrack-timer'
         })
       )
     );
