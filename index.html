@@ -2853,26 +2853,114 @@ document.addEventListener('visibilitychange', () => {
   }
 });
 
-// ── Notificación: mandar al SW al inicio del timer con el endTime ─
-// El SW espera internamente — funciona aunque iOS suspenda la página
+// ── Web Push via backend ──────────────────────────────────────────
+const PUSH_BACKEND = 'https://fittrack-backend-mu.vercel.app/api/push';
+const VAPID_PUBLIC_KEY = 'BIsiYTfFdRxd4uIGHF063WZX0qBzuN9a9x96m0Kecv3Y0URKdeUuaR5w8j1gu3ADdZaeLMqoRXHsfaNuKkYYnxs';
+
+let _pushSubscription = null;
+let _pushDeviceId = null;
+
+function _urlBase64ToUint8Array(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = atob(base64);
+  return Uint8Array.from([...rawData].map(c => c.charCodeAt(0)));
+}
+
+async function _setupWebPush() {
+  if (!('Notification' in window) || !('serviceWorker' in navigator)) return;
+  if (Notification.permission !== 'granted') return;
+  if (!_swReg) return;
+
+  try {
+    // Generar un ID de dispositivo persistente
+    let deviceId = localStorage.getItem('_pushDeviceId');
+    if (!deviceId) {
+      deviceId = 'dev_' + Math.random().toString(36).slice(2) + Date.now().toString(36);
+      localStorage.setItem('_pushDeviceId', deviceId);
+    }
+    _pushDeviceId = deviceId;
+
+    // Suscribirse al push
+    const sub = await _swReg.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: _urlBase64ToUint8Array(VAPID_PUBLIC_KEY)
+    });
+    _pushSubscription = sub;
+
+    // Registrar la suscripción en el backend
+    await fetch(PUSH_BACKEND, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'subscribe', subscription: sub, deviceId })
+    });
+    console.log('[Push] Suscripción registrada en backend');
+  } catch(e) {
+    console.warn('[Push] Error setup:', e);
+  }
+}
+
+function requestNotifPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') {
+        showToast('🔔 Notificaciones activadas');
+        _setupWebPush();
+      }
+    });
+  } else if (Notification.permission === 'granted') {
+    _setupWebPush();
+  }
+}
+
+// Programar notif via backend — funciona con pantalla bloqueada
 function _scheduleTimerNotif(exName, secs) {
-  if (!_swReg?.active || Notification.permission !== 'granted') return;
-  const endTime = Date.now() + secs * 1000;
-  _swReg.active.postMessage({
-    type: 'SCHEDULE_NOTIF',
-    title: '⏱ ¡Descanso terminado!',
-    body: exName + ' — listo para la próxima serie 💪',
-    endTime
-  });
+  if (!_pushDeviceId || !_pushSubscription) {
+    // Fallback al SW local si no hay push backend
+    if (_swReg?.active) {
+      const endTime = Date.now() + secs * 1000;
+      _swReg.active.postMessage({
+        type: 'SCHEDULE_NOTIF',
+        title: '⏱ ¡Descanso terminado!',
+        body: exName + ' — listo para la próxima serie 💪',
+        endTime
+      });
+    }
+    return;
+  }
+  fetch(PUSH_BACKEND, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      action: 'schedule',
+      deviceId: _pushDeviceId,
+      title: '⏱ ¡Descanso terminado!',
+      body: exName + ' — listo para la próxima serie 💪',
+      delayMs: secs * 1000
+    })
+  }).catch(() => {});
 }
 
 function _cancelTimerNotif() {
-  if (!_swReg?.active) return;
-  _swReg.active.postMessage({ type: 'CANCEL_NOTIF' });
+  // SW local
+  if (_swReg?.active) _swReg.active.postMessage({ type: 'CANCEL_NOTIF' });
+  // Backend (best effort — la notif puede llegar igual si ya fue programada)
+  if (_pushDeviceId) {
+    fetch(PUSH_BACKEND, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'cancel', deviceId: _pushDeviceId })
+    }).catch(() => {});
+  }
 }
 
-// ── Web Audio beep ────────────────────────────────────────────────
-// ── Audio: sistema híbrido para iOS Safari ────────────────────────
+function sendNotif(title, body) {
+  if (_swReg && _swReg.active && Notification.permission === 'granted') {
+    _swReg.active.postMessage({ type: 'SHOW_NOTIF', title, body });
+  }
+}
+
 // iOS bloquea AudioContext hasta que haya un tap del usuario.
 // Usamos un <audio> con un beep en base64 como método principal,
 // y AudioContext como secundario.
@@ -3007,23 +3095,6 @@ if ('serviceWorker' in navigator) {
     });
 }
 
-function requestNotifPermission() {
-  if ('Notification' in window && Notification.permission === 'default') {
-    Notification.requestPermission().then(perm => {
-      if (perm === 'granted') showToast('🔔 Notificaciones activadas');
-    });
-  }
-}
-
-function sendNotif(title, body) {
-  if (_swReg && _swReg.active && Notification.permission === 'granted') {
-    _swReg.active.postMessage({ type: 'SHOW_NOTIF', title, body });
-    return;
-  }
-  if ('Notification' in window && Notification.permission === 'granted') {
-    try { new Notification(title, { body }); } catch(e) {}
-  }
-}
 
 // ── Resync timers when page becomes visible again ─────────────────
 document.addEventListener('visibilitychange', () => {
