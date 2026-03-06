@@ -5,6 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="FitTrack">
+<meta name="theme-color" content="#05080f">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png">
 <title>FitTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -1429,6 +1433,8 @@ function init() {
   renderCalendar();
   checkDeloadWeek();
   syncOura();
+  // Pedir permiso de notificaciones para que funcione con pantalla bloqueada
+  setTimeout(requestNotifPermission, 2000);
 }
 
 function updateHeader() {
@@ -2827,6 +2833,35 @@ let _rtInterval = null;
 let _rtRemaining = 0;
 let _rtTotal = 0;
 let _rtEndTime = 0; // absolute timestamp when timer ends
+let _wakeLock = null;
+let _notifTimeout = null;
+
+// ── Screen Wake Lock (mantiene pantalla activa mientras entrenás) ──
+async function _acquireWakeLock() {
+  try {
+    if ('wakeLock' in navigator) {
+      if (_wakeLock) _wakeLock.release().catch(()=>{});
+      _wakeLock = await navigator.wakeLock.request('screen');
+      _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+    }
+  } catch(e) {}
+}
+// Re-acquire wake lock when tab becomes visible (iOS libera el lock al ir a background)
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && _rtEndTime > Date.now()) {
+    _acquireWakeLock();
+  }
+});
+
+// ── Notificación nativa cuando termina el timer ───────────────────
+// En iOS 16.4+ PWA funciona aunque la pantalla esté bloqueada
+function _scheduleTimerNotif(exName, secs) {
+  clearTimeout(_notifTimeout);
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  _notifTimeout = setTimeout(() => {
+    sendNotif('⏱ ¡Descanso terminado!', exName + ' — listo para la próxima serie 💪');
+  }, secs * 1000);
+}
 
 // ── Web Audio beep ────────────────────────────────────────────────
 function playBeep() {
@@ -2848,10 +2883,59 @@ function playBeep() {
   } catch(e) {}
 }
 
+// ── Service Worker + Notificaciones ──────────────────────────────
+let _swReg = null;
+
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').then(reg => {
+    _swReg = reg;
+    console.log('[FitTrack] SW registrado');
+  }).catch(e => console.warn('[FitTrack] SW error:', e));
+}
+
+function requestNotifPermission() {
+  if ('Notification' in window && Notification.permission === 'default') {
+    Notification.requestPermission().then(perm => {
+      if (perm === 'granted') showToast('🔔 Notificaciones activadas — la alarma sonará aunque la pantalla esté apagada');
+    });
+  }
+}
+
+function sendNotif(title, body) {
+  // Opción 1: vía Service Worker (más confiable en iOS PWA)
+  if (_swReg && Notification.permission === 'granted') {
+    _swReg.active?.postMessage({ type: 'SHOW_NOTIF', title, body });
+    return;
+  }
+  // Opción 2: Notification directa
+  if ('Notification' in window && Notification.permission === 'granted') {
+    try { new Notification(title, { body, silent: false }); } catch(e) {}
+  }
+}
+
 // ── Resync timers when page becomes visible again ─────────────────
 document.addEventListener('visibilitychange', () => {
   if (document.visibilityState === 'visible') {
-    _resyncRtTimer();
+    // Rest timer: check if it expired while screen was off
+    if (_rtEndTime && _rtEndTime > 0) {
+      const remaining = Math.round((_rtEndTime - Date.now()) / 1000);
+      if (remaining <= 0) {
+        // Timer already finished while screen was off — fire alarm now
+        clearInterval(_rtInterval);
+        _rtEndTime = 0;
+        _rtRemaining = 0;
+        _updateRtDisplay();
+        if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
+        playBeep();
+        const doneEl = document.getElementById('rtDone');
+        if (doneEl) doneEl.classList.add('show');
+        const overlay = document.getElementById('restTimerOverlay');
+        if (overlay) overlay.classList.add('active');
+        setTimeout(() => dismissRestTimer(), 4000);
+      } else {
+        _resyncRtTimer();
+      }
+    }
     _resyncSSTimers();
   }
 });
@@ -2982,6 +3066,12 @@ function startRestTimer(ex, completedSets, setIdx) {
   document.getElementById('rtDone').classList.remove('show');
   overlay.classList.add('active');
 
+  // Intentar mantener pantalla activa (Screen Wake Lock API)
+  _acquireWakeLock();
+
+  // Notificación nativa programada (funciona en iOS 16.4+ PWA con permiso)
+  _scheduleTimerNotif(ex.name, secs);
+
   _updateRtDisplay();
   clearInterval(_rtInterval);
   _rtInterval = setInterval(() => {
@@ -3026,11 +3116,12 @@ function _updateRtDisplay() {
 }
 
 function _rtFinished() {
+  clearTimeout(_notifTimeout); // ya terminó en primer plano, cancelar notif pendiente
   document.getElementById('rtDone').classList.add('show');
   document.getElementById('rtSecs').textContent = '0';
   _rtEndTime = 0;
   // Vibrate + beep
-  if (navigator.vibrate) navigator.vibrate([200, 100, 200]);
+  if (navigator.vibrate) navigator.vibrate([300, 100, 300, 100, 300]);
   playBeep();
   // Auto dismiss after 3s
   setTimeout(() => dismissRestTimer(), 3000);
@@ -3054,7 +3145,9 @@ function addRestTime(extra) {
 
 function dismissRestTimer() {
   clearInterval(_rtInterval);
+  clearTimeout(_notifTimeout);
   _rtEndTime = 0;
+  if (_wakeLock) { _wakeLock.release().catch(()=>{}); _wakeLock = null; }
   document.getElementById('restTimerOverlay').classList.remove('active');
 }
 
