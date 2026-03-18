@@ -1,0 +1,1707 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+ <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="FitTrack">
+  <meta name="theme-color" content="#05080f">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <title>FitTrack</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <!-- Styles -->
+  <link rel="stylesheet" href="/src/styles/base.css">
+  <link rel="stylesheet" href="/src/styles/layout.css">
+  <link rel="stylesheet" href="/src/styles/components.css">
+  <link rel="stylesheet" href="/src/styles/pages.css">
+ <link rel="stylesheet" href="/src/styles/themes.css">
+  <link rel="stylesheet" href="/src/styles/widgets.css"><script>
+    // Detectar PWA standalone y agregar clase al html
+    (function(){
+      if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
+        document.documentElement.classList.add('pwa-standalone');
+      }
+    })();
+    // Aplicar layout y fuente ANTES de pintar — evita flash y afecta setup wizard
+    (function(){
+      var layout = localStorage.getItem('fittrack_layout') || 'terra'; // terra es el tema por defecto
+var font     = localStorage.getItem('fittrack_font')     || 'default';
+var textScale = localStorage.getItem('fittrack_textscale') || 'normal';      if (layout === 'linen') document.documentElement.classList.add('layout-linen');
+      if (layout === 'terra') document.documentElement.classList.add('layout-terra');
+      if (font !== 'default') document.documentElement.classList.add('font-' + font);
+var _tsZoom = textScale === 'muy-grande' ? 1.4 : textScale === 'grande' ? 1.2 : 1.0;
+if (_tsZoom !== 1.0) {
+        document.addEventListener('DOMContentLoaded', function() {
+          var app = document.getElementById('mainApp');
+          var setup = document.getElementById('setupOverlay');
+          if (app) app.style.zoom = _tsZoom;
+          if (setup) setup.style.zoom = _tsZoom;
+        });
+      } 
+})();
+  </script>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     SETUP WIZARD (from mama) — shown on first launch
+═══════════════════════════════════════════════════════ -->
+<div id="setupOverlay" style="display:none">
+  <div class="setup-inner" style="display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)">
+    <!-- INTRO — visible solo antes de arrancar el wizard -->
+    <div id="setupIntro" style="text-align:center;padding:20px 0 10px">
+      <div style="font-size:56px;margin-bottom:16px">💪</div>
+      <div style="font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--accent);margin-bottom:10px">FitTrack</div>
+      <div style="font-size:14px;color:var(--text);font-weight:600;margin-bottom:8px">Tu compañero de entrenamiento y nutrición</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:24px">
+        Registrá tu comida, tu entrenamiento y tu progreso<br>en un solo lugar — simple y rápido.
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;text-align:left;background:var(--bg3);border-radius:14px;padding:16px;margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">🍽</span><span style="font-size:13px;color:var(--text2)">Calculamos tus macros y calorías automáticamente</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">💪</span><span style="font-size:13px;color:var(--text2)">Seguí tu rutina de entrenamiento día a día</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">📈</span><span style="font-size:13px;color:var(--text2)">Mirá tu progreso de peso y consistencia en el tiempo</span></div>
+        <div style="display:flex;align-items:center;gap:12px"><span style="font-size:20px">🤖</span><span style="font-size:13px;color:var(--text2)">IA que calcula los macros de lo que comés con solo describirlo</span></div>
+      </div>
+<button class="btn btn-primary" style="width:100%;font-size:15px;padding:14px" onclick="document.getElementById('setupIntro').style.display='none';document.getElementById('setupWizardContent').style.cssText='display:flex;flex:1;min-height:0;flex-direction:column;overflow:hidden'">Empezar configuración →</button>    </div>
+
+    <!-- WIZARD CONTENT — oculto hasta que el usuario toca "Empezar" -->
+<!-- WIZARD CONTENT — oculto hasta que el usuario toca "Empezar" -->
+<div id="setupWizardContent" style="display:none;flex:1;min-height:0;flex-direction:column;overflow:hidden">
+    <div class="setup-hero">
+      <div class="setup-hero-logo">💪 FitTrack</div>
+      <div class="setup-hero-sub">Configuremos tu app en pocos pasos.<br>Solo lo hacés una vez.</div>
+    </div>
+    <div class="setup-steps" id="setupDots"></div>
+
+    <!-- PASO 0: Objetivo principal -->
+    <div class="setup-page active" id="sp-0">
+      <div class="setup-label">¿Cuál es tu objetivo? 🎯</div>
+      <div class="setup-hint">Elegí y personalizamos tu plan de calorías, macros y déficit automáticamente.</div>
+      <div id="goalGrid" style="display:flex;flex-direction:column;gap:10px;margin-top:8px"></div>
+    </div>
+
+    <!-- PASO 1: Colores — hidden, moved to settings -->
+    <div class="setup-page" id="sp-1" style="display:none!important"></div>
+
+    <!-- PASO 1: Nombre + plan nutricional -->
+    <div class="setup-page" id="sp-2">
+      <div class="setup-label">¡Hola! Contame un poco de vos</div>
+      <div class="setup-hint">Con estos datos calculamos tu plan de alimentación personalizado.</div>
+      <div class="setup-field"><label>Tu nombre</label><input class="inp" id="cfgName" placeholder="Ej: Gonza" type="text"></div>
+      <div class="inp-row">
+        <div class="setup-field"><label>Edad</label><input class="inp" id="cfgAge" placeholder="25" type="number" min="15" max="90" oninput="calcPlanLive()"></div>
+ <div class="setup-field"><label>Peso (kg)</label><input class="inp" id="cfgWeight" placeholder="80" type="number" step="0.1" inputmode="decimal" oninput="calcPlanLive()"></div>
+        <div class="setup-field"><label>Altura (cm)</label><input class="inp" id="cfgHeight" placeholder="175" type="number" inputmode="numeric" oninput="calcPlanLive()"></div>
+      </div>
+      <div class="setup-field">
+        <label>Nivel de actividad</label>
+        <div class="activity-opts" id="activityOpts">
+          <div class="activity-opt" data-factor="1.2" onclick="selectActivityOpt(this)"><div class="activity-opt-title">🛋 Sedentario</div><div class="activity-opt-sub">Trabajo de oficina, poco o nada de ejercicio</div></div>
+          <div class="activity-opt" data-factor="1.375" onclick="selectActivityOpt(this)"><div class="activity-opt-title">🚶 Ligeramente activo</div><div class="activity-opt-sub">Caminatas, ejercicio 1-3 días por semana</div></div>
+          <div class="activity-opt selected" data-factor="1.55" onclick="selectActivityOpt(this)"><div class="activity-opt-title">🏃 Moderadamente activo</div><div class="activity-opt-sub">Gym o cardio 3-5 días por semana</div></div>
+          <div class="activity-opt" data-factor="1.725" onclick="selectActivityOpt(this)"><div class="activity-opt-title">💪 Muy activo</div><div class="activity-opt-sub">Ejercicio intenso 6-7 días por semana</div></div>
+        </div>
+      </div>
+      <div id="planResult"></div>
+    </div>
+
+    <!-- PASO 2: Rutina de entrenamiento -->
+    <div class="setup-page" id="sp-3">
+      <!-- SUB-STEP A: Elegir método -->
+      <div id="sp3-choose">
+        <div class="setup-label">Tu rutina de entrenamiento</div>
+        <div class="setup-hint" style="margin-bottom:20px">¿Cómo querés armar tu rutina?</div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <button onclick="sp3SelectMode('manual')" style="text-align:left;padding:16px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;width:100%">
+            <div style="font-size:22px;margin-bottom:6px">✏️</div>
+            <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:4px">Crear mi propia rutina</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5">Agregá tus días y ejercicios manualmente. Ideal si ya sabés lo que hacés en el gym.</div>
+          </button>
+<button onclick="sp3SelectMode('ai')" style="text-align:left;padding:16px;border-radius:12px;border:1.5px solid var(--accent);background:var(--accent-bg,rgba(77,138,255,0.08));cursor:pointer;width:100%">            <div style="font-size:22px;margin-bottom:6px">🤖</div>
+            <div style="font-weight:700;font-size:14px;color:var(--accent);margin-bottom:4px">Generar rutina con IA</div>
+            <div style="font-size:12px;color:var(--text3);line-height:1.5">El sistema crea una rutina personalizada basada en evidencia científica según tus músculos, días disponibles y objetivo. Al terminar, tocá <strong>"Aplicar rutina"</strong> y continuarás automáticamente.</div>
+          </button>
+          <button onclick="sp3SelectMode('skip')" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;padding:8px;text-decoration:underline;text-align:center;width:100%">
+            Saltar este paso →
+          </button>
+        </div>
+      </div>
+      <!-- SUB-STEP B: Builder manual -->
+<!-- SUB-STEP B: Builder manual -->
+      <div id="sp3-manual" style="display:none"></div>
+    </div>
+
+    <!-- PASO 3: Ciclo semanal -->
+    <div class="setup-page" id="sp-4">
+      <div id="sp4-content"></div>
+    </div>
+
+    <!-- PASO 4: Suplementos -->
+    <div class="setup-page" id="sp-5">
+      <div class="setup-label">Tus suplementos</div>
+      <div class="setup-hint">Agregá los que tomás con su dosis y horario. Podés saltear este paso.</div>
+      <div class="supp-builder" id="suppBuilder"></div>
+      <button class="add-supp-btn" style="width:100%" onclick="addSuppRow()">+ Agregar suplemento</button>
+    </div>
+
+    <!-- PASO 5: ¡Listo! -->
+    <div class="setup-page" id="sp-6">
+      <div style="text-align:center;padding:20px 0">
+        <div style="font-size:60px;margin-bottom:16px">🎉</div>
+        <div class="setup-label" style="text-align:center">¡Todo listo!</div>
+        <div class="setup-hint" style="text-align:center" id="setupReadySub">Tu app está configurada. Podés empezar a trackear hoy mismo.</div>
+        <div style="background:var(--bg3);border:1px solid var(--border);border-radius:var(--radius);padding:16px;margin-top:20px;text-align:left" id="setupSummary"></div>
+      </div>
+    </div>
+
+<div class="setup-nav" id="setupNav" style="flex-shrink:0;display:flex;gap:10px;padding:16px 20px;padding-bottom:16px;border-top:1px solid var(--border);position:sticky;bottom:0;z-index:10">   <button class="btn btn-ghost" id="setupBack" onclick="setupPrev()" style="display:none;flex:1">← Atrás</button>
+      <button class="btn btn-primary" id="setupNext" onclick="setupNext()" style="flex:1">Continuar →</button>
+    </div>
+    </div><!-- /setupWizardContent -->
+  </div>
+</div>
+
+<div class="app" id="mainApp" style="display:none">
+  <!-- PR POPUP (Feature 3) -->
+  <div id="prPopup" class="pr-popup">
+    <div class="pr-popup-trophy">🏆</div>
+    <div class="pr-popup-title">NUEVO RÉCORD</div>
+    <div class="pr-popup-main" id="prPopupMain"></div>
+    <div class="pr-popup-type" id="prPopupType"></div>
+  </div>
+
+  <!-- REST TIMER OVERLAY -->
+<!-- REST TIMER OVERLAY — desactivado, el timer vive en el banner -->
+<div id="restTimerOverlay" class="rest-timer-overlay" style="display:none!important">    <div class="rest-timer-box">
+      <div class="rest-timer-exname" id="rtExName"></div>
+      <div class="rest-timer-label" id="rtLabel"></div>
+      <div class="rest-timer-done" id="rtDone">✅ ¡Listo para la próxima serie!</div>
+      <div class="rest-timer-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bg4)" stroke-width="10"/>
+          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--accent)" stroke-width="10"
+            stroke-dasharray="427" stroke-dashoffset="0" stroke-linecap="round" id="rtRingFill"/>
+        </svg>
+        <div class="rest-timer-num">
+          <div class="rest-timer-secs" id="rtSecs" style="color:var(--accent)">90</div>
+          <div class="rest-timer-unit">seg</div>
+        </div>
+      </div>
+      <div class="rest-timer-reason" id="rtReason"></div>
+      <div class="rest-timer-btns">
+        <button class="rest-timer-btn add" onclick="addRestTime(30)">+30s</button>
+        <button class="rest-timer-btn add" onclick="playBeep()" style="background:rgba(77,255,180,0.1);color:var(--green);border-color:rgba(77,255,180,0.3)">🔔 Test</button>
+        <button class="rest-timer-btn skip" onclick="dismissRestTimer()">Saltar ✕</button>
+      </div>
+    </div>
+  </div>
+  <!-- HEADER -->
+  <div class="header">
+    <div>
+      <div class="header-title">FitTrack</div>
+      <div style="display:flex;align-items:center;gap:6px;margin-top:2px">
+        <div class="header-date" id="headerDate"></div>
+      </div>
+    </div>
+    <div class="header-right">
+      <div class="day-badge" id="dayBadge" style="display:none">DIA 1</div>
+<button class="settings-btn" onclick="openNotificationsPanel()" style="margin-right:4px;font-size:18px">🔔</button><button class="settings-btn" onclick="openWidgetPreview()" style="font-size:17px">🧩</button>
+      <button class="settings-btn" onclick="openSettings()">⚙</button></div>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+<button class="tab active" id="tab-hoy"          onclick="showPage('home',this)"><span class="tab-icon">🏠</span>Hoy</button>
+    <button class="tab"        id="tab-nutricion"     onclick="showPage('nutricion',this)"><span class="tab-icon">🍽</span>Nutrición</button>
+    <button class="tab"        id="tab-training"      onclick="showPage('training',this)"><span class="tab-icon">💪</span>Entreno</button>
+<button class="tab"        id="tab-recuperacion"  onclick="showPage('recuperacion',this)"><span class="tab-icon">😴</span>Recup.</button>    <button class="tab"        id="tab-progreso"      onclick="showPage('progreso',this)"><span class="tab-icon">📈</span>Progreso</button>
+    <div style="flex-shrink:0;width:env(safe-area-inset-right)"></div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ═══ HOME PAGE ═══ -->
+    <div class="page active" id="page-home">
+      <!-- Daily motivation card — eliminada por decisión de producto -->
+      <div class="daily-motiv-card" style="display:none"><div id="dailyMotivEmoji" style="font-size:36px;flex-shrink:0">💪</div><div><div id="dailyMotivTitle" style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px"></div><div id="dailyMotivMsg" style="font-size:12px;color:var(--text2);line-height:1.5"></div></div></div>
+      <div style="padding-top:0">
+        <div style="text-align:center;margin-bottom:8px">
+          <div style="font-size:28px;font-weight:700;color:var(--accent);letter-spacing:-0.5px">📊 RESUMEN DEL DÍA</div>
+        </div>
+        
+        <div class="card">
+          <div class="day-score-circle" onclick="openScoreBreakdown()" style="cursor:pointer" title="Ver desglose del score">
+            <svg width="180" height="180" viewBox="0 0 180 180">
+              <circle cx="90" cy="90" r="75" fill="none" stroke="var(--bg4)" stroke-width="10"/>
+              <circle cx="90" cy="90" r="75" fill="none" stroke="var(--accent)" stroke-width="10"
+                stroke-dasharray="471" id="dayScoreDash" stroke-dashoffset="471" stroke-linecap="round"/>
+            </svg>
+            <div class="day-score-num">
+ <span id="dayScore">—</span>
+              <span class="day-score-unit">/100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="day-metrics">
+          <div class="day-metric-item" data-nav="macros">
+            <div class="day-metric-icon">🍽</div>
+            <div class="day-metric-val" id="dayMacroScore">—</div>
+<div class="day-metric-lbl">Nutrición</div>            <div class="day-metric-status" id="dayMacroStatus"></div>
+          </div>
+          <div class="day-metric-item" data-nav="training">
+            <div class="day-metric-icon">💪</div>
+            <div class="day-metric-val" id="dayTrainScore">—</div>
+            <div class="day-metric-lbl">Entreno</div>
+            <div class="day-metric-status" id="dayTrainStatus"></div>
+          </div>
+          <div class="day-metric-item" data-nav="recuperacion">
+            <div class="day-metric-icon">🌙</div>
+            <div class="day-metric-val" id="daySleepScore">—</div>
+            <div class="day-metric-lbl">Sueño</div>
+            <div class="day-metric-status" id="daySleepStatus"></div>
+          </div>
+<div class="day-metric-item" id="homeSuppCard" data-nav="supps">
+            <div class="day-metric-icon">💊</div>
+            <div class="day-metric-val" id="daySuppScore">—</div>
+            <div class="day-metric-lbl">Suplementos</div>
+            <div class="day-metric-status" id="daySuppStatus"></div>
+          </div>
+ <div class="day-metric-item" id="dayKcalCard" data-nav="nutricion" style="display:none">
+            <div class="day-metric-icon">🔥</div>
+            <div class="day-metric-val" id="dayKcalScore">—</div>
+            <div class="day-metric-lbl">Balance</div>
+            <div class="day-metric-status" id="dayKcalStatus"></div>
+          </div>
+          <div class="day-metric-item" id="homeSuppCardPlaceholder" style="display:none">
+          </div>
+<div class="day-metric-item" data-nav="recuperacion">           <div class="day-metric-icon">💧</div>
+            <div class="day-metric-val" id="dayWaterScore">—</div>
+            <div class="day-metric-lbl">Agua</div>
+            <div class="day-metric-status" id="dayWaterStatus"></div>
+          </div>
+          <div class="day-metric-item" id="homeWeightCard" onclick="showPage('progreso')" style="cursor:pointer">
+            <div class="day-metric-icon">⚖️</div>
+            <div class="day-metric-val" id="homeWeightVal" style="font-size:13px">—</div>
+            <div class="day-metric-lbl">Peso</div>
+            <div class="day-metric-status" id="homeWeightStatus"></div>
+          </div>
+          <div class="day-metric-item" id="homeStepsCard" data-nav="home" style="display:none">
+            <div class="day-metric-icon">🚶</div>
+            <div class="day-metric-val" id="dayStepsScore" style="font-size:13px">—</div>
+            <div class="day-metric-lbl">Pasos</div>
+            <div class="day-metric-status" id="dayStepsStatus"></div>
+          </div>
+        </div>
+
+        <!-- PREDICCIÓN DEL DÍA -->
+        <div id="dayPrediction" style="margin-top:12px"></div>
+
+        <!-- Tips hidden - kept for JS compat -->
+        <div id="homeTipsContainer"></div>
+      </div>
+    </div>
+
+    <!-- ═══ NUTRICIÓN PAGE (Comida + Kcal con sub-tabs) ═══ -->
+    <div class="page" id="page-nutricion">
+      <!-- Sub-tabs -->
+      <div class="v15-subtabs" id="nutricionSubtabs">
+        <button class="v15-subtab active" id="subtab-comida" onclick="switchSubtab('nutricion','comida',this)">🍽 Comida</button>
+        <button class="v15-subtab" id="subtab-balance" onclick="switchSubtab('nutricion','balance',this)">🔥 Balance Kcal</button>
+        <button class="v15-subtab" id="subtab-plan" onclick="switchSubtab('nutricion','plan',this)">🗓 Plan</button>
+      </div>
+      <!-- Subpage: Comida (contenido original de page-macros) -->
+      <div class="v15-subpage active" id="sub-nutricion-comida">
+
+    <!-- ═══ MACROS PAGE (ahora sub-página) ═══ -->
+    <div id="page-macros">
+      <!-- COMIDAS FRECUENTES: visible directo en la pantalla -->
+      <div id="quickFoodsSection" style="margin-bottom:12px;display:none">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">⚡ Tus comidas habituales</div>
+        <div id="quickFoodsList" style="display:flex;flex-wrap:wrap;gap:6px"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-title"><span>📈</span> Resumen del dia</div>
+        <div class="macro-overview">
+          <div class="macro-stat">
+            <div class="macro-val prot-color" id="totalProt">0</div>
+            <div class="macro-label">Proteina</div>
+            <div class="macro-sub" id="targetProtLbl">/ 190g</div>
+          </div>
+          <div class="macro-stat">
+            <div class="macro-val carb-color" id="totalCarb">0</div>
+            <div class="macro-label">Carbos</div>
+            <div class="macro-sub" id="targetCarbLbl">/ 240g</div>
+          </div>
+          <div class="macro-stat">
+            <div class="macro-val fat-color" id="totalFat">0</div>
+            <div class="macro-label">Grasas</div>
+            <div class="macro-sub" id="targetFatLbl">/ 70g</div>
+          </div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-header"><span class="prog-label">Proteina</span><span class="prog-val" id="protPct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill prot" id="protBar" style="width:0%"></div></div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-header"><span class="prog-label">Carbos</span><span class="prog-val" id="carbPct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill carb" id="carbBar" style="width:0%"></div></div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-header"><span class="prog-label">Grasas</span><span class="prog-val" id="fatPct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill fat" id="fatBar" style="width:0%"></div></div>
+        </div>
+        <div class="prog-row">
+          <div class="prog-header"><span class="prog-label">Calorias</span><span class="prog-val" id="kcalPct">0 / 2400</span></div>
+          <div class="prog-bar"><div class="prog-fill kcal" id="kcalBar" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <!-- MEALS -->
+      <div id="mealsContainer"></div>
+
+      <!-- IA como acción primaria -->
+      <button class="btn btn-primary" style="width:100%;margin-top:8px;font-size:15px;padding:13px;display:flex;align-items:center;justify-content:center;gap:8px" onclick="openAIChat()">
+        <span style="font-size:18px">✨</span>
+        <span>Describí lo que comiste — la IA calcula los macros</span>
+      </button>
+      <div style="display:flex;gap:8px;margin-top:8px">
+        <button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAddFood()">+ Manual</button>
+<button class="btn btn-ghost" style="flex:0 0 auto;font-size:12px;border-color:var(--accent);color:var(--accent)" onclick="openBarcodeScanner()" title="Escanear código de barras">📷 Scanner</button>        <button class="btn btn-ghost" style="flex:1;font-size:12px;border-color:var(--green);color:var(--green)" onclick="openFoodSuggest()">🥗 Sugerencias</button>
+      </div>
+    </div>
+
+    <!-- ═══ CALENDAR PAGE ═══ -->
+    <div class="page" id="page-calendar">
+      <!-- Título + racha -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--text)">📅 Tu progreso mensual</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:3px">Tocá cualquier día para ver el detalle.</div>
+        </div>
+        <!-- RACHA -->
+<div id="calStreakBadge" style="text-align:center;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:8px 12px;min-width:72px;flex-shrink:0">
+          <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:2px">RACHA</div>
+          <div style="display:flex;align-items:center;justify-content:center;gap:4px">
+            <div style="font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--accent)" id="calStreakNum">0</div>
+            <div style="font-size:16px" id="calStreakFire">—</div>
+          </div>
+<div style="font-size:9px;color:var(--text3);margin-top:1px">días ≥85%</div>
+        </div>
+      </div>
+      <div id="calStreakMsg" style="font-size:11px;font-weight:600;color:var(--text3);margin-top:4px;text-align:right">      </div>
+
+      <div class="card" style="padding:16px">
+        <!-- Navegación mes -->
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <button class="cal-nav" onclick="calNav(-1)">‹</button>
+          <div id="calMonthLabel" style="font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--text)"></div>
+          <button class="cal-nav" onclick="calNav(1)">›</button>
+        </div>
+
+        <!-- Grilla calendario -->
+        <div class="cal-grid" id="calGrid"></div>
+
+        <!-- Leyenda clara -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:14px">
+          <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:6px 10px">
+            <div style="width:10px;height:10px;border-radius:3px;background:rgba(50,220,100,0.75);flex-shrink:0"></div>
+            <span style="font-size:11px;color:var(--text2)">Excelente ≥85%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:6px 10px">
+            <div style="width:10px;height:10px;border-radius:3px;background:rgba(255,170,40,0.65);flex-shrink:0"></div>
+            <span style="font-size:11px;color:var(--text2)">Regular 60–84%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:6px 10px">
+            <div style="width:10px;height:10px;border-radius:3px;background:rgba(231,100,60,0.5);flex-shrink:0"></div>
+            <span style="font-size:11px;color:var(--text2)">Bajo &lt;60%</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border-radius:8px;padding:6px 10px">
+            <div style="width:10px;height:10px;border-radius:3px;background:rgba(61,77,112,0.3);border:1px solid var(--border);flex-shrink:0"></div>
+            <span style="font-size:11px;color:var(--text2)">Descanso</span>
+          </div>
+        </div>
+
+        <div id="calMonthStats" style="margin-top:12px"></div>
+      </div>
+    </div>
+
+    <!-- ═══ SUPPLEMENTS PAGE ═══ -->
+    <div class="page" id="page-supps">
+<div class="card">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+    <div class="card-title" style="margin-bottom:0"><span>💊</span> Estado de hoy</div>
+    <button class="btn btn-primary" onclick="openSuppSetup()" style="padding:5px 12px;font-size:12px">+ Agregar</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:4px">
+    <span id="suppDoneCount" class="macro-val prot-color" style="font-size:28px">0</span>
+    <div style="align-self:flex-end;margin-bottom:4px">
+      <div style="font-size:12px;color:var(--text2)">de <strong id="suppTotal">8</strong> tomados</div>
+    </div>
+  </div>
+  <div class="prog-bar" style="height:8px">
+    <div class="prog-fill prot" id="suppBar" style="width:0%"></div>
+  </div>
+</div>
+
+      <div id="suppsEmpty" style="display:none;text-align:center;padding:40px 20px">
+        <div style="font-size:40px;margin-bottom:12px">💊</div>
+        <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">No tenés ningún suplemento agregado</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:20px">Agregá tus suplementos para llevar el control diario</div>
+        <button class="btn btn-primary" onclick="openSuppSetup()">Agregar suplemento</button>
+
+      </div>
+
+      <div id="suppsSectionMorning">
+        <div class="section-div">Manana — con el desayuno</div>
+        <div class="supps-grid" id="suppsMorning"></div>
+      </div>
+      <div id="suppsSectionNoon">
+        <div class="section-div">Mediodia — con el almuerzo</div>
+        <div class="supps-grid" id="suppsNoon"></div>
+      </div>
+      <div id="suppsSectionNight">
+        <div class="section-div">Noche — antes de dormir</div>
+        <div class="supps-grid" id="suppsNight"></div>
+      </div>
+    </div>
+
+    <!-- ═══ METRICS PAGE ═══ -->
+<div class="page" id="page-metrics">
+
+      <!-- BANNER DE OBJETIVO -->
+
+      <!-- WEIGHT PROGRESS BAR — driven by user's goal -->
+      <div class="card" id="weightProgressCard">
+<div id="weightGoalBadge" style="display:none"></div>
+        <div style="display:flex;align-items:flex-end;gap:6px;margin-bottom:10px">
+          <div style="font-family:'Space Mono',monospace;font-size:36px;font-weight:700;color:var(--text);line-height:1" id="weightBig">—</div>
+          <div style="font-size:13px;color:var(--text2);margin-bottom:6px">kg</div>
+          <div style="flex:1"></div>
+          <div id="weightDelta" style="font-size:13px;font-weight:700;text-align:right"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:4px">
+          <span id="wgStartLbl">Inicio: —</span>
+          <span id="wgTargetLbl">Meta: —</span>
+        </div>
+        <div style="background:var(--bg4);border-radius:6px;height:8px;overflow:hidden;margin-bottom:8px">
+          <div id="weightProgressFill" style="height:100%;border-radius:6px;background:var(--accent);width:0%;transition:width 0.5s"></div>
+        </div>
+   <div id="weightProgressStatus" style="font-size:12px;color:var(--text2)"></div>
+
+        <!-- Sub-barras de métricas activas -->
+        <div id="metricProgressBars"></div>
+      </div>
+
+      <!-- REGISTRAR MEDICIÓN -->
+      <div class="card" style="padding:14px 16px">
+        <div class="card-title" style="margin-bottom:14px"><span>➕</span> Registrar medición</div>
+
+        <!-- Fila 1: peso obligatorio -->
+        <div style="margin-bottom:10px">
+          <div style="font-size:10px;color:var(--text3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">Peso (kg) *</div>
+          <input class="inp" id="inpWeight" type="number" step="0.1" placeholder="77.0">
+        </div>
+
+        <!-- Métricas adicionales activas — renderizadas por JS según state.config.activeMetrics -->
+        <div id="metricsActiveFields" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:8px"></div>
+
+        <!-- Inputs ocultos que siempre existen para compatibilidad con saveMetrics() -->
+        <div style="display:none">
+<input id="inpBFReal" type="number" step="0.1">
+          <input id="inpMuscle" type="number" step="0.1">
+          <input id="inpWaist"  type="number" step="0.1">
+          <input id="inpChest"  type="number" step="0.1">
+          <input id="inpArms"   type="number" step="0.1">
+          <input id="inpHips"   type="number" step="0.1">
+        </div>
+
+
+
+        <!-- Campos de métricas personalizadas — generados por JS -->
+        <div id="metricsExtraInputs" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px"></div>
+
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-primary" style="flex:1" onclick="saveMetrics()">Guardar medición</button>
+<button class="btn btn-ghost" style="flex:0 0 auto" onclick="openMetricPicker()" title="Agregar métrica">+ Métrica</button>        </div>
+
+        <!-- Gestión de métricas personalizadas -->
+<!-- Gestión de métricas personalizadas -->
+        <div id="metricsCustomManage" style="margin-top:10px"></div>
+      </div>
+
+      <!-- SUB-BARRAS DE PROGRESO POR MÉTRICA -->
+     
+
+      <!-- GRÁFICO UNIFICADO DE EVOLUCIÓN -->
+      <div class="card" id="unifiedChartWrap">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
+          <div class="card-title" style="margin-bottom:0"><span>📈</span> Evolución</div>
+          <!-- Selector de rango -->
+          <div style="display:flex;gap:4px">
+ <!-- DESPUÉS -->
+<button class="metric-range-btn" onclick="selectMetricRange('7',this)">7d</button>
+<button class="metric-range-btn active" onclick="selectMetricRange('30',this)">30d</button>
+<button class="metric-range-btn" onclick="selectMetricRange('all',this)">Todo</button>
+<button class="metric-range-btn" data-range="custom" onclick="selectMetricRange('custom',this)">📅</button>
+          </div>
+        </div>
+        <!-- Selector de métrica — se rellena por JS -->
+<div id="unifiedMetricSel" class="metric-selector" style="margin-bottom:14px"></div>
+        <!-- Gráfico SVG -->
+        <div class="chart-wrap">
+          <svg class="chart-svg" id="unifiedChartSvg" viewBox="0 0 360 160" preserveAspectRatio="none"></svg>
+        </div>
+        <!-- Stats: actual + cambio período + últimos 7 días -->
+        <div class="stat-trio" id="unifiedChartStats" style="margin-top:10px"></div>
+      </div>
+
+      <!-- IDs legacy ocultos — requeridos por renderMetrics(), renderBodyChart(), renderWeightGoalBar() -->
+      <div style="display:none">
+        <div id="metricWeight"></div><div id="weightChange"></div>
+        <div id="metricBF"></div><div id="bfChange"></div>
+        <div id="metricMuscle"></div>
+        <span id="goalBfCurrent"></span><span id="goalBfTarget"></span>
+        <div id="goalBfBar"></div><div id="goalBfStatus"></div>
+        <span id="goalMuscCurrent"></span><div id="goalMuscBar"></div><div id="goalMuscStatus"></div>
+        <div id="extraMetricsSection"></div>
+        <button id="extraMetricsToggle" onclick="toggleExtraMetrics()"></button>
+        <div id="extraInputs"></div>
+        <button id="extraInputsToggle"></button>
+        <div id="inpBF"></div>
+        <div id="inpMuscle"></div>
+        <span id="greetBadge"></span>
+        <span id="calStreak"></span>
+        <div id="bodyChartSelector"></div>
+        <svg id="bodyChartSvg"></svg>
+        <div id="bodyChartStats"></div>
+      </div>
+    </div>
+
+    <!-- ═══ SLEEP PAGE ═══ -->
+    <div class="page" id="page-sleep">
+      <!-- MANUAL INPUT CARD -->
+<!-- MANUAL INPUT CARD -->
+      <div class="card" id="manualSleepCard">
+        <div class="card-title"><span>✏️</span> Cargar manualmente</div>
+        <div style="font-size:11px;color:var(--text3);margin-bottom:14px">Si no tenés wearable, ingresá tus datos acá. Si sincronizás con Oura, se sobreescriben.</div>
+
+        <div class="input-row" style="margin-bottom:14px">
+          <div style="flex:1">
+            <label class="input-label">Horas de sueño</label>
+            <input class="inp" id="manSleepHours" type="number" step="0.5" min="0" max="24" placeholder="7.5">
+          </div>
+          <div style="flex:1">
+            <label class="input-label">Calidad (1–10)</label>
+            <input class="inp" id="manSleepQuality" type="number" step="1" min="1" max="10" placeholder="8">
+          </div>
+        </div>
+
+        <!-- Campos legacy: mantenidos para compatibilidad con saveManualSleep() y renderSleep() -->
+        <div id="sleepLegacyFields" style="display:none">
+          <input id="manSleepDeep" type="number" step="0.5" min="0">
+          <input id="manSleepHRV"  type="number" step="1"   min="0">
+        </div>
+
+        <button class="btn btn-primary" style="width:100%" onclick="saveManualSleep()">Guardar sueño</button>
+      </div>
+      <!-- OURA SYNC CARD -->
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <div class="card-title" style="margin-bottom:0"><span>🌙</span> Sueño de hoy</div>
+          <button id="syncBtn" onclick="syncOura()" class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-size:11px">↻ Sync Oura</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px">
+          <span id="syncStatus" style="font-size:11px;color:var(--text3)">● Sin sincronizar</span>
+          <span id="lastSync" style="font-size:10px;color:var(--text3)"></span>
+        </div>
+
+        <!-- Readiness score (Oura) -->
+        <div id="readinessSection" style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
+          <div class="readiness-circle" style="flex-shrink:0;width:80px;height:80px">
+            <svg width="80" height="80" viewBox="0 0 100 100">
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--bg4)" stroke-width="8"/>
+              <circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="8"
+                stroke-dasharray="251.2" id="readinessDash" stroke-dashoffset="251.2" stroke-linecap="round"/>
+            </svg>
+            <div class="readiness-num" id="readinessNum" style="font-size:22px">—</div>
+          </div>
+          <div>
+            <div style="font-size:12px;font-weight:700;color:var(--text)" id="readinessLabel">Sin datos de Oura</div>
+            <div style="font-size:11px;color:var(--text3);margin-top:3px">Usá el botón Sync o cargá manualmente abajo</div>
+          </div>
+        </div>
+
+        <!-- Sleep stats row -->
+        <div class="sleep-grid" style="margin-bottom:0">
+          <div class="sleep-card">
+            <div class="sleep-icon">😴</div>
+            <div class="sleep-label">Horas</div>
+            <div class="sleep-val" id="sleepHours">—</div>
+          </div>
+          <div class="sleep-card">
+            <div class="sleep-icon">📊</div>
+            <div class="sleep-label">Eficiencia</div>
+            <div class="sleep-val" id="sleepEff">—</div>
+          </div>
+          <div class="sleep-card">
+            <div class="sleep-icon">🌊</div>
+            <div class="sleep-label">Profundo</div>
+            <div class="sleep-val" id="sleepDeep">—</div>
+          </div>
+          <div class="sleep-card">
+            <div class="sleep-icon">💓</div>
+            <div class="sleep-label">HRV</div>
+            <div class="sleep-val" id="sleepHRV">—</div>
+          </div>
+        </div>
+      </div>
+
+
+
+      <!-- WEARABLES CARD -->
+      <!-- WEARABLES CARD -->
+<div class="card" style="border:1px solid var(--border);background:var(--bg3)">
+  <div style="margin-bottom:14px">
+    <div class="card-title" style="margin-bottom:4px"><span>⌚</span> Conectar wearable</div>
+    <div style="font-size:12px;color:var(--text3);line-height:1.5">
+      Conectá tu wearable y FitTrack sincroniza automáticamente sueño, FC y actividad.
+    </div>
+  </div>
+  <div class="wearables-card-container"></div>
+</div>
+
+</div>
+
+
+      </div><!-- /sub-nutricion-comida -->
+
+      <!-- Subpage: Balance Kcal (contenido original de page-kcal) -->
+      <div class="v15-subpage" id="sub-nutricion-balance">
+
+    <!-- ═══ KCAL / ACTIVIDAD PAGE (ahora sub-página) ═══ -->
+<div id="page-kcal">
+
+  <!-- BALANCE CARD -->
+  <div class="card">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+      <div class="card-title" style="margin-bottom:0"><span>🔥</span> Balance calórico</div>
+      <div id="ouraKcalBadge" style="display:none;font-size:10px;color:var(--accent);background:rgba(77,138,255,0.12);border-radius:20px;padding:2px 8px">Oura ✓</div>
+    </div>
+
+    <!-- Explicación TDEE -->
+<div class="kcal-big">
+      <div style="font-size:12px;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px" id="kcalBalancePre">Te faltan</div>
+      <div class="kcal-num" id="kcalBalance">—</div>
+      <div class="kcal-label" id="kcalBalanceLabel">kcal para tu objetivo</div>
+    </div>
+    <div class="kcal-breakdown">
+      <div class="kcal-item">
+        <div class="kcal-item-val" id="kcalConsumed">0</div>
+        <div class="kcal-item-label">Consumidas</div>
+      </div>
+      <div class="kcal-item">
+        <div class="kcal-item-val" id="kcalBurned">—</div>
+        <div class="kcal-item-label">Objetivo</div>
+      </div>
+      <div class="kcal-item">
+        <div class="kcal-item-val" id="kcalTarget">—</div>
+        <div class="kcal-item-label" id="kcalTargetLabel">Ajuste</div>
+      </div>
+    </div>
+    <div class="balance-bar-wrap">
+      <div class="balance-label"><span>0 kcal</span><span id="kcalTargetLbl">— kcal</span></div>
+      <div class="balance-bar" style="background:var(--bg4);border-radius:4px;overflow:hidden">
+        <div id="deficitBar" style="height:100%;width:0%;background:var(--green);border-radius:4px;transition:width 0.4s ease,background 0.3s ease"></div>
+      </div>
+    </div>
+    <div id="kcalStatusMsg"></div>
+    <div id="macroHistorySection"></div>
+  </div>
+
+  <!-- WEARABLE CARD -->
+<div class="card" style="border:1px solid var(--border);background:var(--bg3)">
+    <div style="margin-bottom:12px">
+      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">⌚ Conectá tu wearable para más precisión</div>
+      <div style="font-size:11px;color:var(--text3);line-height:1.6">Con un wearable FitTrack usa tu gasto calórico <strong style="color:var(--text2)">real del día</strong>. La diferencia puede ser de 200–500 kcal.</div>
+    </div>
+    <div class="wearables-card-container"></div>
+  </div>
+
+
+
+      </div><!-- /page-kcal inner -->
+      </div><!-- /sub-nutricion-balance -->
+
+      <!-- Subpage: Plan Semanal -->
+      <div class="v15-subpage" id="sub-nutricion-plan">
+          <div id="mealPlanContent"></div>
+      </div><!-- /sub-nutricion-plan -->
+
+    </div><!-- /page-nutricion -->
+
+    <!-- ═══ TRAINING PAGE ═══ --><!-- ═══ TRAINING PAGE ═══ -->
+    <div class="page" id="page-training">
+<!-- EDIT WEEK STYLES -->
+      <style>
+        .edit-week-panel{padding:16px}
+        .ew-header{margin-bottom:14px}
+        .ew-grid{display:flex;flex-direction:column;gap:6px}
+        .ew-day-row{display:flex;align-items:flex-start;gap:10px;min-height:40px}
+        .ew-day-label{width:32px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--text3);padding-top:10px;text-transform:uppercase}
+        .ew-day-cell{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-height:38px;padding:5px 6px;border-radius:10px;border:1.5px dashed var(--border);background:var(--bg3);transition:background 0.15s,border-color 0.15s}
+        .ew-day-cell.ew-drag-over{background:rgba(77,138,255,0.12);border-color:var(--accent)}
+        .ew-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:600;cursor:grab;user-select:none;transition:opacity 0.15s;max-width:180px}
+        .ew-chip-gym{background:rgba(77,138,255,0.15);border:1px solid rgba(77,138,255,0.35);color:var(--accent)}
+        .ew-chip-sport{background:rgba(77,220,120,0.15);border:1px solid rgba(77,220,120,0.35);color:var(--green)}
+        .ew-chip-dragging{opacity:0.4}
+.ew-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+        .ew-chip{gap:2px}        .ew-chip-del,.ew-chip-edit{background:none;border:none;cursor:pointer;font-size:11px;padding:0;line-height:1;flex-shrink:0}
+ .ew-chip-del{color:var(--red);opacity:0.9;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;font-size:14px}
+        .ew-chip-edit{color:var(--text3);min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+        .ew-add-btn{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:3px 6px;border-radius:6px;white-space:nowrap}
+        .ew-add-btn:hover{background:var(--bg4);color:var(--text)}
+        .ew-done-btn{width:100%;margin-top:16px;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer}
+      </style>
+
+      <!-- SESSION TIMER BANNER -->      <div id="sessionTimerBanner" style="display:none;align-items:center;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100"></div>
+
+      <!-- PREMIUM HEADER (Apple Fitness+ layout) -->
+      <div id="premiumTrainingContainer"></div>
+
+      <!-- BOTÓN IA (hidden — manejado por _renderPremiumTraining) -->
+      <div id="aiRoutineBtn" style="display:none"></div>
+      <!-- weekStrip legacy (hidden) -->
+      <div id="weekStrip" style="display:none"></div>
+
+      <!-- DELOAD BANNER -->
+      <div id="deloadBanner" style="display:none"></div>
+      <div id="adaptiveRoutineBanner" style="display:none"></div>
+
+      <!-- RUTINAS (hidden — reemplazado por premium layout) -->
+      <div id="routineCards" style="display:none"></div>
+
+      <!-- EJERCICIOS DEL DIA -->
+      <div id="exerciseListSection">
+        <!-- PROGRESS BAR -->
+        <div id="trainingProgressWrap" style="display:none;padding:0 16px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">
+            <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px" id="trainingProgressLabel">0 de 0 ejercicios</div>
+          </div>
+          <div style="background:var(--bg4);border-radius:6px;height:5px;overflow:hidden">
+            <div id="trainingProgressBar" style="height:100%;border-radius:6px;background:var(--accent);width:0%;transition:width 0.4s ease"></div>
+          </div>
+        </div>
+        <div id="exerciseList"></div>
+      </div>
+      <!-- PROGRESO - collapsed by default -->
+<div style="margin-bottom:12px">
+        <div class="section-div">📈 Progreso por ejercicio</div>
+        <div class="card" style="margin-top:8px">
+          <select class="ex-select" id="exSelect" onchange="renderStrengthChart()">
+            <option value="">— Seleccionar ejercicio —</option>
+          </select>
+          <div id="strengthChartWrap" style="display:none">
+            <div class="chart-wrap">
+              <svg class="chart-svg" id="strengthChartSvg" viewBox="0 0 360 160" preserveAspectRatio="none"></svg>
+            </div>
+          </div>
+          <div id="strengthChartStats"></div>
+          <div id="exHistoryList"></div>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ═══ WATER PAGE (ahora dentro de Recuperación — se mueve a page-recuperacion) ═══ -->
+    <div class="page" id="page-water" style="display:none">
+      <div class="card" style="text-align:center;padding:24px 20px">
+        <div class="card-title" style="justify-content:center;margin-bottom:20px"><span>💧</span> Hidratación del día</div>
+
+        <!-- BIG GLASS -->
+        <div style="display:flex;justify-content:center;margin-bottom:20px">
+          <div class="glass-wrap" onclick="addWater(250)" style="width:120px;height:192px">
+            <svg class="glass-svg" viewBox="0 0 80 140" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <clipPath id="glassClipW">
+                  <path d="M8,4 L72,4 L68,136 L12,136 Z"/>
+                </clipPath>
+                <linearGradient id="waterGradW" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" style="stop-color:var(--accent);stop-opacity:0.9"/>
+                  <stop offset="100%" style="stop-color:var(--green);stop-opacity:0.7"/>
+                </linearGradient>
+                <linearGradient id="glassGradW" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" style="stop-color:var(--border);stop-opacity:0.8"/>
+                  <stop offset="30%" style="stop-color:rgba(255,255,255,0.08)"/>
+                  <stop offset="100%" style="stop-color:var(--border);stop-opacity:0.6"/>
+                </linearGradient>
+              </defs>
+              <g clip-path="url(#glassClipW)">
+                <rect id="waterRectW" x="8" y="136" width="64" height="0" fill="url(#waterGradW)" rx="2"/>
+                <path id="wavePathW" fill="url(#waterGradW)" opacity="0.5"/>
+              </g>
+              <path d="M8,4 L72,4 L68,136 L12,136 Z" fill="none" stroke="url(#glassGradW)" stroke-width="2.5" stroke-linejoin="round"/>
+              <path d="M16,12 L18,120" stroke="rgba(255,255,255,0.12)" stroke-width="4" stroke-linecap="round"/>
+              <path d="M6,4 L74,4" stroke="var(--border)" stroke-width="3" stroke-linecap="round"/>
+            </svg>
+            <div class="glass-label">
+              <div class="glass-pct" id="waterPctW">0%</div>
+              <div class="glass-ml" id="waterMlW">0ml</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Stats -->
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:20px">
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--accent)" id="waterMlNum">0</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">ml tomados</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--green)" id="waterGlassesNum">0</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">vasos</div>
+          </div>
+          <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px">
+            <div style="font-family:'Space Mono',monospace;font-size:18px;font-weight:700;color:var(--yellow)" id="waterRemainingNum">3000</div>
+            <div style="font-size:10px;color:var(--text2);margin-top:2px">ml restantes</div>
+          </div>
+        </div>
+
+        <!-- Buttons -->
+        <div class="hydration-quick" style="margin-bottom:12px">
+          <button class="hydration-btn" onclick="addWater(150)">+150ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso chico</div></button>
+          <button class="hydration-btn" onclick="addWater(250)">+250ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso normal</div></button>
+          <button class="hydration-btn" onclick="addWater(350)">+350ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso grande</div></button>
+          <button class="hydration-btn" onclick="addWater(500)">+500ml<div style="font-size:9px;color:var(--text3);margin-top:1px">botella</div></button>
+        </div>
+        <button class="hydration-reset" onclick="resetWater()" style="font-size:12px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 16px;cursor:pointer;width:100%">↺ Resetear hidratación</button>
+      </div>
+
+      <!-- Goal bar -->
+      <div class="card">
+        <div class="card-title"><span>🎯</span> Objetivo diario: 3000ml</div>
+        <div style="height:16px;background:var(--bg4);border-radius:8px;overflow:hidden;margin-bottom:8px">
+          <div id="waterGoalBar" style="height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);width:0%"></div>
+        </div>
+        <div id="waterGoalMsg" style="font-size:11px;color:var(--text2);text-align:center"></div>
+      </div>
+
+    </div>
+
+    <!-- ═══ RECUPERACIÓN PAGE (Sueño + Suplementos + Agua scroll continuo) ═══ -->
+<div class="page" id="page-recuperacion">
+
+      <!-- Sub-tabs -->
+      <div class="v15-subtabs" id="recuperacionSubtabs">
+        <button class="v15-subtab active" id="subtab-rec-sueno"       onclick="switchSubtab('recuperacion','sueno',this)">🌙 Sueño</button>
+        <button class="v15-subtab"        id="subtab-rec-suplementos" onclick="switchSubtab('recuperacion','suplementos',this)">💊 Suplementos</button>
+        <button class="v15-subtab"        id="subtab-rec-agua"        onclick="switchSubtab('recuperacion','agua',this)">💧 Agua</button>
+      </div>
+
+      <!-- Subpage: Sueño -->
+      <div class="v15-subpage active" id="sub-recuperacion-sueno">
+        <div id="recuperacion-sleep-content">
+          <!-- _syncRecuperacionContent() inyecta aquí el contenido de sleep -->
+        </div>
+      </div><!-- /sub-recuperacion-sueno -->
+
+      <!-- Subpage: Suplementos -->
+      <div class="v15-subpage" id="sub-recuperacion-suplementos">
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <div class="card-title" style="margin-bottom:0"><span>💊</span> Estado de hoy</div>
+            <button class="btn btn-primary" onclick="openSuppSetup()" style="padding:5px 12px;font-size:12px">+ Editar</button>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:4px">
+            <span id="suppDoneCount2" class="macro-val prot-color" style="font-size:28px">0</span>
+            <div>
+              <div style="font-size:11px;color:var(--text2)">de</div>
+              <span id="suppTotal2" style="font-size:14px;font-weight:700;color:var(--text2)">0</span>
+            </div>
+            <div style="flex:1"></div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--text3)">progreso</div>
+              <div id="suppPct2" style="font-size:14px;font-weight:700;color:var(--accent)">0%</div>
+            </div>
+          </div>
+          <div class="prog-bar" style="margin-bottom:4px"><div id="suppBar2" class="prog-fill prot" style="width:0%"></div></div>
+        </div>
+        <div id="suppsSectionMorning2">
+          <div class="section-div">Mañana</div>
+          <div class="supps-grid" id="suppsMorning2"></div>
+        </div>
+        <div id="suppsSectionNoon2">
+          <div class="section-div">Mediodía</div>
+          <div class="supps-grid" id="suppsNoon2"></div>
+        </div>
+        <div id="suppsSectionNight2">
+          <div class="section-div">Noche — antes de dormir</div>
+          <div class="supps-grid" id="suppsNight2"></div>
+        </div>
+      </div><!-- /sub-recuperacion-suplementos -->
+
+      <!-- Subpage: Agua -->
+      <div class="v15-subpage" id="sub-recuperacion-agua">
+        <div id="recuperacion-water-content">
+          <!-- _syncRecuperacionContent() inyecta aquí el contenido de water -->
+        </div>
+      </div><!-- /sub-recuperacion-agua -->
+
+    </div><!-- /page-recuperacion -->
+
+    <!-- ═══ PROGRESO PAGE (Métricas arriba + Calendario abajo) ═══ -->
+<!-- ═══ PROGRESO PAGE (Métricas + Calendario con sub-tabs) ═══ -->
+    <div class="page" id="page-progreso">
+
+      <!-- Sub-tabs -->
+      <div class="v15-subtabs" id="progresoSubtabs">
+        <button class="v15-subtab active" id="subtab-prog-metricas"   onclick="switchSubtab('progreso','metricas',this)">📈 Métricas</button>
+        <button class="v15-subtab"        id="subtab-prog-calendario" onclick="switchSubtab('progreso','calendario',this)">📅 Calendario</button>
+      </div>
+
+      <!-- Subpage: Métricas -->
+      <div class="v15-subpage active" id="sub-progreso-metricas">
+        <div id="progreso-metrics-content"></div>
+      </div>
+
+      <!-- Subpage: Calendario -->
+      <div class="v15-subpage" id="sub-progreso-calendario">
+        <div id="progreso-calendar-content"></div>
+      </div>
+
+    </div><!-- /page-progreso -->
+
+  </div><!-- /content -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+<div class="modal-overlay" id="addFoodModal" onclick="closeModal('addFoodModal')">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-title">
+      Agregar alimento
+      <button class="modal-close" onclick="closeModal('addFoodModal')">✕</button>
+    </div>
+
+    <!-- FREQUENT FOODS (auto-learned) -->
+    <div id="freqFoodsWrap" style="display:none;margin-bottom:14px"></div>
+
+    <!-- SAVED PRESETS -->
+    <div id="presetsSection">
+      <label class="input-label">⚡ Mis predeterminados</label>
+      <div id="presetsList" style="display:flex;flex-direction:column;gap:6px;margin-bottom:4px"></div>
+      <div style="font-size:10px;color:var(--text3);margin:6px 0 10px;text-align:center">— o buscá un alimento —</div>
+    </div>
+
+    <!-- FOOD SEARCH + BARCODE -->
+    <div class="input-group" style="position:relative">
+      <label class="input-label">Buscar alimento</label>
+      <div style="display:flex;gap:6px">
+        <input class="inp" id="foodSearch" placeholder="Pechuga, arroz, huevo..." autocomplete="off"
+          oninput="onFoodSearchInput(this.value)" style="flex:1">
+        <button onclick="openBarcodeScanner()" title="Escanear código de barras"
+          style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0 12px;cursor:pointer;font-size:18px;flex-shrink:0">⬛</button>
+      </div>
+      <div id="foodSearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:10px;z-index:500;max-height:200px;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);margin-top:2px"></div>
+    </div>
+
+    <!-- GRAMS INPUT (shown after selecting a food from catalog) -->
+    <div id="foodGramsRow" style="display:none;margin-top:10px">
+      <div style="display:flex;align-items:center;gap:10px;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:10px 14px">
+        <div style="flex:1">
+          <div id="selectedFoodName" style="font-size:13px;font-weight:700;color:var(--text)"></div>
+          <div id="selectedFoodPer100" style="font-size:11px;color:var(--text3);margin-top:2px"></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">
+          <input type="number" id="foodGrams" class="inp" value="100" min="1" max="2000"
+            oninput="onGramsInput(this.value)"
+            style="width:70px;text-align:center;font-size:14px;font-weight:700">
+          <span style="font-size:12px;color:var(--text3)">g</span>
+        </div>
+      </div>
+      <div id="gramsPreview" style="display:flex;gap:8px;margin-top:8px;text-align:center"></div>
+    </div>
+
+    <!-- MANUAL FALLBACK (colapsable) -->
+    <div style="margin-top:10px">
+      <button onclick="toggleManualEntry()" id="manualToggleBtn"
+        style="width:100%;background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:4px 0;text-align:center">
+        + Ingresar macros manualmente
+      </button>
+      <div id="manualEntrySection" style="display:none;margin-top:8px">
+        <div class="input-group">
+          <label class="input-label">Nombre</label>
+          <input class="inp" id="foodName" placeholder="Nombre del alimento">
+        </div>
+        <div class="input-row">
+          <div style="flex:1"><label class="input-label">Prot (g)</label><input class="inp" id="foodProt" type="number" placeholder="0"></div>
+          <div style="flex:1"><label class="input-label">Carbos (g)</label><input class="inp" id="foodCarb" type="number" placeholder="0"></div>
+          <div style="flex:1"><label class="input-label">Grasas (g)</label><input class="inp" id="foodFat" type="number" placeholder="0"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-group" style="margin-top:10px">
+      <label class="input-label">Comida</label>
+      <select class="inp" id="foodMeal">
+        <option value="Desayuno">Desayuno</option>
+        <option value="Almuerzo">Almuerzo</option>
+        <option value="Merienda">Merienda</option>
+        <option value="Cena">Cena</option>
+        <option value="Extra">Extra / Snack</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <button class="btn btn-primary" style="flex:1" onclick="addFood()">Agregar</button>
+      <button class="btn btn-ghost" style="flex:0 0 auto;font-size:12px" onclick="saveAsPreset()" title="Guardar preset">💾</button>
+    </div>
+  </div>
+</div>
+
+<!-- BARCODE SCANNER OVERLAY -->
+<div id="barcodeScannerOverlay" style="display:none;position:fixed;inset:0;background:#000;z-index:10000;flex-direction:column">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:16px 20px;background:rgba(0,0,0,0.8)">
+    <span style="color:#fff;font-size:15px;font-weight:700">Escanear código de barras</span>
+    <button onclick="closeBarcodeScanner()" style="background:none;border:none;color:#fff;font-size:22px;cursor:pointer">✕</button>
+  </div>
+  <div style="flex:1;position:relative;display:flex;align-items:center;justify-content:center">
+    <video id="barcodeVideo" style="width:100%;height:100%;object-fit:cover" playsinline muted></video>
+    <div style="position:absolute;width:240px;height:120px;border:2px solid rgba(255,200,0,0.8);border-radius:8px;box-shadow:0 0 0 2000px rgba(0,0,0,0.45)"></div>
+    <div id="barcodeScanStatus" style="position:absolute;bottom:30px;left:0;right:0;text-align:center;color:#fff;font-size:13px;text-shadow:0 1px 3px rgba(0,0,0,0.8)">Apuntá al código de barras</div>
+  </div>
+</div>
+
+
+<!-- AI CHAT MODAL -->
+<div class="modal-overlay" id="aiChatModal" onclick="if(event.target===this)closeAIChat()">
+  <div class="ai-modal">
+    <div class="ai-modal-header">
+      <div class="ai-modal-title">
+        <div style="display:flex;align-items:center;gap:8px">
+          <span style="font-size:20px">✨</span>
+          <div>
+            <div>IA Nutricional</div>
+            <div class="ai-modal-subtitle">Gemini 2.0 Flash · Calculá macros en segundos</div>
+          </div>
+        </div>
+        <button class="modal-close" onclick="closeAIChat()">✕</button>
+      </div>
+    </div>
+    <div class="ai-chat-area" id="aiChatArea">
+      <div class="ai-bubble bot">
+        👋 Decime qué comiste y calculo los macros.<br><br>
+        <strong>Ejemplos:</strong><br>
+        • 200g carne vacuna y 300g papa<br>
+        • bowl de avena con banana y miel<br>
+        • 2 huevos revueltos con tostadas
+      </div>
+    </div>
+    <div class="ai-input-area">
+      <div class="ai-quick-chips">
+        <div class="ai-chip" onclick="sendAIChip(this)">200g pechuga pollo</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">150g arroz cocido</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">2 huevos revueltos</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">100g atún en lata</div>
+        <div class="ai-chip" onclick="sendAIChip(this)">1 banana mediana</div>
+      </div>
+      <div class="ai-input-row">
+        <input class="ai-inp" id="aiInput" placeholder="Ej: 200g carne y 300g papa..." onkeydown="if(event.key==='Enter')sendAIMessage()">
+        <button class="ai-send-btn" id="aiSendBtn" onclick="sendAIMessage()">↑</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- THEME PICKER DROPDOWN -->
+<div class="theme-picker-overlay" id="themePickerOverlay" onclick="closeThemePicker()"></div>
+<div class="theme-picker-dropdown" id="themePickerDropdown">
+  <div class="theme-picker-title">🎨 Elegí tu tema</div>
+  <div class="theme-grid">
+    <div class="theme-card active" data-theme="dark" style="background:linear-gradient(135deg,#080d18,#1a2440)" onclick="applyTheme('dark')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#4d8aff"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#ff6b4d"></div></div>
+      <div class="tc-name">Noche</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="rose" style="background:linear-gradient(135deg,#180a0e,#3d1a24)" onclick="applyTheme('rose')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#ff6b9d"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#ff9b6b"></div></div>
+      <div class="tc-name">Rosa</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="lavender" style="background:linear-gradient(135deg,#0e0918,#2d1f4a)" onclick="applyTheme('lavender')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#a78bfa"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#f472b6"></div></div>
+      <div class="tc-name">Lavanda</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="emerald" style="background:linear-gradient(135deg,#081812,#1a3d2a)" onclick="applyTheme('emerald')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#10d9a0"></div><div class="tc-dot" style="background:#fbbf24"></div><div class="tc-dot" style="background:#4dffb4"></div></div>
+      <div class="tc-name">Esmeralda</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="sunset" style="background:linear-gradient(135deg,#180f00,#3d2a00)" onclick="applyTheme('sunset')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#f97316"></div><div class="tc-dot" style="background:#eab308"></div><div class="tc-dot" style="background:#4dffb4"></div></div>
+      <div class="tc-name">Atardecer</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="ocean" style="background:linear-gradient(135deg,#000f18,#003040)" onclick="applyTheme('ocean')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#06b6d4"></div><div class="tc-dot" style="background:#8b5cf6"></div><div class="tc-dot" style="background:#4dffb4"></div></div>
+      <div class="tc-name">Océano</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="crimson" style="background:linear-gradient(135deg,#180508,#3d1520)" onclick="applyTheme('crimson')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#ff3860"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#ff8c42"></div></div>
+      <div class="tc-name">Carmesí</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="gold" style="background:linear-gradient(135deg,#160f00,#3d2e00)" onclick="applyTheme('gold')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#f7b731"></div><div class="tc-dot" style="background:#26de81"></div><div class="tc-dot" style="background:#fd9644"></div></div>
+      <div class="tc-name">Dorado</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="steel" style="background:linear-gradient(135deg,#08080c,#1e1e2e)" onclick="applyTheme('steel')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#94a3b8"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#f87171"></div></div>
+      <div class="tc-name">Acero</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="mint" style="background:linear-gradient(135deg,#051210,#133d38)" onclick="applyTheme('mint')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#2dd4bf"></div><div class="tc-dot" style="background:#34d399"></div><div class="tc-dot" style="background:#fbbf24"></div></div>
+      <div class="tc-name">Menta</div><div class="tc-check">✓</div>
+    </div>
+    <div class="theme-card" data-theme="violet" style="background:linear-gradient(135deg,#0a0710,#2d1f45)" onclick="applyTheme('violet')">
+      <div class="tc-dots"><div class="tc-dot" style="background:#7c3aed"></div><div class="tc-dot" style="background:#4dffb4"></div><div class="tc-dot" style="background:#db2777"></div></div>
+      <div class="tc-name">Violeta</div><div class="tc-check">✓</div>
+    </div>
+  </div>
+</div>
+
+<!-- CALENDAR DAY DETAIL MODAL -->
+
+<!-- ADD CUSTOM METRIC MODAL -->
+<!-- ADD CUSTOM METRIC MODAL -->
+<div class="modal-overlay" id="addCustomMetricModal" onclick="if(event.target===this)closeAddCustomMetric()" style="z-index:201">
+  <div class="modal" onclick="event.stopPropagation()" style="padding:20px">
+    <div class="modal-title">
+      <span style="font-size:15px">+ Nueva métrica</span>
+      <button class="modal-close" onclick="closeAddCustomMetric()">✕</button>
+    </div>
+    <div class="input-group" style="margin-bottom:12px">
+      <label class="input-label">Nombre</label>
+      <input class="inp" id="customMetricName" placeholder="Ej: Cuello, Muslo...">
+    </div>
+    <div class="input-group" style="margin-bottom:16px">
+      <label class="input-label">Unidad</label>
+      <input class="inp" id="customMetricUnit" placeholder="Ej: cm, kg, %">
+    </div>
+    <button class="btn btn-primary" style="width:100%" onclick="saveCustomMetric()">Guardar métrica</button>
+  </div>
+</div>
+
+<div class="modal-overlay" id="calDayModal" onclick="if(event.target===this)closeCalDay()">
+  <div class="modal" onclick="event.stopPropagation()" style="padding:20px">
+    <div class="modal-title">
+      <span id="calDayModalTitle" style="font-size:15px">Resumen del día</span>
+      <button class="modal-close" onclick="closeCalDay()">✕</button>
+    </div>
+
+    <!-- Score círculo pequeño + label -->
+    <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+      <div style="position:relative;width:64px;height:64px;flex-shrink:0">
+        <svg width="64" height="64" viewBox="0 0 64 64">
+          <circle cx="32" cy="32" r="26" fill="none" stroke="var(--bg4)" stroke-width="5"/>
+          <circle cx="32" cy="32" r="26" fill="none" stroke="var(--accent)" stroke-width="5"
+            stroke-dasharray="163.4" id="calDayScoreDash" stroke-dashoffset="163.4" stroke-linecap="round"
+            transform="rotate(-90 32 32)"/>
+        </svg>
+        <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Space Mono',monospace;font-size:14px;font-weight:700" id="calDayScoreNum">—</div>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text)" id="calDayScoreLabel">—</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px" id="calDayScoreSub"></div>
+      </div>
+    </div>
+
+    <!-- Checklist de objetivos -->
+<!-- Checklist de objetivos -->
+    <div style="display:flex;flex-direction:column;gap:8px" id="calDayChecklist"></div>
+    <div id="calDayEditBtn" style="margin-top:14px"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+
+<!-- ═══════════════════════════════════════════════════════
+     SETTINGS MODAL (from mama)
+═══════════════════════════════════════════════════════ -->
+<!-- FOOD SUGGESTIONS MODAL -->
+<div class="modal-overlay" id="foodSuggestModal" onclick="if(event.target===this)closeModal('foodSuggestModal')">
+  <div class="settings-modal" onclick="event.stopPropagation()" style="max-height:88vh;overflow-y:auto">
+    <div class="modal-title">🥗 Sugerencias del día <button class="modal-close" onclick="closeModal('foodSuggestModal')">✕</button></div>
+    <div id="fsMacroStatus" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px"></div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px">
+      <div style="display:flex;gap:5px;flex-wrap:wrap">
+        <button class="fs-filter active" data-meal="all" onclick="fsSwitchMeal('all',this)">Todo</button>
+        <button class="fs-filter" data-meal="Desayuno" onclick="fsSwitchMeal('Desayuno',this)">☀️ Desayuno</button>
+        <button class="fs-filter" data-meal="Almuerzo" onclick="fsSwitchMeal('Almuerzo',this)">🍽 Almuerzo</button>
+        <button class="fs-filter" data-meal="Merienda" onclick="fsSwitchMeal('Merienda',this)">🍎 Merienda</button>
+        <button class="fs-filter" data-meal="Cena" onclick="fsSwitchMeal('Cena',this)">🌙 Cena</button>
+      </div>
+      <button id="fsPrefsBtn" onclick="fsTogglePrefs()" style="flex-shrink:0;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;font-weight:600;color:var(--text2);cursor:pointer">⚙ Preferencias</button>
+    </div>
+    <div id="fsPrefsPanel" style="display:none;background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px"></div>
+    <div id="fsSuggestions"></div>
+  </div>
+</div>
+
+<!-- AI ROUTINE GENERATOR MODAL -->
+<div class="modal-overlay" id="aiRoutineModal" onclick="if(event.target===this)closeModal('aiRoutineModal')">
+  <div class="settings-modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-title" id="airModalTitle">🤖 Generador de rutina <button class="modal-close" onclick="closeModal('aiRoutineModal')">✕</button></div>
+    <div class="wiz-progress" id="airProgress"></div>
+    <div id="airStepSubtitle" style="font-size:11px;color:var(--text3);margin-bottom:14px"></div>
+
+    <!-- STEP 1: Equipment -->
+    <div class="wiz-step active" id="airStep1">
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="air-equip-btn active" data-eq="gym" onclick="airPickEquip(this)">
+          <div style="font-size:26px">🏋️</div>
+          <div style="font-weight:700;font-size:13px;margin-top:4px">Gimnasio completo</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Máquinas, barras, mancuernas</div>
+        </button>
+        <button class="air-equip-btn" data-eq="home" onclick="airPickEquip(this)">
+          <div style="font-size:26px">🏠</div>
+          <div style="font-weight:700;font-size:13px;margin-top:4px">Casa con equipamiento</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Mancuernas, bandas elásticas, banco</div>
+        </button>
+        <button class="air-equip-btn" data-eq="calistenia" onclick="airPickEquip(this)">
+          <div style="font-size:26px">🤸</div>
+          <div style="font-weight:700;font-size:13px;margin-top:4px">Calistenia / Sin equipo</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px">Solo peso corporal, barra de dominadas</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 2: Level, Goal -->
+    <div class="wiz-step" id="airStep2">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Nivel</div>
+      <div style="display:flex;gap:6px;margin-bottom:20px">
+        <button class="air-level" data-level="beginner" onclick="airSetLevel(this)">🌱 Principiante</button>
+        <button class="air-level active" data-level="intermediate" onclick="airSetLevel(this)">💪 Intermedio</button>
+        <button class="air-level" data-level="advanced" onclick="airSetLevel(this)">🔥 Avanzado</button>
+      </div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px">Objetivo</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <button class="air-goal" data-goal="strength" onclick="airSetGoal(this)" style="text-align:left;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;width:100%">
+<div style="font-weight:700;font-size:13px;color:var(--red)">💥 Levantar más peso</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Aumentar la fuerza sin enfocarte en el tamaño del músculo · 3–5 reps · cargas altas</div>
+        </button>
+<button class="air-goal active" data-goal="hypertrophy" onclick="airSetGoal(this)" style="text-align:left;padding:12px 14px;border-radius:10px;border:1.5px solid var(--accent);background:var(--accent-bg,rgba(77,138,255,0.08));cursor:pointer;width:100%"><div style="font-weight:700;font-size:13px;color:var(--accent)">💪 Ganar músculo</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Aumentar el tamaño y definición muscular · 6–15 reps · volumen moderado</div>
+        </button>
+        <button class="air-goal" data-goal="endurance" onclick="airSetGoal(this)" style="text-align:left;padding:12px 14px;border-radius:10px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;width:100%">
+<div style="font-weight:700;font-size:13px;color:var(--green)">🏃 Resistencia</div>
+          <div style="font-size:10px;color:var(--text3);margin-top:2px">Mejorar la capacidad de sostener el esfuerzo por más tiempo · 15–25 reps</div>
+        </button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Days & Time -->
+    <div class="wiz-step" id="airStep3">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Días de gym por semana</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:4px">
+        <button class="air-days-btn" data-d="2" onclick="airPickDays(this)">2</button>
+        <button class="air-days-btn" data-d="3" onclick="airPickDays(this)">3</button>
+        <button class="air-days-btn active" data-d="4" onclick="airPickDays(this)">4</button>
+        <button class="air-days-btn" data-d="5" onclick="airPickDays(this)">5</button>
+        <button class="air-days-btn" data-d="6" onclick="airPickDays(this)">6</button>
+      </div>
+      <div style="font-size:9px;color:var(--text3);margin-bottom:14px">📖 Schoenfeld 2017: 2x/semana por músculo = superior para hipertrofia</div>
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:6px">Duración máxima por sesión</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:4px">
+        <button class="air-time-btn" data-t="30" onclick="airPickTime(this)">30 min</button>
+        <button class="air-time-btn" data-t="45" onclick="airPickTime(this)">45 min</button>
+        <button class="air-time-btn active" data-t="60" onclick="airPickTime(this)">60 min</button>
+        <button class="air-time-btn" data-t="75" onclick="airPickTime(this)">75 min</button>
+        <button class="air-time-btn" data-t="90" onclick="airPickTime(this)">90 min</button>
+        <button class="air-time-btn" data-t="120" onclick="airPickTime(this)">120 min</button>
+      </div>
+      <div style="font-size:9px;color:var(--text3)">⏱ El tiempo determina cuántos ejercicios entran por sesión (incluye calentamiento y vuelta a la calma)</div>
+      <div id="airTimeHint" style="font-size:10px;color:var(--accent);margin-top:6px"></div>
+    </div>
+
+    <!-- STEP 4: Muscles body map -->
+ <!-- STEP 4: Actividades (NUEVO) -->
+<!-- STEP 4: Muscles body map -->
+    <div class="wiz-step" id="airStep4">
+      <div style="display:flex;gap:10px;align-items:flex-start">
+        <div style="flex-shrink:0">
+          <svg viewBox="0 0 100 240" width="96" height="230" style="display:block">
+            <ellipse cx="50" cy="16" rx="12" ry="14" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5"/>
+            <rect x="45" y="29" width="10" height="8" rx="3" fill="var(--bg4)" stroke="var(--border)" stroke-width="1"/>
+            <path id="bm-chest" d="M30,37 Q50,34 70,37 L69,68 Q50,72 31,68 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('chest')" style="cursor:pointer"/>
+            <ellipse id="bm-shoulders" cx="22" cy="46" rx="10" ry="13" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('shoulders')" style="cursor:pointer"/>
+            <ellipse class="bm-mirror" data-zone="shoulders" cx="78" cy="46" rx="10" ry="13" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('shoulders')" style="cursor:pointer"/>
+            <path id="bm-biceps" d="M12,60 Q8,68 9,80 Q15,83 20,80 Q21,68 20,58 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('biceps')" style="cursor:pointer"/>
+            <path class="bm-mirror" data-zone="biceps" d="M88,60 Q92,68 91,80 Q85,83 80,80 Q79,68 80,58 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('biceps')" style="cursor:pointer"/>
+            <path id="bm-triceps" d="M20,59 Q15,65 14,79 Q19,82 23,79 Q23,65 24,58 Z" fill="var(--bg3)" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,2" onclick="bmToggle('triceps')" style="cursor:pointer;opacity:0.8"/>
+            <path class="bm-mirror" data-zone="triceps" d="M80,59 Q85,65 86,79 Q81,82 77,79 Q77,65 76,58 Z" fill="var(--bg3)" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,2" onclick="bmToggle('triceps')" style="cursor:pointer;opacity:0.8"/>
+            <path id="bm-abs" d="M33,68 Q50,72 67,68 L66,104 Q50,108 34,104 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('abs')" style="cursor:pointer"/>
+            <path id="bm-forearms" d="M8,81 Q5,93 7,103 Q12,105 16,103 Q17,93 18,81 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1" onclick="bmToggle('forearms')" style="cursor:pointer"/>
+            <path class="bm-mirror" data-zone="forearms" d="M92,81 Q95,93 93,103 Q88,105 84,103 Q83,93 82,81 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1" onclick="bmToggle('forearms')" style="cursor:pointer"/>
+            <path id="bm-glutes" d="M34,104 Q50,110 66,104 L65,120 Q50,126 35,120 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('glutes')" style="cursor:pointer"/>
+            <path id="bm-quads" d="M35,121 Q30,128 30,154 Q38,158 45,154 Q46,134 43,121 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('quads')" style="cursor:pointer"/>
+            <path class="bm-mirror" data-zone="quads" d="M65,121 Q70,128 70,154 Q62,158 55,154 Q54,134 57,121 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('quads')" style="cursor:pointer"/>
+            <path id="bm-hamstrings" d="M43,122 Q46,132 47,154 Q50,156 53,154 Q51,132 48,121 Z" fill="var(--bg3)" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,2" onclick="bmToggle('hamstrings')" style="cursor:pointer;opacity:0.7"/>
+            <path class="bm-mirror" data-zone="hamstrings" d="M57,122 Q54,132 53,154 Q50,156 47,154 Q49,132 52,121 Z" fill="var(--bg3)" stroke="var(--border)" stroke-width="1" stroke-dasharray="3,2" onclick="bmToggle('hamstrings')" style="cursor:pointer;opacity:0.7"/>
+            <path id="bm-calves" d="M30,156 Q27,170 29,183 Q35,185 40,183 Q41,170 40,156 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('calves')" style="cursor:pointer"/>
+            <path class="bm-mirror" data-zone="calves" d="M70,156 Q73,170 71,183 Q65,185 60,183 Q59,170 60,156 Z" fill="var(--bg4)" stroke="var(--border)" stroke-width="1.5" onclick="bmToggle('calves')" style="cursor:pointer"/>
+            <text x="50" y="234" text-anchor="middle" font-size="7.5" fill="var(--text3)">Tocá para seleccionar</text>
+          </svg>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:5px" id="bmCheckList"></div>
+      </div>
+</div>
+
+    <!-- STEP 5: Focus -->
+    <div class="wiz-step" id="airStep5">
+      <div id="airFocusOptions"></div>
+    </div>
+
+    <!-- STEP 6: Actividades -->
+    <div class="wiz-step" id="airStep6">
+      <div id="airActivityContent"></div>
+    </div>
+
+    <!-- STEP 7: Schedule -->
+    <div class="wiz-step" id="airStep7">
+<div id="airSchedInfo" style="font-size:11px;color:var(--accent);background:var(--accent-bg,rgba(77,138,255,0.08));border:1px solid var(--accent-border,rgba(77,138,255,0.2));border-radius:8px;padding:8px;margin-bottom:12px"></div>      <div id="airSchedGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:10px"></div>
+      <div id="airSchedWarning" style="display:none;font-size:11px;color:var(--yellow);background:rgba(255,212,77,0.08);border:1px solid rgba(255,212,77,0.3);border-radius:8px;padding:8px">⚠️ <strong>Atención:</strong> Días consecutivos pueden perjudicar la recuperación. Se recomiendan al menos 48h de descanso entre sesiones del mismo grupo muscular.</div>
+    </div>
+
+    <!-- STEP 8: Result -->
+    <div class="wiz-step" id="airStep8">
+      <div id="airResultContent"></div>
+    </div>
+
+    <div style="display:flex;gap:8px;margin-top:16px">
+      <button id="airBtnBack" class="btn btn-ghost" style="flex:1;display:none" onclick="airWizNav(-1)">← Atrás</button>
+      <button id="airBtnNext" class="btn btn-primary" style="flex:1" onclick="airWizNav(1)">Continuar →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ROUTINE EDITOR MODAL -->
+
+<!-- ROUTINE EDITOR MODAL -->
+<!-- ROUTINE EDITOR MODAL -->
+<div class="modal-overlay" id="routineEditorModal" onclick="if(event.target===this)closeModal('routineEditorModal')">
+  <div class="settings-modal" onclick="event.stopPropagation()" style="max-height:90vh;overflow-y:auto">
+    <div class="modal-title">✏️ <span id="reModalDayName">Editar día</span> <button class="modal-close" onclick="closeModal('routineEditorModal')">✕</button></div>
+    <div id="reDayNameWrap" style="margin-bottom:10px"></div>
+    <div id="reExList" style="margin-bottom:8px"></div>
+    <button onclick="reAddExercise()" style="width:100%;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer;margin-bottom:4px">+ Ejercicio</button>
+    <button onclick="saveRoutineEditor()" style="width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer">✓ Guardar</button>
+    <div id="rePanelDays" style="display:none"><div id="reDayTabs"></div></div>
+    <div id="rePanelCycle" style="display:none"><div id="reCycleBuilder"></div></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeModal('settingsModal')"><div class="settings-modal" onclick="event.stopPropagation()">
+  <div class="modal-title">⚙ Configuración <button class="modal-close" onclick="closeModal('settingsModal')">✕</button></div>
+<div style="margin-bottom:16px">
+      <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:8px">✨ Estilo visual</label>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px">
+        <div class="layout-card active" data-layout="dark" onclick="changeLayout('dark')" style="border-radius:12px;padding:10px 8px;cursor:pointer;transition:all 0.2s;border:2px solid transparent;background:linear-gradient(135deg,#080d18,#1a2440);text-align:center">
+          <div style="font-size:18px;margin-bottom:4px">🌑</div>
+          <div style="font-size:10px;font-weight:700;color:rgba(255,255,255,0.8);letter-spacing:0.5px">Clásico</div>
+          <div style="font-size:9px;color:rgba(255,255,255,0.35);margin-top:2px">oscuro</div>
+        </div>
+        <div class="layout-card" data-layout="linen" onclick="changeLayout('linen')" style="border-radius:12px;padding:10px 8px;cursor:pointer;transition:all 0.2s;border:2px solid transparent;background:linear-gradient(135deg,#f2ebe0,#e6dbc8);text-align:center">
+          <div style="font-size:18px;margin-bottom:4px">📜</div>
+          <div style="font-size:10px;font-weight:700;color:#2d2620;letter-spacing:0.5px">Linen</div>
+          <div style="font-size:9px;color:#7a6858;margin-top:2px">editorial</div>
+        </div>
+        <div class="layout-card" data-layout="terra" onclick="changeLayout('terra')" style="border-radius:12px;padding:10px 8px;cursor:pointer;transition:all 0.2s;border:2px solid transparent;background:linear-gradient(135deg,#111a0d,#1c2815);text-align:center">
+          <div style="font-size:18px;margin-bottom:4px">🌿</div>
+          <div style="font-size:10px;font-weight:700;color:#c8a84b;letter-spacing:0.5px">Terra</div>
+          <div style="font-size:9px;color:rgba(200,168,75,0.5);margin-top:2px">orgánico</div>
+        </div>
+      </div>
+
+<button class="btn btn-ghost" onclick="closeModal('settingsModal'); openChangeGoalSheet()" 
+  style="width:100%;justify-content:flex-start;gap:10px;padding:14px 16px;border-radius:12px;border:1px solid var(--border)">
+  🎯 <span>Cambiar objetivo</span>
+</button>
+
+<div style="margin-top:14px">
+  <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:10px">🔠 Tamaño de texto</label>
+  <div style="display:flex;gap:8px">
+    <button class="text-size-btn" data-size="normal" onclick="applyTextScale('normal')"
+      style="flex:1;padding:12px 6px;border-radius:10px;border:2px solid var(--accent);background:var(--bg3);color:var(--accent);font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;text-align:center;line-height:1.3">
+      <div style="font-size:14px">A</div>
+      <div style="font-size:9px;font-weight:400;color:var(--text3);margin-top:3px">Normal</div>
+    </button>
+    <button class="text-size-btn" data-size="grande" onclick="applyTextScale('grande')"
+      style="flex:1;padding:12px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;text-align:center;line-height:1.3">
+      <div style="font-size:18px">A</div>
+      <div style="font-size:9px;font-weight:400;color:var(--text3);margin-top:3px">Grande</div>
+    </button>
+    <button class="text-size-btn" data-size="muy-grande" onclick="applyTextScale('muy-grande')"
+      style="flex:1;padding:12px 6px;border-radius:10px;border:2px solid var(--border);background:var(--bg3);color:var(--text2);font-family:'DM Sans',sans-serif;font-weight:700;cursor:pointer;text-align:center;line-height:1.3">
+      <div style="font-size:22px">A</div>
+      <div style="font-size:9px;font-weight:400;color:var(--text3);margin-top:3px">Muy grande</div>
+    </button>
+  </div>
+</div>
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Nombre</label>
+      <input class="inp" id="settingName" placeholder="Tu nombre">
+    </div>
+    <div style="margin-bottom:12px">
+      <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Calorías objetivo</label>
+      <input class="inp" id="settingKcal" type="number" placeholder="2400">
+    </div>
+    <div class="input-row" style="margin-bottom:12px">
+      <div style="flex:1"><label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Proteína (g)</label><input class="inp" id="settingProt" type="number"></div>
+      <div style="flex:1"><label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Carbos (g)</label><input class="inp" id="settingCarb" type="number"></div>
+      <div style="flex:1"><label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Grasas (g)</label><input class="inp" id="settingFat" type="number"></div>
+    </div>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="saveSettings()">Guardar cambios</button>
+    <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:rgba(255,107,77,0.3)" onclick="openResetConfirm()">Reiniciar configuración</button>
+  </div>
+</div>
+<!-- ═══════════════════════════════════════════════════════
+     CELEBRATION MODAL (from mama)
+═══════════════════════════════════════════════════════ -->
+<div id="celebrationModal" onclick="closeCelebration()">
+  <div class="celeb-box" onclick="event.stopPropagation()">
+    <div class="confetti-wrap" id="confettiWrap"></div>
+    <span class="celeb-emoji" id="celebEmoji">🎉</span>
+    <div class="celeb-title" id="celebTitle">¡Lo lograste!</div>
+    <div class="celeb-msg" id="celebMsg">¡Sos una crack!</div>
+    <button class="celeb-btn" onclick="closeCelebration()">¡Gracias! 💪</button>
+  </div>
+</div>
+
+<!-- RESET CONFIRM MODAL -->
+<div id="resetConfirmModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);align-items:center;justify-content:center;padding:24px">
+  <div onclick="event.stopPropagation()" style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:320px;width:100%;text-align:center">
+    <div style="font-size:36px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">¿Reiniciar todo?</div>
+    <div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:24px">Se borrarán todos tus datos, comidas, métricas y configuración. Esta acción no se puede deshacer.</div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-ghost" style="flex:1" onclick="closeResetConfirm()">Cancelar</button>
+      <button class="btn btn-primary" style="flex:1;background:var(--red);border-color:var(--red)" onclick="resetSetup()">Sí, borrar todo</button>
+    </div>
+  </div>
+</div>
+
+</body>
+
+
+<!-- ═══════════════════════════════════════════
+     JS — cargado como scripts clásicos (sin módulos ES)
+     para compatibilidad con Vite + Capacitor
+═══════════════════════════════════════════ -->
+
+<!-- Utils -->
+<script src="/js/utils/storage.js"></script>
+<script src="/js/utils/debug.js"></script>
+
+<!-- Data / Config -->
+<script src="/js/modules/training-data.js"></script>
+<script src="/js/modules/supplements-data.js"></script>
+<script src="/js/modules/food-db.js"></script>
+
+<!-- UI Helpers -->
+<script src="/js/ui/ui-helpers.js"></script>
+<script src="/js/ui/celebration.js"></script>
+<script src="/js/ui/motivation.js"></script>
+<script src="/js/ui/settings.js"></script>
+
+<!-- Feature Modules -->
+<script src="/js/modules/macros.js"></script>
+<script src="/js/modules/training.js"></script>
+<script src="/js/modules/supplements.js"></script>
+<script src="/js/modules/metrics.js"></script>
+<script src="/js/modules/sleep.js"></script>
+<script src="/js/modules/hydration.js"></script>
+<script src="/js/modules/calendar.js"></script>
+<script src="/js/modules/routine-editor.js"></script>
+<script src="/js/modules/setup.js"></script>
+
+<!-- AI -->
+<script src="/js/ai/food-suggest.js"></script>
+<script src="/js/modules/meal-plan.js"></script>
+<script src="/js/ai/ai-routine.js"></script>
+
+<!-- Timers (dependen de training y supplements) -->
+<script src="/js/ui/timers.js"></script>
+
+<script src="/js/ui/session-timer-patch.js"></script>
+
+<!-- Bootstrap — arranca la app -->
+<script src="/js/ui/navigation.js"></script>
+<script src="/js/modules/wearables.js"></script><script src="/js/modules/widgets.js"></script>
+<script src="/js/utils/bootstrap.js"></script>
+<script>
+// ─── PATCH 1: Saltar timer siempre funcione ───────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  var _orig = window.dismissRestTimer;
+  window.dismissRestTimer = function() {
+    try { if (typeof _orig === 'function') _orig(); } catch(e) {}
+    var overlay = document.getElementById('restTimerOverlay');
+    if (overlay) { overlay.style.display = 'none'; overlay.classList.remove('active','open'); }
+  };
+});
+
+// ─── PATCH 2: Simplificar display de BMR/TDEE en planResult ──────────────────
+// Sobreescribe calcPlanLive después de que setup.js lo defina
+document.addEventListener('DOMContentLoaded', function() {
+  var _origCalcPlan = window.calcPlanLive;
+  window.calcPlanLive = function() {
+    // Ejecutar lógica original primero (calcula y guarda en state)
+    if (typeof _origCalcPlan === 'function') {
+      _origCalcPlan();
+    }
+    // Luego sobrescribir el HTML de planResult con versión simplificada
+    setTimeout(function() {
+      var el = document.getElementById('planResult');
+      if (!el || !el.innerHTML) return;
+
+      // Extraer valores numéricos que ya calculó setup.js del DOM
+      var html = el.innerHTML;
+      var tdeeMatch = html.match(/(\d{3,5})\s*kcal/g);
+      var protMatch = html.match(/(\d+)g.*[Pp]rote/);
+      var carbMatch = html.match(/[Cc]arbo[^0-9]*(\d+)g/);
+      var fatMatch  = html.match(/[Gg]rasa[^0-9]*(\d+)g/);
+
+      // Buscar valores por ID si los pone setup.js
+      function getVal(id) {
+        var node = document.getElementById(id);
+        return node ? node.textContent.trim() : null;
+      }
+
+      // Intentar leer desde elementos con ID conocidos (setup.js podría usarlos)
+      var items = el.querySelectorAll('[class*="plan"], [class*="row"], .plan-row, .result-row');
+
+      // Recolectar todos los números del HTML actual para mostrarlos limpios
+      var numbers = [];
+      el.querySelectorAll('span, div').forEach(function(n) {
+        var txt = n.textContent.trim();
+        if (/^\d{3,5}\s*(kcal|g)$/.test(txt) || /^[\d,.]+\s*(kcal|g)$/.test(txt)) {
+          numbers.push({ text: txt, el: n });
+        }
+      });
+
+      // Buscar el valor de TDEE (el segundo número kcal grande, o el mayor)
+      var kcalNums = [];
+      var gNums = [];
+      numbers.forEach(function(n) {
+        if (n.text.includes('kcal')) kcalNums.push(parseInt(n.text));
+        if (n.text.includes('g') && !n.text.includes('kcal')) gNums.push(parseInt(n.text));
+      });
+
+      // Solo reemplazar las etiquetas BMR/TDEE en el texto, no la estructura entera
+      el.querySelectorAll('*').forEach(function(node) {
+        if (node.children.length === 0) {
+          var t = node.textContent;
+          if (t === 'BMR') node.textContent = 'Calorías en reposo';
+          if (t === 'TDEE') node.textContent = 'Calorías quemadas/día';
+          if (t === 'TU PLAN CALCULADO') node.textContent = 'TU PLAN NUTRICIONAL';
+        }
+      });
+    }, 50);
+  };
+
+  // Ejecutar una vez si ya hay datos
+  if (document.getElementById('cfgAge') && document.getElementById('cfgAge').value) {
+    window.calcPlanLive();
+  }
+});
+
+// ─── PATCH 3: Calendario semanal para creación manual de rutina ───────────────
+document.addEventListener('DOMContentLoaded', function() {
+  // Estado del calendario manual
+  var _manualWeek = {
+    Mon: null, Tue: null, Wed: null, Thu: null, Fri: null, Sat: null, Sun: null
+  };
+  var _manualSelectedDay = null;
+  var _DOW_LABELS = ['LUN','MAR','MIÉ','JUE','VIE','SÁB','DOM'];
+  var _DOW_KEYS   = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  var _DOW_FULL   = { Mon:'Lunes', Tue:'Martes', Wed:'Miércoles', Thu:'Jueves', Fri:'Viernes', Sat:'Sábado', Sun:'Domingo' };
+
+  // Reemplazar el contenido de sp3-manual con el calendario semanal
+  function renderManualWeekCalendar() {
+    var container = document.getElementById('sp3-manual');
+    if (!container) return;
+
+    container.innerHTML =
+      '<div style="font-size:13px;font-weight:700;margin-bottom:4px">Tu semana de entrenamiento</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:12px">Tocá cada día para configurarlo.</div>' +
+
+      // Grid de 7 días
+      '<div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:16px" id="manualWeekGrid"></div>' +
+
+      // Panel del día seleccionado
+      '<div id="manualDayPanel" style="display:none;border-radius:10px;border:1.5px solid var(--border);background:var(--bg3);padding:12px;margin-bottom:12px">' +
+        '<div style="font-size:12px;font-weight:700;margin-bottom:10px" id="manualDayTitle"></div>' +
+        '<div style="display:flex;flex-direction:column;gap:6px">' +
+          '<button onclick="_manualSetDay(\'train\')" style="text-align:left;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg4);cursor:pointer;font-size:12px;color:var(--text)">🏋️ Entrenamiento de fuerza</button>' +
+          '<button onclick="_manualSetDay(\'sport\')" style="text-align:left;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg4);cursor:pointer;font-size:12px;color:var(--text)">⚽ Actividad deportiva</button>' +
+          '<button onclick="_manualSetDay(\'rest\')"  style="text-align:left;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);background:var(--bg4);cursor:pointer;font-size:12px;color:var(--text)">😴 Descanso</button>' +
+        '</div>' +
+      '</div>' +
+
+      // Builder de ejercicios (visible solo si el día es "train")
+      '<div id="manualExBuilder" style="display:none">' +
+        '<div id="exColHdr" class="ex-col-hdr"><span style="flex:3;padding-left:4px">Ejercicio</span><span style="flex:1;text-align:center">Series</span><span style="flex:1;text-align:center">Reps</span><span style="width:36px"></span></div>' +
+        '<div id="exBuilderContainer"></div>' +
+        '<div id="addExRow"><button class="add-supp-btn" style="width:100%" onclick="addExercise()">+ Agregar ejercicio</button></div>' +
+      '</div>' +
+
+      '<button onclick="sp3BackToChoose()" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:8px 0;margin-top:4px;text-decoration:underline">← Volver a elegir método</button>';
+
+    renderWeekGrid();
+  }
+
+  function renderWeekGrid() {
+    var grid = document.getElementById('manualWeekGrid');
+    if (!grid) return;
+    grid.innerHTML = _DOW_KEYS.map(function(d, i) {
+      var type = _manualWeek[d];
+      var isSelected = _manualSelectedDay === d;
+      var icon = type === 'train' ? '🏋️' : type === 'sport' ? '⚽' : type === 'rest' ? '😴' : '➕';
+      var color = type === 'train' ? 'var(--accent)' : type === 'sport' ? 'var(--green)' : type === 'rest' ? 'var(--text3)' : 'var(--border)';
+      var bg = isSelected ? 'rgba(77,138,255,0.12)' : (type ? 'var(--bg3)' : 'var(--bg4)');
+      return '<div onclick="_manualSelectDay(\'' + d + '\')" style="border-radius:8px;padding:6px 2px;cursor:pointer;border:1.5px solid ' +
+        (isSelected ? 'var(--accent)' : color) + ';background:' + bg + ';text-align:center">' +
+        '<div style="font-size:9px;font-weight:700;color:' + (isSelected ? 'var(--accent)' : 'var(--text2)') + '">' + _DOW_LABELS[i] + '</div>' +
+        '<div style="font-size:15px;margin-top:2px">' + icon + '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  // Exponer funciones al scope global
+  window._manualSelectDay = function(dow) {
+    _manualSelectedDay = dow;
+    renderWeekGrid();
+    var panel = document.getElementById('manualDayPanel');
+    var title = document.getElementById('manualDayTitle');
+    var exBuilder = document.getElementById('manualExBuilder');
+    if (panel) { panel.style.display = 'block'; }
+    if (title) { title.textContent = _DOW_FULL[dow]; }
+    if (exBuilder) { exBuilder.style.display = _manualWeek[dow] === 'train' ? 'block' : 'none'; }
+  };
+
+  window._manualSetDay = function(type) {
+    if (!_manualSelectedDay) return;
+    _manualWeek[_manualSelectedDay] = type;
+    renderWeekGrid();
+    // Mostrar builder de ejercicios si es entrenamiento
+    var exBuilder = document.getElementById('manualExBuilder');
+    if (exBuilder) { exBuilder.style.display = type === 'train' ? 'block' : 'none'; }
+    // Sincronizar con sistema de training si existe
+    // (el resto lo maneja training.js cuando se guarda)
+  };
+
+  // Interceptar sp3SelectMode para inyectar el calendario cuando el usuario elige "manual"
+// PATCH 3 desactivado — lógica movida a setup.js _renderExBuilderUI
+});
+</script>
+
+</body>
+</html>

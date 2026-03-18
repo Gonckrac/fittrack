@@ -1,0 +1,1756 @@
+/* ── FULL COLOR THEMES (bg + borders + accent + text + card) ── */
+/* Default = Noche (dark blue) — no class needed */
+body.theme-rose     { --accent:#ff6b9d; --accent2:#ff9b6b; --green:#4dffb4; --red:#ff6b4d; --yellow:#ffd44d; --bg:#0f0508; --bg2:#180a0e; --bg3:#200c12; --bg4:#2a1018; --border:#3d1a24; --card:#0d0609; --text2:#b87b8a; --text3:#6b3d4a; }
+body.theme-lavender { --accent:#a78bfa; --accent2:#f472b6; --green:#4dffb4; --red:#f472b6; --yellow:#fbbf24; --bg:#080510; --bg2:#0e0918; --bg3:#140d20; --bg4:#1a1228; --border:#2d1f4a; --card:#060410; --text2:#8b7ab8; --text3:#4a3d70; }
+body.theme-emerald  { --accent:#10d9a0; --accent2:#fbbf24; --green:#10d9a0; --red:#ef4444; --yellow:#fbbf24; --bg:#050f0a; --bg2:#081812; --bg3:#0c2018; --bg4:#102818; --border:#1a3d2a; --card:#040d08; --text2:#5a9b7a; --text3:#2d5a3d; }
+body.theme-sunset   { --accent:#f97316; --accent2:#eab308; --green:#4dffb4; --red:#ef4444; --yellow:#eab308; --bg:#0f0800; --bg2:#180f00; --bg3:#201500; --bg4:#281c00; --border:#3d2a00; --card:#0d0700; --text2:#b88a40; --text3:#6b4d1a; }
+body.theme-ocean    { --accent:#06b6d4; --accent2:#8b5cf6; --green:#4dffb4; --red:#ef4444; --yellow:#ffd44d; --bg:#00090f; --bg2:#000f18; --bg3:#001520; --bg4:#001b28; --border:#003040; --card:#00070d; --text2:#2a7a9a; --text3:#0a4a5a; }
+body.theme-crimson  { --accent:#ff3860; --accent2:#ff8c42; --green:#4dffb4; --red:#ff3860; --yellow:#ffd44d; --bg:#0f0508; --bg2:#180a0d; --bg3:#200c10; --bg4:#2a1015; --border:#3d1520; --card:#0d0407; --text2:#b8607a; --text3:#6b2d3d; }
+body.theme-gold     { --accent:#f7b731; --accent2:#fd9644; --green:#26de81; --red:#fc5c65; --yellow:#f7b731; --bg:#0d0900; --bg2:#160f00; --bg3:#1e1500; --bg4:#271c00; --border:#3d2e00; --card:#0b0800; --text2:#a88a3a; --text3:#5a4a1a; }
+body.theme-steel    { --accent:#94a3b8; --accent2:#64748b; --green:#4dffb4; --red:#f87171; --yellow:#fbbf24; --bg:#050507; --bg2:#08080c; --bg3:#0d0d14; --bg4:#12121e; --border:#1e1e2e; --card:#040407; --text2:#64748b; --text3:#334155; }
+body.theme-mint     { --accent:#2dd4bf; --accent2:#34d399; --green:#34d399; --red:#f87171; --yellow:#fbbf24; --bg:#030d0c; --bg2:#051210; --bg3:#081a18; --bg4:#0c2220; --border:#133d38; --card:#020b0a; --text2:#3d8a80; --text3:#1a4a45; }
+body.theme-violet   { --accent:#7c3aed; --accent2:#db2777; --green:#4dffb4; --red:#db2777; --yellow:#fbbf24; --bg:#060408; --bg2:#0a0710; --bg3:#100b18; --bg4:#160f20; --border:#2d1f45; --card:#040308; --text2:#6b5a8a; --text3:#3d2d5a; }
+/* ── Layout card selector (settings modal) ── */
+.layout-card.active {
+  border-color: white !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.3);
+}
+body.layout-linen .layout-card.active {
+  border-color: #2d2620 !important;
+  box-shadow: 0 0 0 1px rgba(45,38,32,0.3);
+}
+body.layout-terra .layout-card.active {
+  border-color: #c8a84b !important;
+  box-shadow: 0 0 0 1px rgba(200,168,75,0.4);
+}
+/* ══════════════════════════════════════════════════
+   LAYOUT: LINEN — editorial serif cálido (claro)
+══════════════════════════════════════════════════ */
+body.layout-linen {
+  --bg: #f8f3eb; --bg2: #f2ebe0; --bg3: #ede4d6; --bg4: #e6dbc8;
+  --accent: #8a7060; --accent2: #5a8070; --green: #5a8070; --red: #c05040;
+  --yellow: #a09050; --text: #2d2620; --text2: #7a6858; --text3: #a89880;
+  --border: rgba(45,38,32,0.12); --card: #f4efe6; --radius: 16px; --radius-sm: 10px;
+  font-family: 'Nunito', 'DM Sans', sans-serif;
+}
+body.layout-linen .card { background: #f4efe6; border-color: rgba(45,38,32,0.1); }
+body.layout-linen .inp { background: #ede4d6; border-color: rgba(45,38,32,0.15); color: #2d2620; }
+body.layout-linen .inp::placeholder { color: #a89880; }
+body.layout-linen .btn-primary { background: #2d2620; color: #f8f3eb; border: none; }
+body.layout-linen .btn-ghost { border-color: rgba(45,38,32,0.25); color: #2d2620; }
+body.layout-linen .modal-overlay > * { background: #f4efe6; }
+body.layout-linen .settings-modal { background: #f4efe6; }
+body.layout-linen .header { background: #f8f3eb; border-bottom: 1px solid rgba(45,38,32,0.1); }
+body.layout-linen .tabs { background: #f8f3eb; border-bottom: 1px solid rgba(45,38,32,0.1); }
+body.layout-linen .tab { color: rgba(45,38,32,0.35); }
+body.layout-linen .tab.active { color: #2d2620; border-bottom-color: #2d2620; }
+body.layout-linen .content { background: #f8f3eb; }
+/* ══════════════════════════════════════════════════════════════════════════════
+   LAYOUT: TERRA — experiencia completa
+   Verde musgo profundo + dorado orgánico. Instrument Serif. App entera.
+══════════════════════════════════════════════════════════════════════════════ */
+/* ── Variables y fuente base ── */
+body.layout-terra {
+  --bg:     #0d1209;
+  --bg2:    #111a0d;
+  --bg3:    #162010;
+  --bg4:    #1c2815;
+  --accent: #c8a84b;
+  --accent2:#6a9e5a;
+  --green:  #6a9e5a;
+  --red:    #c87a30;
+  --yellow: #c8a84b;
+  --text:   #e8e0cc;
+  --text2:  #a09878;
+  --text3:  #5a5438;
+  --border: rgba(200,168,75,0.14);
+  --card:   #101908;
+  --radius: 20px;
+  --radius-sm: 12px;
+  --accent-bg: rgba(200,168,75,0.08);
+  --accent-border: rgba(200,168,75,0.2);
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  background: #0d1209;
+}
+/* ── Fondo con atmósfera de luz verde desde arriba ── */
+body.layout-terra,
+body.layout-terra .app {
+  background: #0d1209;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(80,120,30,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 60%,  rgba(200,168,75,0.06) 0%, transparent 40%),
+    radial-gradient(ellipse at 10% 90%,  rgba(40,70,15,0.2)   0%, transparent 45%);
+}
+/* ══════════════════
+   HEADER — limpio, transparente, serif
+══════════════════ */
+body.layout-terra .header {
+  background: rgba(13,18,9,0.75);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(200,168,75,0.1);
+  padding: 14px 20px 14px;
+  padding-top: calc(14px + env(safe-area-inset-top));
+}
+body.layout-terra .header-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+  color: #e8e0cc;
+  letter-spacing: 0.3px;
+}
+body.layout-terra .header-date {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 11px;
+  color: #5a5438;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+body.layout-terra .day-badge {
+  background: rgba(200,168,75,0.1);
+  border: 1px solid rgba(200,168,75,0.22);
+  color: #c8a84b;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  border-radius: 20px;
+  padding: 4px 12px;
+}
+body.layout-terra .settings-btn {
+  background: rgba(200,168,75,0.08);
+  border: 1px solid rgba(200,168,75,0.15);
+  color: #a09878;
+  border-radius: 10px;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+body.layout-terra .settings-btn:hover {
+  border-color: rgba(200,168,75,0.35);
+  color: #c8a84b;
+}
+/* ══════════════════
+   TABS — pills horizontales translúcidas
+══════════════════ */
+body.layout-terra .tabs {
+  background: rgba(13,18,9,0.8);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(200,168,75,0.08);
+  padding: 8px 12px 0;
+  gap: 4px;
+}
+body.layout-terra .tab {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: rgba(232,224,204,0.28);
+  border-bottom: 2px solid transparent;
+  padding: 6px 14px 10px;
+  border-radius: 0;
+  transition: all 0.25s;
+  white-space: nowrap;
+}
+body.layout-terra .tab.active {
+  color: #c8a84b;
+  border-bottom-color: #c8a84b;
+}
+body.layout-terra .tab-icon {
+  font-size: 15px;
+  margin-bottom: 2px;
+}
+/* ══════════════════
+   CONTENT
+══════════════════ */
+body.layout-terra .content {
+  background: transparent;
+  padding: 20px 16px;
+}
+/* ══════════════════
+   CARDS — borde dorado tenue, gradiente sutil
+══════════════════ */
+body.layout-terra .card {
+  background: linear-gradient(160deg, #111d0d 0%, #0e1809 100%);
+  border: 1px solid rgba(200,168,75,0.12);
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.35), inset 0 1px 0 rgba(200,168,75,0.06);
+  margin-bottom: 14px;
+}
+body.layout-terra .card-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  color: rgba(200,168,75,0.45);
+  font-weight: 400;
+  margin-bottom: 14px;
+}
+/* ══════════════════
+   MOTIVATION CARD
+══════════════════ */
+body.layout-terra .daily-motiv-card {
+  background: linear-gradient(135deg, rgba(200,168,75,0.07) 0%, rgba(106,158,90,0.05) 100%);
+  border: 1px solid rgba(200,168,75,0.14);
+  border-radius: 20px;
+  padding: 16px;
+  margin-bottom: 16px;
+  gap: 14px;
+}
+body.layout-terra #dailyMotivEmoji { font-size: 26px; }
+body.layout-terra #dailyMotivTitle {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 400;
+  color: #c8a84b;
+  letter-spacing: 0.2px;
+  margin-bottom: 3px;
+}
+body.layout-terra #dailyMotivMsg {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #a09878;
+  line-height: 1.6;
+}
+/* ══════════════════
+   PROGRESS BARS
+══════════════════ */
+body.layout-terra .prog-bar {
+  height: 4px;
+  background: rgba(200,168,75,0.08);
+  border-radius: 2px;
+}
+body.layout-terra .prog-fill       { height: 4px; border-radius: 2px; }
+body.layout-terra .prog-fill.prot  { background: #6a9e5a; box-shadow: 0 0 8px rgba(106,158,90,0.4); }
+body.layout-terra .prog-fill.carb  { background: #c8a84b; box-shadow: 0 0 8px rgba(200,168,75,0.4); }
+body.layout-terra .prog-fill.fat   { background: #c87a30; box-shadow: 0 0 8px rgba(200,122,48,0.4); }
+body.layout-terra .prog-fill.kcal  { background: #a09878; }
+body.layout-terra .prog-fill.over  { background: #c87a30; }
+body.layout-terra .prog-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 13px;
+  color: #e8e0cc;
+}
+body.layout-terra .prog-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 12px;
+  color: #a09878;
+  font-weight: 400;
+}
+/* ══════════════════
+   MACRO STATS
+══════════════════ */
+body.layout-terra .macro-stat {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.09);
+  border-radius: 12px;
+}
+body.layout-terra .macro-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 22px;
+  font-weight: 400;
+}
+body.layout-terra .macro-val.prot-color { color: #6a9e5a; }
+body.layout-terra .macro-val.carb-color { color: #c8a84b; }
+body.layout-terra .macro-val.fat-color  { color: #c87a30; }
+body.layout-terra .macro-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: #5a5438;
+  text-transform: uppercase;
+}
+body.layout-terra .macro-sub { color: #5a5438; font-size: 10px; }
+/* ══════════════════
+   INPUTS Y FORMULARIOS
+══════════════════ */
+body.layout-terra .inp {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 14px;
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.15);
+  border-radius: 12px;
+  color: #e8e0cc;
+}
+body.layout-terra .inp:focus {
+  border-color: rgba(200,168,75,0.45);
+  background: rgba(200,168,75,0.08);
+  outline: none;
+}
+body.layout-terra .inp::placeholder {
+  color: rgba(160,152,120,0.35);
+}
+body.layout-terra select.inp {
+  background: rgba(200,168,75,0.05);
+  color: #e8e0cc;
+}
+body.layout-terra .input-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: #5a5438;
+}
+/* ══════════════════
+   BOTONES
+══════════════════ */
+body.layout-terra .btn {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  border-radius: 12px;
+  transition: all 0.2s;
+}
+body.layout-terra .btn-primary {
+  background: linear-gradient(135deg, #c8a84b, #a88835);
+  color: #0d1209;
+  border: none;
+  font-weight: 400;
+  box-shadow: 0 4px 16px rgba(200,168,75,0.28);
+}
+body.layout-terra .btn-primary:hover { box-shadow: 0 6px 20px rgba(200,168,75,0.4); }
+body.layout-terra .btn-ghost {
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.2);
+  color: #c8a84b;
+}
+body.layout-terra .btn-ghost:hover {
+  background: rgba(200,168,75,0.1);
+  border-color: rgba(200,168,75,0.4);
+}
+/* ══════════════════
+   MODALES
+══════════════════ */
+body.layout-terra .modal-overlay { background: rgba(0,0,0,0.75); }
+body.layout-terra .modal {
+  background: linear-gradient(180deg, #131f0e 0%, #0f1a0b 100%);
+  border-top: 1px solid rgba(200,168,75,0.12);
+  border-radius: 28px 28px 0 0;
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.6);
+}
+body.layout-terra .modal-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 18px;
+  font-weight: 400;
+  color: #e8e0cc;
+  letter-spacing: 0.3px;
+}
+body.layout-terra .modal-close {
+  background: rgba(200,168,75,0.08);
+  border: 1px solid rgba(200,168,75,0.15);
+  color: #a09878;
+  border-radius: 50%;
+}
+body.layout-terra .settings-modal {
+  background: linear-gradient(180deg, #131f0e 0%, #0f1a0b 100%);
+}
+/* ══════════════════
+   TRAINING — ejercicios, sets
+══════════════════ */
+body.layout-terra .exercise-card {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.1);
+  border-radius: 14px;
+  margin-bottom: 8px;
+}
+body.layout-terra .exercise-name {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 14px;
+  color: #e8e0cc;
+}
+body.layout-terra .exercise-muscle {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+  font-size: 10px;
+}
+body.layout-terra .exercise-chevron { color: #5a5438; }
+body.layout-terra .set-input {
+  background: rgba(200,168,75,0.06);
+  border: 1px solid rgba(200,168,75,0.12);
+  color: #e8e0cc;
+  border-radius: 8px;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+body.layout-terra .set-input:focus { border-color: rgba(200,168,75,0.4); }
+body.layout-terra .set-input::placeholder { color: rgba(160,152,120,0.35); }
+body.layout-terra .set-num { color: #5a5438; }
+body.layout-terra .set-check {
+  border: 2px solid rgba(200,168,75,0.2);
+  border-radius: 6px;
+  background: transparent;
+}
+body.layout-terra .set-check.done {
+  background: #6a9e5a;
+  border-color: #6a9e5a;
+  box-shadow: 0 0 8px rgba(106,158,90,0.4);
+}
+body.layout-terra .add-set-btn {
+  color: rgba(200,168,75,0.6);
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+/* Week strip — días de la semana en entreno */
+body.layout-terra #weekStrip .day-cell { /* si existe esta clase */
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+/* Training progress bar */
+body.layout-terra #trainingProgressBar {
+  background: linear-gradient(90deg, #6a9e5a, #c8a84b);
+  box-shadow: 0 0 8px rgba(106,158,90,0.4);
+}
+/* Botones de rutina */
+body.layout-terra [onclick="openAIRoutine()"] {
+  background: rgba(200,168,75,0.08);
+  border: 1px solid rgba(200,168,75,0.2);
+  color: #c8a84b;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  border-radius: 10px;
+}
+body.layout-terra [onclick="openRoutineEditor()"] {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.1);
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  border-radius: 10px;
+}
+/* ══════════════════
+   SUPLEMENTOS
+══════════════════ */
+body.layout-terra .supp-item {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.09);
+  border-radius: 14px;
+}
+body.layout-terra .supp-item.taken {
+  background: rgba(106,158,90,0.08);
+  border-color: rgba(106,158,90,0.25);
+}
+body.layout-terra .supp-check {
+  border: 2px solid rgba(200,168,75,0.2);
+}
+body.layout-terra .supp-item.taken .supp-check {
+  background: #6a9e5a;
+  border-color: #6a9e5a;
+  box-shadow: 0 0 8px rgba(106,158,90,0.4);
+}
+body.layout-terra .supp-name {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .supp-dose {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #a09878;
+}
+body.layout-terra .supp-time { color: #5a5438; }
+/* ══════════════════
+   MÉTRICAS
+══════════════════ */
+body.layout-terra .metric-card {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.09);
+  border-radius: 14px;
+}
+body.layout-terra .metric-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-weight: 400;
+  color: #c8a84b;
+}
+body.layout-terra .metric-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+  letter-spacing: 1px;
+}
+body.layout-terra .metric-unit { color: #5a5438; }
+body.layout-terra .metric-change.up   { color: #6a9e5a; }
+body.layout-terra .metric-change.down { color: #c87a30; }
+body.layout-terra .history-row { border-bottom-color: rgba(200,168,75,0.08); }
+body.layout-terra .history-date {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+}
+body.layout-terra .history-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+/* ══════════════════
+   SUEÑO
+══════════════════ */
+body.layout-terra .sleep-card {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.09);
+  border-radius: 14px;
+}
+body.layout-terra .sleep-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .sleep-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  letter-spacing: 1.5px;
+  color: #5a5438;
+}
+body.layout-terra .readiness-num {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #c8a84b;
+}
+body.layout-terra .readiness-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  letter-spacing: 2px;
+  color: #5a5438;
+}
+/* ══════════════════
+   AGUA / HIDRATACIÓN
+══════════════════ */
+body.layout-terra .glass-svg { filter: drop-shadow(0 4px 20px rgba(106,158,90,0.2)); }
+body.layout-terra .glass-pct {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .glass-ml { color: #a09878; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+/* ══════════════════
+   KCAL
+══════════════════ */
+body.layout-terra .kcal-num {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-weight: 400;
+  color: #c8a84b;
+  text-shadow: 0 0 40px rgba(200,168,75,0.25);
+}
+body.layout-terra .kcal-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+  letter-spacing: 1.5px;
+}
+body.layout-terra .kcal-item {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.09);
+  border-radius: 12px;
+}
+body.layout-terra .kcal-item-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .kcal-item-label {
+  color: #5a5438;
+  letter-spacing: 0.5px;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+/* ══════════════════
+   CALENDARIO
+══════════════════ */
+body.layout-terra .cal-month {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .cal-nav {
+  background: rgba(200,168,75,0.06);
+  border: 1px solid rgba(200,168,75,0.14);
+  color: #a09878;
+  border-radius: 8px;
+}
+body.layout-terra .cal-nav:hover {
+  border-color: rgba(200,168,75,0.4);
+  color: #c8a84b;
+}
+body.layout-terra .cal-dow {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+  letter-spacing: 1px;
+}
+body.layout-terra .cal-day { color: #a09878; border-radius: 8px; }
+body.layout-terra .cal-day.today  { border-color: #c8a84b; color: #c8a84b; }
+body.layout-terra .cal-day.trained { background: rgba(106,158,90,0.5); color: #e8e0cc; }
+body.layout-terra .cal-day.rest    { background: rgba(90,84,56,0.2); color: #5a5438; }
+body.layout-terra .cal-day.day-great { background: rgba(106,158,90,0.7); color: #fff; }
+body.layout-terra .cal-day.day-ok    { background: rgba(200,168,75,0.55); color: #0d1209; }
+body.layout-terra .cal-day.day-low   { background: rgba(200,122,48,0.45); color: #e8e0cc; }
+body.layout-terra .cal-day.missed    { background: rgba(200,122,48,0.2); color: rgba(232,200,160,0.6); }
+body.layout-terra .cal-streak-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #c8a84b;
+}
+body.layout-terra .cal-streak-lbl {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+  letter-spacing: 1px;
+}
+/* ══════════════════
+   MEALS / COMIDAS
+══════════════════ */
+body.layout-terra .meal-card { /* card con comidas */ }
+body.layout-terra .meal-name {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 15px;
+  color: #e8e0cc;
+}
+body.layout-terra .meal-kcal {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+}
+body.layout-terra .meal-item {
+  background: rgba(200,168,75,0.04);
+  border-radius: 10px;
+}
+body.layout-terra .meal-item-name {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #a09878;
+  font-size: 12px;
+}
+body.layout-terra .meal-item-macros { color: #5a5438; }
+body.layout-terra .meal-add-btn {
+  border-color: rgba(200,168,75,0.14);
+  color: rgba(200,168,75,0.35);
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  border-radius: 10px;
+}
+body.layout-terra .meal-add-btn:hover {
+  border-color: rgba(200,168,75,0.4);
+  color: #c8a84b;
+}
+body.layout-terra .meal-placeholder {
+  border-color: rgba(200,168,75,0.12);
+  color: #5a5438;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+/* ══════════════════
+   SECTION DIVIDERS & TAGS
+══════════════════ */
+body.layout-terra .section-div {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 9px;
+  letter-spacing: 2.5px;
+  color: #5a5438;
+  text-transform: uppercase;
+}
+body.layout-terra .tag-green  { background: rgba(106,158,90,0.15); color: #6a9e5a; }
+body.layout-terra .tag-red    { background: rgba(200,122,48,0.15); color: #c87a30; }
+body.layout-terra .tag-blue   { background: rgba(200,168,75,0.1);  color: #c8a84b; }
+body.layout-terra .tag-yellow { background: rgba(200,168,75,0.15); color: #c8a84b; }
+/* ══════════════════
+   PREDICTION CARD
+══════════════════ */
+body.layout-terra .prediction-card {
+  background: linear-gradient(160deg, rgba(200,168,75,0.07), rgba(106,158,90,0.04));
+  border: 1px solid rgba(200,168,75,0.14);
+  border-radius: 16px;
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+body.layout-terra .prediction-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #a09878;
+  font-size: 11px;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+body.layout-terra .prediction-row {
+  border-bottom: 1px solid rgba(200,168,75,0.07);
+  padding: 7px 0;
+}
+body.layout-terra .prediction-action {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+  font-size: 13px;
+}
+body.layout-terra .prediction-new  { color: #6a9e5a; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+body.layout-terra .prediction-arrow { color: #5a5438; }
+body.layout-terra .prediction-potential {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(200,168,75,0.1);
+}
+body.layout-terra .prediction-potential-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+  font-size: 10px;
+  letter-spacing: 1px;
+}
+body.layout-terra .prediction-potential-val {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  font-size: 28px;
+  color: #c8a84b;
+}
+/* ══════════════════
+   SUGGESTION CARDS
+══════════════════ */
+body.layout-terra .suggestion-card.warn {
+  background: rgba(200,168,75,0.06);
+  border-color: rgba(200,168,75,0.2);
+}
+body.layout-terra .suggestion-card.success {
+  background: rgba(106,158,90,0.06);
+  border-color: rgba(106,158,90,0.2);
+}
+body.layout-terra .suggestion-card.info {
+  background: rgba(200,168,75,0.04);
+  border-color: rgba(200,168,75,0.15);
+}
+body.layout-terra .suggestion-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .suggestion-sub {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #a09878;
+  line-height: 1.6;
+}
+/* ══════════════════
+   CHARTS — selector de progreso
+══════════════════ */
+body.layout-terra .prog-sel-btn {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.12);
+  color: #a09878;
+}
+body.layout-terra .prog-sel-btn.active {
+  background: rgba(200,168,75,0.15);
+  border-color: rgba(200,168,75,0.4);
+  color: #c8a84b;
+}
+body.layout-terra .stat-pill {
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.1);
+  border-radius: 10px;
+}
+body.layout-terra .stat-pill-val { color: #c8a84b; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;  }
+body.layout-terra .stat-pill-lbl { color: #5a5438; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+/* Chart lines */
+body.layout-terra .chart-label-x { fill: #5a5438; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+body.layout-terra .chart-label-y { fill: #5a5438; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+body.layout-terra .chart-grid { stroke: rgba(200,168,75,0.06); }
+/* ══════════════════
+   PROG TARGET
+══════════════════ */
+body.layout-terra .prog-target {
+  background: rgba(200,168,75,0.06);
+  border-color: rgba(200,168,75,0.2);
+}
+body.layout-terra .prog-target-text { color: #c8a84b; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;  }
+body.layout-terra .prog-target.warn { background: rgba(200,122,48,0.06); border-color: rgba(200,122,48,0.2); }
+body.layout-terra .prog-target.warn .prog-target-text { color: #c87a30; }
+body.layout-terra .prog-target.success { background: rgba(106,158,90,0.06); border-color: rgba(106,158,90,0.2); }
+body.layout-terra .prog-target.success .prog-target-text { color: #6a9e5a; }
+body.layout-terra .prog-target-sub { color: #5a5438; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;  }
+/* ══════════════════
+   DELOAD BANNER
+══════════════════ */
+body.layout-terra .deload-banner {
+  background: linear-gradient(135deg, rgba(200,122,48,0.08), rgba(200,168,75,0.06));
+  border-color: rgba(200,122,48,0.3);
+  border-radius: 16px;
+}
+body.layout-terra .deload-banner-title { color: #c87a30; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;  }
+body.layout-terra .deload-banner-sub { color: #a09878; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;  }
+body.layout-terra .deload-pill { background: rgba(200,122,48,0.12); border-color: rgba(200,122,48,0.3); color: #c87a30; }
+body.layout-terra .deload-dismiss { color: #5a5438; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+/* ══════════════════
+   SETUP WIZARD — TERRA COMPLETO
+══════════════════ */
+
+/* Fondo del overlay igual que la app */
+body.layout-terra #setupOverlay {
+  background: #0d1209;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(80,120,30,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 90%,  rgba(40,70,15,0.20) 0%, transparent 45%);
+}
+body.layout-terra .setup-inner {
+  background: transparent;
+  color: #e8e0cc;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+
+/* ── INTRO SCREEN ── */
+body.layout-terra #setupIntro {
+  padding: 48px 24px 32px;
+}
+/* Emoji de bienvenida */
+body.layout-terra #setupIntro > div:first-child {
+  text-shadow: 0 4px 24px rgba(200,168,75,0.25);
+}
+/* Título FitTrack */
+body.layout-terra #setupIntro > div:nth-child(2) {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important;
+  color: #c8a84b !important;
+  letter-spacing: -0.5px;
+}
+/* Subtítulo */
+body.layout-terra #setupIntro > div:nth-child(3) {
+  color: #e8e0cc !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+/* Descripción */
+body.layout-terra #setupIntro > div:nth-child(4) {
+  color: #a09878 !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+/* Feature list box */
+body.layout-terra #setupIntro > div:nth-child(5) {
+  background: rgba(200,168,75,0.06) !important;
+  border: 1px solid rgba(200,168,75,0.15) !important;
+  border-radius: 14px !important;
+}
+body.layout-terra #setupIntro > div:nth-child(5) span[style*="color:var(--text2)"],
+body.layout-terra #setupIntro > div:nth-child(5) span {
+  color: #a09878 !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+
+/* ── HERO DEL WIZARD ── */
+body.layout-terra .setup-hero-logo {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #c8a84b;
+  letter-spacing: -0.5px;
+}
+body.layout-terra .setup-hero-sub {
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+
+/* ── DOTS DE PROGRESO ── */
+body.layout-terra .setup-step-dot {
+  background: rgba(200,168,75,0.12);
+  border-color: rgba(200,168,75,0.2);
+}
+body.layout-terra .setup-step-dot.active {
+  background: #c8a84b;
+  border-color: #c8a84b;
+  box-shadow: 0 0 8px rgba(200,168,75,0.4);
+}
+body.layout-terra .setup-step-dot.done {
+  background: #6a9e5a;
+  border-color: #6a9e5a;
+}
+body.layout-terra .wiz-dot.done { background: #c8a84b; }
+/* ══════════════════════════════════════════════════════════════
+   TERRA — AI Routine: inline style overrides exhaustivos
+══════════════════════════════════════════════════════════════ */
+
+/* Chips del calendario (gym = dorado, actividad = verde) */
+body.layout-terra #aiRoutineModal .air-chip[data-val="train"] {
+  background: rgba(200,168,75,0.14) !important;
+  border-color: rgba(200,168,75,0.45) !important;
+  color: #c8a84b !important;
+}
+body.layout-terra #aiRoutineModal .air-chip:not([data-val="train"]) {
+  background: rgba(106,158,90,0.12) !important;
+  border-color: rgba(106,158,90,0.38) !important;
+  color: #6a9e5a !important;
+}
+
+/* Drop zones del calendario */
+body.layout-terra #aiRoutineModal .air-drop-zone {
+  border-color: rgba(200,168,75,0.2) !important;
+}
+
+/* Focus options cards */
+body.layout-terra #airFocusOptions > div {
+  background: rgba(200,168,75,0.04) !important;
+  border-color: rgba(200,168,75,0.18) !important;
+}
+
+/* Activity cards en step 6 */
+body.layout-terra #airStep6 [style*="rgba(77,138,255"] {
+  background: rgba(200,168,75,0.08) !important;
+  border-color: rgba(200,168,75,0.2) !important;
+  color: #c8a84b !important;
+}
+body.layout-terra #airStep6 [style*="background:var(--bg3)"],
+body.layout-terra #airStep6 [style*="background: var(--bg3)"] {
+  background: rgba(200,168,75,0.04) !important;
+  border-color: rgba(200,168,75,0.18) !important;
+}
+body.layout-terra #airStep6 [style*="background:var(--bg4)"],
+body.layout-terra #airStep6 [style*="background: var(--bg4)"] {
+  background: rgba(200,168,75,0.03) !important;
+}
+
+/* Días/semana selector buttons dentro de actividades */
+body.layout-terra #airStep6 button[style*="var(--border)"] {
+  border-color: rgba(200,168,75,0.25) !important;
+  background: rgba(200,168,75,0.03) !important;
+  color: #a09878 !important;
+}
+body.layout-terra #airStep6 button[style*="var(--accent)"] {
+  border-color: #c8a84b !important;
+  background: rgba(200,168,75,0.15) !important;
+  color: #c8a84b !important;
+}
+
+/* Warning box tiempo */
+body.layout-terra #airFocusOptions [style*="rgba(255,212,77"] {
+  background: rgba(200,168,75,0.06) !important;
+  border-color: rgba(200,168,75,0.25) !important;
+}
+
+/* Resultado — day cards */
+body.layout-terra #airResultContent .air-day-card {
+  background: rgba(200,168,75,0.05) !important;
+  border-color: rgba(200,168,75,0.15) !important;
+}
+body.layout-terra #airResultContent [style*="border-bottom:1px solid var(--border)"],
+body.layout-terra #airResultContent [style*="border-bottom: 1px solid var(--border)"] {
+  border-bottom-color: rgba(200,168,75,0.12) !important;
+}
+body.layout-terra #airResultContent [style*="rgba(77,138,255,0.06)"] {
+  background: rgba(200,168,75,0.06) !important;
+}
+body.layout-terra #airResultContent [style*="rgba(77,138,255,0.25)"] {
+  border-color: rgba(200,168,75,0.25) !important;
+}
+
+/* Step 7 schedule — texto descanso y filas */
+body.layout-terra #airStep7 [style*="color:var(--text3)"] {
+  color: #5a5438 !important;
+}
+body.layout-terra #airStep7 [style*="border-bottom:1px solid var(--border)"] {
+  border-bottom-color: rgba(200,168,75,0.12) !important;
+}
+body.layout-terra #airStep7 .air-drop-zone[style*="var(--bg4)"] {
+  background: rgba(200,168,75,0.03) !important;
+  border-color: rgba(200,168,75,0.18) !important;
+}
+
+/* Modal subtitle */
+body.layout-terra #airStepSubtitle {
+  color: #5a5438 !important;
+}
+
+/* Botones solo gym / sí sumar */
+body.layout-terra #airStep6 button[style*="var(--text2)"] {
+  color: #a09878 !important;
+  border-color: rgba(200,168,75,0.18) !important;
+  background: rgba(200,168,75,0.03) !important;
+}
+/* ── LABELS Y TEXTOS ── */
+body.layout-terra .setup-label {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .setup-hint {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #a09878;
+}
+body.layout-terra .setup-field label {
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  letter-spacing: 0.8px;
+}
+
+/* ── INPUTS ── */
+body.layout-terra .setup-page .inp {
+  background: rgba(200,168,75,0.06);
+  border: 1px solid rgba(200,168,75,0.2);
+  color: #e8e0cc;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+body.layout-terra .setup-page .inp:focus {
+  border-color: #c8a84b;
+  box-shadow: 0 0 0 3px rgba(200,168,75,0.15);
+  outline: none;
+}
+body.layout-terra .setup-page .inp::placeholder {
+  color: rgba(160,152,120,0.45);
+}
+body.layout-terra .setup-page select.inp option {
+  background: #1a2010;
+  color: #e8e0cc;
+}
+
+/* ── GOAL CARDS ── */
+body.layout-terra .goal-card {
+  background: rgba(200,168,75,0.04);
+  border: 1.5px solid rgba(200,168,75,0.15);
+  transition: all 0.2s;
+}
+body.layout-terra .goal-card:hover {
+  border-color: rgba(200,168,75,0.4);
+  background: rgba(200,168,75,0.08);
+}
+body.layout-terra .goal-card.selected {
+  background: rgba(200,168,75,0.12);
+  border-color: #c8a84b;
+  box-shadow: 0 0 0 1px rgba(200,168,75,0.2);
+}
+body.layout-terra .goal-card [style*="color:var(--text)"] {
+  color: #e8e0cc !important;
+}
+body.layout-terra .goal-card [style*="color:var(--text2)"],
+body.layout-terra .goal-card [style*="color:var(--border)"] {
+  color: #a09878 !important;
+}
+
+/* ── CARDS GENÉRICAS EN SETUP ── */
+body.layout-terra .setup-page .card {
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.12);
+}
+
+/* ── SEPARADORES ── */
+body.layout-terra .setup-page [style*="height:1px"],
+body.layout-terra #setupIntro [style*="height:1px"] {
+  background: rgba(200,168,75,0.12) !important;
+}
+
+/* ── BOTONES EN SETUP ── */
+body.layout-terra #setupIntro .btn-primary,
+body.layout-terra .setup-nav .btn-primary {
+  background: linear-gradient(135deg, #c8a84b, #b8943a);
+  color: #0d1209;
+  font-weight: 700;
+  border: none;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  box-shadow: 0 4px 16px rgba(200,168,75,0.3);
+}
+body.layout-terra #setupIntro .btn-primary:hover,
+body.layout-terra .setup-nav .btn-primary:hover {
+  box-shadow: 0 6px 22px rgba(200,168,75,0.45);
+  transform: translateY(-1px);
+}
+body.layout-terra .setup-nav .btn-ghost {
+  border-color: rgba(200,168,75,0.25);
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  background: transparent;
+}
+body.layout-terra .setup-nav .btn-ghost:hover {
+  border-color: rgba(200,168,75,0.5);
+  color: #c8a84b;
+}
+
+/* ── PLAN PREVIEW (el cálculo en tiempo real) ── */
+body.layout-terra #planPreview,
+body.layout-terra .plan-preview {
+  background: rgba(200,168,75,0.07);
+  border: 1px solid rgba(200,168,75,0.2);
+  border-radius: 12px;
+}
+body.layout-terra #planPreview [style*="color:var(--accent)"] {
+  color: #c8a84b !important;
+}
+
+/* ── SELECCIÓN DE DÍAS (training wizard) ── */
+body.layout-terra .ex-dtab {
+  background: rgba(200,168,75,0.05);
+  border-color: rgba(200,168,75,0.15);
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+body.layout-terra .ex-dtab.active {
+  background: rgba(200,168,75,0.15);
+  border-color: #c8a84b;
+  color: #c8a84b;
+}
+/* ══════════════════
+   GENERADOR DE RUTINA (AI) — TERRA
+   Reemplaza azul hardcodeado rgba(77,138,255,...) por dorado terra
+══════════════════ */
+/* AI Routine modal — fondo y bordes terra */
+body.layout-terra #aiRoutineModal .settings-modal {
+  background: linear-gradient(180deg, #131f0e 0%, #0f1a0b 100%) !important;
+}
+body.layout-terra #aiRoutineModal .wiz-step {
+  background: transparent;
+}
+body.layout-terra .air-equip-btn {
+  background: rgba(200,168,75,0.04) !important;
+  border-color: rgba(200,168,75,0.18) !important;
+  color: #e8e0cc !important;
+}
+body.layout-terra .air-equip-btn.active,
+body.layout-terra .air-equip-btn:hover {
+  border-color: #c8a84b !important;
+  background: rgba(200,168,75,0.12) !important;
+}
+/* Inline backgrounds hardcodeados en JS */
+body.layout-terra #aiRoutineModal [style*="background:var(--bg3)"],
+body.layout-terra #aiRoutineModal [style*="background: var(--bg3)"] {
+  background: rgba(200,168,75,0.04) !important;
+}
+body.layout-terra #aiRoutineModal [style*="background:var(--bg4)"],
+body.layout-terra #aiRoutineModal [style*="background: var(--bg4)"] {
+  background: rgba(200,168,75,0.03) !important;
+}
+body.layout-terra #aiRoutineModal [style*="border:1.5px solid var(--border)"],
+body.layout-terra #aiRoutineModal [style*="border: 1.5px solid var(--border)"],
+body.layout-terra #aiRoutineModal [style*="border:1px solid var(--border)"],
+body.layout-terra #aiRoutineModal [style*="border: 1px solid var(--border)"] {
+  border-color: rgba(200,168,75,0.18) !important;
+}
+body.layout-terra #aiRoutineModal [style*="color:var(--text)"] {
+  color: #e8e0cc !important;
+}
+body.layout-terra #aiRoutineModal [style*="color:var(--text2)"] {
+  color: #a09878 !important;
+}
+body.layout-terra #aiRoutineModal [style*="color:var(--text3)"] {
+  color: #5a5438 !important;
+}
+body.layout-terra #aiRoutineModal [style*="rgba(77,138,255,0.1)"] {
+  background: rgba(200,168,75,0.08) !important;
+}
+body.layout-terra #aiRoutineModal [style*="rgba(77,138,255,0.08)"] {
+  background: rgba(200,168,75,0.06) !important;
+}
+body.layout-terra #aiRoutineModal [style*="rgba(77,138,255,0.2)"] {
+  border-color: rgba(200,168,75,0.2) !important;
+}
+body.layout-terra #aiRoutineModal [style*="rgba(77,138,255,0.25)"] {
+  border-color: rgba(200,168,75,0.25) !important;
+}
+body.layout-terra #aiRoutineModal [style*="border-bottom:1px solid var(--border)"],
+body.layout-terra #aiRoutineModal [style*="border-bottom: 1px solid var(--border)"] {
+  border-bottom-color: rgba(200,168,75,0.12) !important;
+}
+body.layout-terra .air-level {
+  background: rgba(200,168,75,0.04);
+  border-color: rgba(200,168,75,0.18);
+  color: #a09878;
+}
+body.layout-terra .air-level.active {
+  background: rgba(200,168,75,0.15);
+  border-color: #c8a84b;
+  color: #c8a84b;
+}
+body.layout-terra .air-days-btn,
+body.layout-terra .air-time-btn {
+  background: rgba(200,168,75,0.04);
+  border-color: rgba(200,168,75,0.18);
+  color: #a09878;
+}
+body.layout-terra .air-days-btn.active,
+body.layout-terra .air-time-btn.active {
+  background: rgba(200,168,75,0.15);
+  border-color: #c8a84b;
+  color: #c8a84b;
+}
+body.layout-terra #aiRoutineModal .air-goal {
+  background: rgba(200,168,75,0.04) !important;
+  border-color: rgba(200,168,75,0.18) !important;
+}
+body.layout-terra #aiRoutineModal .air-goal.active {
+  background: rgba(200,168,75,0.12) !important;
+  border-color: #c8a84b !important;
+}
+body.layout-terra .bm-check.active {
+  background: rgba(200,168,75,0.15);
+  border-color: #c8a84b;
+  color: #c8a84b;
+}
+body.layout-terra #airSchedInfo {
+  background: rgba(200,168,75,0.07) !important;
+  border-color: rgba(200,168,75,0.2) !important;
+}
+body.layout-terra .air-day-card {
+  background: rgba(200,168,75,0.05);
+  border-color: rgba(200,168,75,0.15);
+}
+body.layout-terra .air-day-title { color: #c8a84b; }
+body.layout-terra .air-ex-row { color: #a09878; border-color: rgba(200,168,75,0.1); }
+body.layout-terra .wiz-progress .wiz-dot { background: rgba(200,168,75,0.2); }
+body.layout-terra .wiz-progress .wiz-dot.active { background: #c8a84b; }
+body.layout-terra .wiz-progress .wiz-dot.done { background: #6a9e5a; }
+body.layout-terra .metric-sel-btn.active,
+body.layout-terra .metric-range-btn.active {
+  background: rgba(200,168,75,0.15);
+  border-color: #c8a84b;
+  color: #c8a84b;
+}
+body.layout-terra .plan-tip {
+  background: rgba(200,168,75,0.07);
+  border-left-color: #c8a84b;
+}
+body.layout-terra .daily-motiv-card {
+  background: linear-gradient(135deg, rgba(200,168,75,0.08), rgba(106,158,90,0.06));
+  border-color: rgba(200,168,75,0.2);
+}
+body.layout-terra .prog-target {
+  background: rgba(200,168,75,0.07);
+  border-color: rgba(200,168,75,0.2);
+}
+body.layout-terra .ss-badge {
+  background: rgba(200,168,75,0.1);
+  border-color: rgba(200,168,75,0.25);
+  color: #c8a84b;
+}
+body.layout-terra .ss-divider {
+  background: rgba(200,168,75,0.05);
+  border-left-color: #c8a84b;
+  color: #c8a84b;
+}
+body.layout-terra .ss-timer-wrap { border-left-color: #c8a84b; }
+body.layout-terra .ss-timer-btn.add {
+  background: rgba(200,168,75,0.12);
+  color: #c8a84b;
+  border-color: rgba(200,168,75,0.3);
+}
+body.layout-terra .weight-suggestion.keep {
+  background: rgba(200,168,75,0.07);
+  border-color: rgba(200,168,75,0.25);
+}
+body.layout-terra .glass-svg {
+  filter: drop-shadow(0 4px 20px rgba(200,168,75,0.2));
+}
+body.layout-terra #weightGoalBadge,
+body.layout-terra #ouraKcalBadge {
+  background: rgba(200,168,75,0.1) !important;
+}
+body.layout-terra [onclick*="openAIRoutine"] {
+  background: rgba(200,168,75,0.08) !important;
+  border-color: rgba(200,168,75,0.3) !important;
+  color: #c8a84b !important;
+}
+body.layout-terra .toast.toast-big {
+  box-shadow: 0 4px 20px rgba(200,168,75,0.2);
+}
+
+/* ══════════════════
+   TOAST
+══════════════════ */
+body.layout-terra .toast {
+  background: linear-gradient(135deg, #1c2815, #162010);
+  color: #c8a84b;
+  border: 1px solid rgba(200,168,75,0.2);
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  box-shadow: 0 8px 28px rgba(0,0,0,0.5);
+}
+/* ══════════════════
+   EMPTY STATE
+══════════════════ */
+body.layout-terra .empty { color: #5a5438; font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;  }
+/* ══════════════════
+   SESSION TIMER BANNER
+══════════════════ */
+body.layout-terra #sessionTimerBanner {
+  background: rgba(13,18,9,0.95);
+  border-bottom: 1px solid rgba(200,168,75,0.12);
+  backdrop-filter: blur(20px);
+}
+/* ══════════════════
+   AI CHAT
+══════════════════ */
+body.layout-terra .ai-inp {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.15);
+  color: #e8e0cc;
+  border-radius: 20px;
+}
+body.layout-terra .ai-chip {
+  background: rgba(200,168,75,0.07);
+  border: 1px solid rgba(200,168,75,0.14);
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  border-radius: 20px;
+}
+body.layout-terra .ai-send-btn {
+  background: linear-gradient(135deg, #c8a84b, #a88835);
+  color: #0d1209;
+  border-radius: 50%;
+}
+/* ══════════════════
+   FOOD SUGGEST
+══════════════════ */
+body.layout-terra .fs-card {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.1);
+  border-radius: 14px;
+}
+body.layout-terra .fs-card:hover { border-color: rgba(200,168,75,0.3); }
+body.layout-terra .fs-card-name {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+body.layout-terra .fs-card-tip {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #5a5438;
+}
+body.layout-terra .fs-filter {
+  background: rgba(200,168,75,0.05);
+  border: 1px solid rgba(200,168,75,0.12);
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+body.layout-terra .fs-filter.active {
+  background: rgba(106,158,90,0.12);
+  border-color: #6a9e5a;
+  color: #6a9e5a;
+}
+/* ══════════════════
+   SETTINGS MODAL — layout selector
+══════════════════ */
+body.layout-terra .settings-modal .modal-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+/* ══════════════════
+   STREAKS & RACHA BADGE
+══════════════════ */
+body.layout-terra #calStreakBadge {
+  background: rgba(200,168,75,0.06);
+  border: 1px solid rgba(200,168,75,0.14);
+  border-radius: 14px;
+}
+body.layout-terra #calStreakNum {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #c8a84b;
+}
+/* ══════════════════
+   THEME PICKER DROPDOWN
+══════════════════ */
+body.layout-terra .theme-picker-dropdown {
+  background: linear-gradient(180deg, #131f0e, #0f1a0b);
+  border: 1px solid rgba(200,168,75,0.12);
+  border-radius: 20px 20px 0 0;
+}
+body.layout-terra .theme-picker-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #a09878;
+}
+/* ══════════════════
+   REST TIMER
+══════════════════ */
+body.layout-terra .rest-timer-box {
+  background: linear-gradient(180deg, #131f0e, #0f1a0b);
+  border: 1px solid rgba(200,168,75,0.14);
+  border-radius: 24px;
+}
+body.layout-terra .rest-timer-secs {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #c8a84b;
+  text-shadow: 0 0 40px rgba(200,168,75,0.3);
+}
+body.layout-terra .rest-timer-btn.skip {
+  background: rgba(200,168,75,0.06);
+  border-color: rgba(200,168,75,0.15);
+  color: #a09878;
+}
+body.layout-terra .rest-timer-btn.add {
+  background: rgba(200,168,75,0.08);
+  border-color: rgba(200,168,75,0.25);
+  color: #c8a84b;
+}
+body.layout-terra .rest-timer-done {
+  background: rgba(106,158,90,0.08);
+  border-color: rgba(106,158,90,0.25);
+  color: #6a9e5a;
+}
+/* ══════════════════
+   GOAL BARS (caloric progress)
+══════════════════ */
+body.layout-terra #goalBarsContainer .goal-bar-fill {
+  box-shadow: 0 0 8px rgba(200,168,75,0.3);
+}
+/* Scrollbar invisible en content */
+body.layout-terra .content::-webkit-scrollbar { display: none; }
+body.layout-terra .content { scrollbar-width: none; }
+/* ══════════════════
+   QUICK FOODS
+══════════════════ */
+body.layout-terra .quick-food-chip,
+body.layout-terra [id="quickFoodsList"] > * {
+  background: rgba(200,168,75,0.06);
+  border: 1px solid rgba(200,168,75,0.14);
+  color: #a09878;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  border-radius: 20px;
+}
+/* ══════════════════
+   ACTIVITY OPTIONS (setup)
+══════════════════ */
+body.layout-terra .activity-opt {
+  background: rgba(200,168,75,0.04);
+  border: 1px solid rgba(200,168,75,0.1);
+  border-radius: 12px;
+  color: #a09878;
+}
+body.layout-terra .activity-opt.selected {
+  background: rgba(200,168,75,0.1);
+  border-color: rgba(200,168,75,0.35);
+  color: #c8a84b;
+}
+body.layout-terra .activity-opt-title {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+  color: #e8e0cc;
+}
+
+/* ── ITALIC: solo para elementos decorativos / display ── */
+
+/* Header title — nombre de la app */
+
+/* Motivation card — mensajes inspiracionales */
+
+/* Meal names — estética editorial */
+
+/* Score display (renderizado por macros.js) */
+
+/* Modal titles */
+
+/* Prediction card — texto de feedback */
+
+/* Toast */
+
+/* Calendario — mes */
+
+/* Kcal grande */
+
+/* Metric val grande */
+
+/* Readiness sueño */
+
+/* Sleep val */
+
+/* Day badge */
+
+/* Setup — solo el logo */
+
+/* Score grande en terra home (JS-rendered) */
+
+/* ══════════════════════════════════════════════════════════════════
+   TERRA — SETUP WIZARD (pantalla de configuración inicial)
+   Asegura que la experiencia completa sea verde musgo desde el inicio
+══════════════════════════════════════════════════════════════════ */
+body.layout-terra #setupOverlay {
+  background: #0d1209;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(80,120,30,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 90%,  rgba(40,70,15,0.2)   0%, transparent 45%);
+}
+body.layout-terra .setup-inner { color: #e8e0cc; }
+body.layout-terra .setup-hero-logo {
+  color: #c8a84b;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-weight: 700;
+}
+body.layout-terra .setup-hero-sub { color: #a09878; }
+body.layout-terra .setup-label { color: #e8e0cc; font-family: 'Plus Jakarta Sans', sans-serif; }
+body.layout-terra .setup-hint  { color: #a09878; }
+body.layout-terra .setup-field label { color: #a09878; }
+body.layout-terra .setup-step-dot { background: rgba(200,168,75,0.15); border-color: rgba(200,168,75,0.2); }
+body.layout-terra .setup-step-dot.active { background: #c8a84b; border-color: #c8a84b; }
+body.layout-terra .setup-step-dot.done { background: #6a9e5a; border-color: #6a9e5a; }
+
+/* LINEN — SETUP WIZARD */
+body.layout-linen #setupOverlay {
+  background: #f8f3eb;
+}
+body.layout-linen .setup-inner { color: #2d2620; }
+body.layout-linen .setup-hero-logo { color: #8a7060; font-family: 'Nunito', sans-serif; font-weight: 700; }
+body.layout-linen .setup-hero-sub { color: #7a6858; }
+body.layout-linen .setup-label { color: #2d2620; }
+body.layout-linen .setup-hint  { color: #7a6858; }
+body.layout-linen .setup-field label { color: #7a6858; }
+body.layout-linen .setup-step-dot { background: rgba(45,38,32,0.1); border-color: rgba(45,38,32,0.15); }
+body.layout-linen .setup-step-dot.active { background: #2d2620; border-color: #2d2620; }
+body.layout-linen .setup-step-dot.done { background: #5a8070; border-color: #5a8070; }
+
+/* ══════════════════════════════════════════════════════════════════
+   SISTEMA DE TIPOGRAFÍAS — afecta toda la app (sans-serif base)
+   Se aplica con body.font-* en paralelo al layout/theme
+══════════════════════════════════════════════════════════════════ */
+
+/* Variable de fuente base — todos los textos usan esto */
+:root { --font-body: 'DM Sans', sans-serif; }
+
+/* Aplicar la variable a toda la app */
+body, .card, .modal, .btn, .tab, .inp, .setup-label, .setup-hint,
+.card-title, .macro-label, .metric-label, .section-title {
+  font-family: var(--font-body);
+}
+
+/* font-inter — limpia y neutra, muy legible */
+body.font-inter { --font-body: 'Inter', sans-serif; }
+
+/* font-nunito — redondeada y amigable */
+body.font-nunito { --font-body: 'Nunito', sans-serif; }
+
+/* font-outfit — geométrica y moderna */
+body.font-outfit { --font-body: 'Outfit', sans-serif; }
+
+/* font-jakarta — elegante y versátil */
+body.font-jakarta { --font-body: 'Plus Jakarta Sans', sans-serif; }
+
+/* font-mono — datos y precisión (Space Mono) */
+body.font-mono { --font-body: 'Space Mono', monospace; }
+
+/* Los layouts sobrescriben con su propia preferencia si no hay font-* */
+body.layout-linen:not([class*="font-"]) { --font-body: 'Nunito', 'DM Sans', sans-serif; }
+body.layout-terra:not([class*="font-"]) { --font-body: 'Plus Jakarta Sans', 'DM Sans', sans-serif; }
+
+
+/* ── Font option selector — estado activo ── */
+.font-option-active {
+  border-color: var(--accent) !important;
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+/* ── Early-apply: layout aplicado en <html> antes de que body exista ──
+   Solo necesario para el setup wizard (aparece antes de init())       */
+html.layout-terra body, html.layout-terra #setupOverlay {
+  background: #0d1209 !important;
+  background-image:
+    radial-gradient(ellipse at 50% -10%, rgba(80,120,30,0.28) 0%, transparent 55%),
+    radial-gradient(ellipse at 10% 90%,  rgba(40,70,15,0.2)   0%, transparent 45%) !important;
+}
+html.layout-terra .setup-label { color: #e8e0cc; }
+html.layout-terra .setup-hint  { color: #a09878; }
+html.layout-terra .setup-field label { color: #a09878; }
+html.layout-terra .setup-hero-logo { color: #c8a84b; }
+html.layout-terra .setup-hero-sub  { color: #a09878; }
+html.layout-terra .inp { background: rgba(255,255,255,0.06); border-color: rgba(200,168,75,0.2); color: #e8e0cc; }
+html.layout-terra .inp:focus { border-color: #c8a84b; box-shadow: 0 0 0 3px rgba(200,168,75,0.15); outline: none; }
+html.layout-terra .inp::placeholder { color: rgba(160,152,120,0.5); }
+html.layout-terra select.inp option { background: #1a2010; color: #e8e0cc; }
+
+/* Botón primario terra en wizard */
+html.layout-terra .btn-primary {
+  background: linear-gradient(135deg, #c8a84b 0%, #a8882b 100%);
+  color: #0d1209;
+  border: none;
+  font-weight: 700;
+  letter-spacing: 0.3px;
+}
+html.layout-terra .btn-primary:hover { box-shadow: 0 6px 20px rgba(200,168,75,0.4); }
+
+/* Botón secundario / back */
+html.layout-terra .btn-secondary, html.layout-terra .btn-back {
+  background: rgba(255,255,255,0.05);
+  border-color: rgba(200,168,75,0.2);
+  color: #a09878;
+}
+
+/* Dots de progreso */
+html.layout-terra .setup-step-dot { background: rgba(200,168,75,0.15); border-color: rgba(200,168,75,0.2); }
+html.layout-terra .setup-step-dot.active { background: #c8a84b; border-color: #c8a84b; }
+html.layout-terra .setup-step-dot.done { background: #6a9e5a; border-color: #6a9e5a; }
+
+/* Cards de objetivo (goal-card) */
+html.layout-terra .goal-card {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(200,168,75,0.18);
+  color: #e8e0cc;
+}
+html.layout-terra .goal-card:hover { border-color: rgba(200,168,75,0.45); background: rgba(200,168,75,0.07); }
+html.layout-terra .goal-card.selected { background: rgba(200,168,75,0.12); border-color: #c8a84b; }
+
+/* Opciones de actividad */
+html.layout-terra .activity-opt {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(200,168,75,0.18);
+}
+html.layout-terra .activity-opt:hover { border-color: rgba(200,168,75,0.4); }
+html.layout-terra .activity-opt.selected {
+  border-color: #c8a84b;
+  background: rgba(200,168,75,0.1);
+}
+html.layout-terra .activity-opt-title { color: #e8e0cc; }
+html.layout-terra .activity-opt-sub   { color: #a09878; }
+
+/* Intro features list card */
+html.layout-terra #setupIntro [style*="background:var(--bg3)"],
+html.layout-terra #setupIntro [style*="background: var(--bg3)"] {
+  background: rgba(255,255,255,0.04) !important;
+  border: 1px solid rgba(200,168,75,0.15);
+}
+
+/* Textos generales dentro del overlay */
+html.layout-terra #setupOverlay { color: #e8e0cc; }
+html.layout-terra #setupOverlay [style*="color:var(--text)"]   { color: #e8e0cc !important; }
+html.layout-terra #setupOverlay [style*="color:var(--text2)"]  { color: #a09878 !important; }
+html.layout-terra #setupOverlay [style*="color:var(--accent)"] { color: #c8a84b !important; }
+
+/* Tarjetas genéricas dentro del wizard */
+html.layout-terra #setupOverlay .card {
+  background: rgba(255,255,255,0.04);
+  border-color: rgba(200,168,75,0.18);
+}
+
+/* Live plan preview */
+html.layout-terra #setupOverlay [style*="color:var(--green)"] { color: #6a9e5a !important; }
+
+/* Tabs de días de entrenamiento */
+html.layout-terra .ex-dtab        { color: #a09878; border-color: rgba(200,168,75,0.2); background: rgba(255,255,255,0.03); }
+html.layout-terra .ex-dtab.active { color: #c8a84b; border-color: #c8a84b; background: rgba(200,168,75,0.1); }
+
+/* Sport / deporte pills */
+html.layout-terra #setupOverlay button[style*="var(--border)"] {
+  border-color: rgba(200,168,75,0.25) !important;
+  background: rgba(255,255,255,0.04) !important;
+  color: #a09878 !important;
+}
+
+/* ── Intro screen: título, subtítulo, descripción ── */
+html.layout-terra #setupIntro [style*="font-family:'Space Mono'"] {
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important;
+  color: #c8a84b !important;
+  letter-spacing: -0.5px;
+}
+html.layout-terra #setupIntro [style*="color:var(--text)"] {
+  color: #e8e0cc !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+html.layout-terra #setupIntro [style*="color:var(--text2)"] {
+  color: #a09878 !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif;
+}
+
+/* Feature list: separadores internos */
+html.layout-terra #setupIntro [style*="background:var(--border)"],
+html.layout-terra #setupIntro [style*="background: var(--border)"] {
+  background: rgba(200,168,75,0.12) !important;
+}
+
+/* Plan preview: números en verde/acento terra */
+html.layout-terra #planPreview,
+html.layout-terra .plan-preview {
+  background: rgba(200,168,75,0.06) !important;
+  border: 1px solid rgba(200,168,75,0.18) !important;
+  border-radius: 12px;
+}
+html.layout-terra #planPreview [style*="color:var(--text)"],
+html.layout-terra #planPreview [style*="color:var(--text2)"] {
+  color: #a09878 !important;
+}
+html.layout-terra #planPreview [style*="color:var(--green)"] { color: #6a9e5a !important; }
+html.layout-terra #planPreview [style*="color:var(--accent)"] { color: #c8a84b !important; }
+
+
+html.layout-linen body, html.layout-linen #setupOverlay { background: #f8f3eb !important; }
+html.layout-linen .setup-label { color: #2d2620; }
+html.layout-linen .setup-hint  { color: #7a6858; }
+html.layout-linen .setup-field label { color: #7a6858; }
+html.layout-linen .setup-hero-logo { color: #8a7060; }
+html.layout-linen .inp { background: #ede4d6; border-color: rgba(45,38,32,0.15); color: #2d2620; }
+html.layout-linen .btn-primary { background: #2d2620; color: #f8f3eb; border: none; }
+
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT TERRA — plan-result & setup wizard fixes (v15)
+══════════════════════════════════════════════════════════════ */
+body.layout-terra .plan-result {
+  background: rgba(200,168,75,0.05);
+  border-color: rgba(200,168,75,0.18);
+}
+body.layout-terra .plan-row {
+  border-bottom-color: rgba(200,168,75,0.1);
+}
+body.layout-terra .plan-lbl {
+  color: #a09878;
+}
+body.layout-terra .plan-val {
+  color: #c8a84b;
+}
+body.layout-terra .plan-val[style*="color:var(--green)"] {
+  color: #6a9e5a !important;
+}
+body.layout-terra .plan-val[style*="color:var(--yellow)"] {
+  color: #c8a84b !important;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   LAYOUT TERRA — setup wizard sp-2 planResult hardened (v15b)
+══════════════════════════════════════════════════════════════ */
+body.layout-terra #planResult .plan-result {
+  background: rgba(200,168,75,0.06) !important;
+  border-color: rgba(200,168,75,0.2) !important;
+}
+body.layout-terra #planResult .plan-row {
+  border-bottom-color: rgba(200,168,75,0.12) !important;
+}
+body.layout-terra #planResult .plan-lbl {
+  color: #a09878 !important;
+  font-family: 'Plus Jakarta Sans', 'DM Sans', sans-serif !important;
+}
+body.layout-terra #planResult .plan-val {
+  color: #c8a84b !important;
+  font-family: 'Space Mono', monospace !important;
+}
+body.layout-terra #planResult .plan-tip {
+  background: rgba(200,168,75,0.07) !important;
+  border-left-color: #c8a84b !important;
+  color: #a09878 !important;
+}
+/* Override inline bg vars en planResult generado por JS */
+body.layout-terra #planResult > div {
+  background: rgba(200,168,75,0.06) !important;
+  border: 1px solid rgba(200,168,75,0.2) !important;
+  border-radius: 12px !important;
+}
+body.layout-terra #planResult [style*="background:var(--bg"],
+body.layout-terra #planResult [style*="background: var(--bg"] {
+  background: rgba(200,168,75,0.06) !important;
+}
+body.layout-terra #planResult [style*="color:var(--text2)"] {
+  color: #a09878 !important;
+}
+body.layout-terra #planResult [style*="color:var(--text3)"] {
+  color: #5a5438 !important;
+}
+body.layout-terra #planResult [style*="color:var(--green)"] {
+  color: #6a9e5a !important;
+}
+body.layout-terra #planResult [style*="color:var(--yellow)"] {
+  color: #c8a84b !important;
+}
+body.layout-terra #planResult [style*="border-bottom:1px solid var(--border)"],
+body.layout-terra #planResult [style*="border-bottom: 1px solid var(--border)"] {
+  border-bottom-color: rgba(200,168,75,0.12) !important;
+}
+body.layout-terra #planResult [style*="font-size:10px"] {
+  color: #5a5438 !important;
+}
+/* inp fuera de .setup-page (nombre field) */
+body.layout-terra .setup-inner .inp {
+  background: rgba(200,168,75,0.06) !important;
+  border-color: rgba(200,168,75,0.2) !important;
+  color: #e8e0cc !important;
+}
+/* ══ TERRA — modal AI routine durante setup wizard (html.layout-terra) ══ */
+html.layout-terra #aiRoutineModal .settings-modal {
+  background: linear-gradient(180deg, #131f0e 0%, #0f1a0b 100%) !important;
+}
+html.layout-terra .air-equip-btn {
+  background: rgba(200,168,75,0.04) !important;
+  border-color: rgba(200,168,75,0.18) !important;
+  color: #e8e0cc !important;
+}
+html.layout-terra .air-equip-btn.active {
+  border-color: #c8a84b !important;
+  background: rgba(200,168,75,0.12) !important;
+}
+html.layout-terra .air-level,
+html.layout-terra .air-days-btn,
+html.layout-terra .air-time-btn {
+  background: rgba(200,168,75,0.04);
+  border-color: rgba(200,168,75,0.18);
+  color: #a09878;
+}
+html.layout-terra .air-level.active,
+html.layout-terra .air-days-btn.active,
+html.layout-terra .air-time-btn.active {
+  background: rgba(200,168,75,0.15);
+  border-color: #c8a84b;
+  color: #c8a84b;
+}
+html.layout-terra #aiRoutineModal [style*="rgba(77,138,255,0.08)"] {
+  background: rgba(200,168,75,0.06) !important;
+}
+html.layout-terra #aiRoutineModal [style*="rgba(77,138,255,0.2)"] {
+  border-color: rgba(200,168,75,0.2) !important;
+}
+html.layout-terra #airSchedInfo {
+  background: rgba(200,168,75,0.07) !important;
+  border-color: rgba(200,168,75,0.2) !important;
+}
+html.layout-terra .btn-primary {
+  background: linear-gradient(135deg, #c8a84b, #a88835) !important;
+  color: #0d1209 !important;
+}

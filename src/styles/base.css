@@ -1,0 +1,35 @@
+:root {
+  --bg: #05080f;
+  --bg2: #080d18;
+  --bg3: #0c1220;
+  --bg4: #111a2e;
+  --accent: #4d8aff;
+  --accent2: #ff6b4d;
+  --green: #4dffb4;
+  --red: #ff6b4d;
+  --yellow: #ffd44d;
+  --text: #e8eaf6;
+  --text2: #7b8ab8;
+  --text3: #3d4d70;
+  --border: #1a2440;
+  --card: #090e1c;
+  --radius: 16px;
+  --radius-sm: 10px;
+}
+* { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+html, body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Sans', sans-serif; overflow:hidden; font-size:14px; }
+html { height: -webkit-fill-available; }
+body { min-height: -webkit-fill-available; }html.text-grande { font-size:17px; }
+html.text-muy-grande { font-size:20px; }
+* {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.man-chip {
+  -webkit-user-drag: element;
+}
+input, textarea, [contenteditable] {
+  -webkit-user-select: text;
+  user-select: text;
+}
