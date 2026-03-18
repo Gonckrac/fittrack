@@ -3,7 +3,7 @@ var WEARABLE_CONFIG = {
   oura: {
     name: 'Oura Ring',
     emoji: '💍',
-    clientId: 'TU_OURA_CLIENT_ID',
+    clientId: '466a8c8a-ab40-4985-8158-c32965717e89',
     authUrl: 'https://cloud.ouraring.com/oauth/authorize',
     tokenUrl: 'https://api.ouraring.com/oauth/token',
     scope: 'personal daily heartrate workout tag session spo2 ring_configuration',
