@@ -250,8 +250,32 @@ function generateRoutine(params) {
   var lowerM = muscles.filter(function(m) { return ['quads','hamstrings','glutes','calves'].indexOf(m) >= 0; });
   var coreM  = muscles.filter(function(m) { return ['abs'].indexOf(m) >= 0; });
 
-  // ── 2. Select optimal split ───────────────────────────────────────────────
+    // ── 2. Select optimal split ───────────────────────────────────────────────
   var splitDays = selectOptimalSplit(days, pushM, pullM, lowerM, coreM);
+
+// Guarantee ≥2x frequency per muscle SOLO si el tiempo por sesión lo permite
+  // Un músculo compound ocupa ~(75+150)*sets + 90 = ~315s por set config
+  // Con sessionTime bajo (≤35min) no tiene sentido forzar frecuencia 2x
+  var setsConfigTemp = SETS_PER_SESSION[level] || SETS_PER_SESSION.intermediate;
+  var minTimePerMuscle = Math.round(((75 + 150) * setsConfigTemp.compound + 90) / 60); // ~5min
+  var musclesPerSession = Math.max(1, Math.floor((sessionTime - 13) / minTimePerMuscle));
+
+  if (days >= 3) {
+    muscles.forEach(function(m) {
+      var freq = splitDays.filter(function(d) { return d.muscles.indexOf(m) >= 0; }).length;
+      if (freq < 2) {
+        // Solo agregar si el día destino no está ya saturado por el tiempo
+        var bestDay = splitDays.reduce(function(best, d, i) {
+          if (d.muscles.indexOf(m) >= 0) return best;
+          var dayMuscleCount = d.muscles.filter(function(x) { return muscles.indexOf(x) >= 0; }).length;
+          // No agregar si el día ya tiene más músculos de los que caben en el tiempo
+          if (dayMuscleCount >= musclesPerSession) return best;
+          return (best === null || dayMuscleCount < best.count) ? { idx: i, count: dayMuscleCount } : best;
+        }, null);
+        if (bestDay !== null) splitDays[bestDay.idx].muscles = splitDays[bestDay.idx].muscles.concat([m]);
+      }
+    });
+  }
 
   // ── 3. Calculate target volume per muscle ─────────────────────────────────
   var volMultiplier = VOLUME_GOAL_MULTIPLIER[goal] || 1.0;
@@ -324,8 +348,7 @@ function generateRoutine(params) {
       setsThisSession = Math.max(setsThisSession, 2);
 
       // Select exercises using rotation index
-      var isIsoOnly = ['biceps','abs','calves','traps','forearms'].indexOf(mId) >= 0;
-
+  var isIsoOnly = ['abs','calves','traps','forearms'].indexOf(mId) >= 0;
       if (isIsoOnly) {
         // Isolation-dominant muscles: 2 different isolation exercises
         var iso1 = pool.isolations[sCount % Math.max(1, pool.isolations.length)];
@@ -453,36 +476,53 @@ function buildExerciseEntry(exerciseDef, muscleId, sets, goal, level) {
 }
 
 // ─── TIME BUDGET ENFORCEMENT ──────────────────────────────────────────────────
-// Removes exercises from the end of the list until session fits within time budget
+// Prioriza compounds sobre isolations y respeta estrictamente el tiempo del usuario.
+// Nunca supera maxMinutes (sin overage). Mínimo: 1 ejercicio si el tiempo no alcanza.
 function enforceTimeBudget(exercises, maxMinutes, goal) {
   if (!exercises.length) return exercises;
-  var totalTime = estimateSessionTime(exercises, goal);
-  // Allow 10% overage before cutting
-  while (totalTime > maxMinutes * 1.1 && exercises.length > 2) {
-    exercises = exercises.slice(0, exercises.length - 1);
-    totalTime = estimateSessionTime(exercises, goal);
+
+  // Separar compounds e isolations — compounds tienen prioridad absoluta
+  var compounds  = exercises.filter(function(ex) { return ex.type === 'compound'; });
+  var isolations = exercises.filter(function(ex) { return ex.type !== 'compound'; });
+
+  // Reconstruir lista: primero todos los compounds, luego isolations
+  // Agregar de a uno hasta que no quepa más
+  var result = [];
+  var ordered = compounds.concat(isolations);
+
+  for (var i = 0; i < ordered.length; i++) {
+    var candidate = result.concat([ordered[i]]);
+    if (estimateSessionTime(candidate, goal) <= maxMinutes) {
+      result = candidate;
+    }
+    // Si el primer compound ya no cabe, igual lo incluimos (mínimo 1 ejercicio)
+    if (result.length === 0 && i === ordered.length - 1) {
+      result = [ordered[0]];
+    }
   }
-  return exercises;
+
+  return result.length ? result : [ordered[0]];
 }
 
 // ─── SESSION TIME ESTIMATOR ───────────────────────────────────────────────────
 // Returns estimated session duration in minutes
+// compound set: 75s exec + 150s rest = 225s | isolation set: 40s exec + 90s rest = 130s
+// transition between exercises: 90s | warmup: 10min | cooldown: 3min
 function estimateSessionTime(exercises, goal) {
-  var WARMUP = 8;  // minutes
-  var COOLDOWN = 3; // minutes
+  var WARMUP   = 10;
+  var COOLDOWN = 3;
+  var TRANSITION = 90;
   var totalSeconds = 0;
 
   exercises.forEach(function(ex) {
-    var execKey = ex.type + '_' + goal;
-    var execTime = SET_EXECUTION_TIME[execKey] || SET_EXECUTION_TIME['isolation_any'];
-    var restTime = ex.rest ? ex.rest.seconds : 90;
-
-    // Time = (execution + rest) * sets, minus rest after last set
+    var isCompound = ex.type === 'compound';
+    var execTime   = isCompound ? 75 : 40;
+    var restTime   = isCompound ? 150 : 90;
+    // (exec + rest) * sets − rest after last set
     totalSeconds += (execTime + restTime) * ex.sets - restTime;
   });
 
-  // Add transition time between exercises (avg 45 seconds)
-  totalSeconds += exercises.length * 45;
+  totalSeconds += exercises.length * TRANSITION;
 
   return WARMUP + COOLDOWN + Math.round(totalSeconds / 60);
 }
