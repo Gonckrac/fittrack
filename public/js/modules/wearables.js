@@ -64,10 +64,58 @@ function connectWearable(provider) {
 
 function disconnectWearable(provider) {
   if (!state.wearables) return;
+  var cfg = WEARABLE_CONFIG[provider];
+
+  // Cerrar sheet de detalle si está abierto
+  var detailSheet = document.getElementById('wearableDetailSheet');
+  if (detailSheet) detailSheet.remove();
+
+  // Sheet de confirmación
+  var existing = document.getElementById('disconnectConfirmSheet');
+  if (existing) existing.remove();
+  var sheet = document.createElement('div');
+  sheet.id = 'disconnectConfirmSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:flex-end;justify-content:center';
+  sheet.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:24px 20px 32px;width:100%;max-width:480px;margin:0 auto">' +
+      '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 20px"></div>' +
+      '<div style="font-size:32px;text-align:center;margin-bottom:12px">' + cfg.emoji + '</div>' +
+      '<div style="font-size:16px;font-weight:700;color:var(--text);text-align:center;margin-bottom:8px">¿Desconectar ' + cfg.name + '?</div>' +
+      '<div style="font-size:13px;color:var(--text2);text-align:center;line-height:1.6;margin-bottom:24px">' +
+        'Se van a borrar los datos de sueño y pasos sincronizados. Vas a tener que volver a conectarlo para sincronizar.' +
+      '</div>' +
+      '<div style="display:flex;gap:8px">' +
+        '<button onclick="document.getElementById(\'disconnectConfirmSheet\').remove()" class="btn btn-ghost" style="flex:1">Cancelar</button>' +
+        '<button onclick="_confirmDisconnect(\'' + provider + '\')" class="btn" style="flex:1;background:var(--red);color:#fff;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:600;cursor:pointer">Desconectar</button>' +
+      '</div>' +
+    '</div>';
+  sheet.addEventListener('click', function(e) { if (e.target === sheet) sheet.remove(); });
+  document.body.appendChild(sheet);
+}
+
+function _confirmDisconnect(provider) {
+  document.getElementById('disconnectConfirmSheet')?.remove();
+  if (!state.wearables) return;
+
+  // Borrar datos del wearable del día actual
+  if (state[TODAY]) {
+    if (state[TODAY].sleep) {
+      delete state[TODAY].sleep.readiness;
+      delete state[TODAY].sleep.hours;
+      delete state[TODAY].sleep.efficiency;
+      delete state[TODAY].sleep.deep;
+      delete state[TODAY].sleep.hrv;
+      delete state[TODAY].sleep.rhr;
+    }
+    delete state[TODAY].steps;
+    delete state[TODAY].lastSync;
+  }
+
   delete state.wearables[provider];
   saveState(state);
   renderWearablesCard();
-  if (typeof renderSleep === 'function') renderSleep(); // ← agregar esta línea
+  if (typeof renderSleep === 'function') renderSleep();
+  if (typeof renderHome  === 'function') renderHome();
   showToast(WEARABLE_CONFIG[provider].name + ' desconectado');
 }
 
