@@ -1019,12 +1019,29 @@ var SLOT_DIST_V4 = {
   dinner:    0.30,
 };
 
-// Tolerancia máxima por día (±5% = 0.05)
 var MACRO_TOLERANCE = 0.05;
 
 // ─── FUNCIÓN PRINCIPAL ────────────────────────────────────────────
-// Corrige los valores hardcodeados de complete_meals usando FOOD_CATALOG
-// y MEAL_RECIPE para obtener macros verídicos por porción real.
+function _generatePlan(targets, goal, freqFoodNames) {
+  _recalcMealMacros();
+  var eligible = _filterMeals();
+  if (eligible.length < 8) eligible = FOOD_DB_V2.complete_meals || [];
+  var freqSet = {};
+  (freqFoodNames || []).forEach(function(n) { freqSet[n.toLowerCase()] = true; });
+  var usedIds = {};
+  var plan = [];
+  for (var d = 0; d < 7; d++) {
+    var dayResult = _generateDay(targets, eligible, usedIds, freqSet, d);
+    dayResult.meals && Object.keys(dayResult.meals).forEach(function(slot) {
+      var m = dayResult.meals[slot];
+      if (m) usedIds[m.id] = (usedIds[m.id] || 0) + 1;
+    });
+    plan.push({ day: d, meals: dayResult.meals });
+  }
+  return plan;
+}
+
+// ─── RECALCULAR MACROS DESDE INGREDIENTES REALES ─────────────────
 function _recalcMealMacros() {
   var meals = FOOD_DB_V2.complete_meals || [];
   meals.forEach(function(meal) {
