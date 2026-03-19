@@ -389,3 +389,19 @@
 /* ── METRIC SELECTORS ── */
 .metric-range-btn { background:var(--bg3); border:1px solid var(--border); border-radius:8px; padding:3px 9px; font-size:0.78em; font-weight:600; color:var(--text3); cursor:pointer; transition:all 0.15s; font-family:'Space Mono',monospace; }
 .metric-range-btn.active { background:rgba(77,138,255,0.15); border-color:var(--accent); color:var(--accent); }
+/* ── CHEVRON en cards del home ── */
+.day-metric-item {
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  position: relative;
+}
+.day-metric-chevron {
+  position: absolute;
+  bottom: 6px;
+  right: 8px;
+  font-size: 14px;
+  color: var(--accent);
+  opacity: 0.6;
+  line-height: 1;
+  pointer-events: none;
+}
