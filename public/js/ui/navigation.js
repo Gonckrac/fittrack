@@ -111,9 +111,10 @@ if (id === 'progreso') {
 if (id === 'home') {
     _animateScoreIfChanged();
   }
-  if (id === 'recuperacion') {
+if (id === 'recuperacion') {
     _syncRecuperacionSleep();
     renderSuppsV15();
+    _syncRecuperacionWater();
   }
 }
 
@@ -142,6 +143,12 @@ function initHomeCardNav() {
     card.addEventListener('click', function() {
       var target = card.getAttribute('data-nav');
       if (target && target !== 'home') showPage(target);
+      if (target === 'water') {
+        setTimeout(function() {
+          var btn = document.getElementById('subtab-rec-agua');
+          if (btn) switchSubtab('recuperacion', 'agua', btn);
+        }, 50);
+      }
     });
   });
 }
