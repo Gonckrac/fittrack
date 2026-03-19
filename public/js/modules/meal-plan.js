@@ -100,7 +100,8 @@ function _guessFoodCategory(name) {
   return 'Frutas y verduras';
 }
 
-// ─── STATE DEL WIZARD ────────────────────────────────────────────var _wz = {
+// ─── STATE DEL WIZARD ────────────────────────────────────────────
+var _wz = {
   step: 'idle',
   dayIdx: 0,
   allergies: [],
@@ -340,8 +341,9 @@ var ing = _getMealIngredients(meal.id);
         ing.map(function(i){ return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text2)">'+i[0]+'</span><span style="color:var(--text3);font-weight:600">'+i[1]+'g</span></div>'; }).join('') +
       '</div>' : '';
 
-    return '<div id="meal_'+dayIdx+'_'+slot+'"
-style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">' +
+    return '<div id="meal_'+dayIdx+'_'+slot+'" style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">' +
+
+
       '<div style="display:flex;align-items:flex-start;gap:10px">' +
         '<div style="font-size:11px;color:var(--text3);min-width:72px;padding-top:2px;flex-shrink:0">'+SLOT_LABELS[slot]+'</div>' +
         '<div style="flex:1;cursor:pointer" onclick="_toggleMealDetail(\'det_'+dayIdx+'_'+slot+'\')">' +
