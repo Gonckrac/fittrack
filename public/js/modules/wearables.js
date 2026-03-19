@@ -165,7 +165,7 @@ async function syncOura() {
     sl.hrv        = data.sleep?.hrv_avg          || sl.hrv;
     sl.rhr        = data.sleep?.resting_hr       || sl.rhr;
 
-    }
+    
     saveState(state);
     if (typeof renderSleep === 'function') renderSleep();
     if (typeof renderKcal  === 'function') renderKcal();
