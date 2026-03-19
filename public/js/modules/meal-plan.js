@@ -1036,12 +1036,21 @@ function _generatePlan(targets, goal, freqFoodNames) {
   var freqSet = {};
   (freqFoodNames || []).forEach(function(n) { freqSet[n.toLowerCase()] = true; });
   var usedIds = {};
+  // Trackers semanales para variado
+  var weekProtein = {};  // proteinSource → count por slot
+  var weekCategory = {}; // 'slot:category' → count
   var plan = [];
   for (var d = 0; d < 7; d++) {
-    var dayResult = _generateDay(targets, eligible, usedIds, freqSet, d);
+    var dayResult = _generateDay(targets, eligible, usedIds, freqSet, d, weekProtein, weekCategory);
     dayResult.meals && Object.keys(dayResult.meals).forEach(function(slot) {
       var m = dayResult.meals[slot];
-      if (m) usedIds[m.id] = (usedIds[m.id] || 0) + 1;
+      if (!m) return;
+      usedIds[m.id] = (usedIds[m.id] || 0) + 1;
+      // Actualizar trackers semanales
+      var pKey = slot + ':' + (m.proteinSource || 'none');
+      weekProtein[pKey] = (weekProtein[pKey] || 0) + 1;
+      var cKey = slot + ':' + (m.category || 'other');
+      weekCategory[cKey] = (weekCategory[cKey] || 0) + 1;
     });
     plan.push({ day: d, meals: dayResult.meals });
   }
@@ -1089,13 +1098,14 @@ function _recalcMealMacros() {
 }
 // ─── GENERADOR DE UN DÍA ─────────────────────────────────────────
 // ─── GENERADOR DE UN DÍA ─────────────────────────────────────────
-function _generateDay(targets, eligible, usedIds, freqSet, dayIndex) {
-  var MAX_ATTEMPTS = 20; // más intentos = más chances de cumplir ±5%
+function _generateDay(targets, eligible, usedIds, freqSet, dayIndex, weekProtein, weekCategory) {
+  weekProtein = weekProtein || {};
+  weekCategory = weekCategory || {};  var MAX_ATTEMPTS = 20; // más intentos = más chances de cumplir ±5%
   var bestDay = null;
   var bestError = Infinity;
 
   for (var attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
-    var candidate = _tryBuildDay(targets, eligible, usedIds, freqSet, attempt);
+    var candidate = _tryBuildDay(targets, eligible, usedIds, freqSet, attempt, weekProtein, weekCategory);
     var error = _calcDayError(candidate.meals, targets);
 
     if (error < bestError) {
@@ -1118,11 +1128,26 @@ function _generateDay(targets, eligible, usedIds, freqSet, dayIndex) {
   return scaled;
 }
 
+// ─── LÍMITES SEMANALES POR VARIEDAD ──────────────────────────────
+function _getWeeklyLimits(slot) {
+  var variety = _wz.variety || 'balanced';
+  if (variety === 'varied') {
+    // lunch/dinner: máx 2 veces la misma proteinSource, máx 2 veces la misma categoría
+    // breakfast/snack: máx 2 veces la misma categoría
+    return { maxProtein: 2, maxCategory: 2 };
+  } else if (variety === 'mealprep') {
+    return { maxProtein: 7, maxCategory: 7 }; // sin límite efectivo
+  } else {
+    // balanced
+    return { maxProtein: 4, maxCategory: 3 };
+  }
+}
+
 // ─── INTENTO DE CONSTRUCCIÓN DE UN DÍA ───────────────────────────
-function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt) {
+function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt, weekProtein, weekCategory) {
   var meals = {};
   var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
-  var usedThisDay = {}; // evita repetir la misma comida dentro del mismo día
+  var usedThisDay = {};
 
   SLOTS.forEach(function(slot) {
     var slotTarget = {
@@ -1131,12 +1156,19 @@ function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt) {
       carbs:   Math.round(targets.carb    * SLOT_DIST_V4[slot]),
       fats:    Math.round(targets.fat     * SLOT_DIST_V4[slot]),
     };
-
- var cands = eligible.filter(function(m) {
+  var limits = _getWeeklyLimits(slot);
+    var cands = eligible.filter(function(m) {
       if (m.mealType.indexOf(slot) < 0) return false;
-      if (usedThisDay[m.id]) return false; // nunca repetir en el mismo día
+      if (usedThisDay[m.id]) return false;
       var maxRep = _wz.variety === 'varied' ? 1 : _wz.variety === 'mealprep' ? 4 : 2;
-      return (usedIds[m.id] || 0) < maxRep;
+      if ((usedIds[m.id] || 0) >= maxRep) return false;
+      // Límite semanal de proteinSource por slot
+      var pKey = slot + ':' + (m.proteinSource || 'none');
+      if ((weekProtein[pKey] || 0) >= limits.maxProtein) return false;
+      // Límite semanal de categoría por slot
+      var cKey = slot + ':' + (m.category || 'other');
+      if ((weekCategory[cKey] || 0) >= limits.maxCategory) return false;
+      return true;
     });
 
 if (!cands.length) {
