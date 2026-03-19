@@ -188,8 +188,7 @@ function openWearableDetail(provider) {
       '</div>' +
       '<div style="background:var(--bg3);border-radius:12px;padding:12px;margin-bottom:16px;font-size:12px;color:var(--text2)">Los datos de sueño, frecuencia cardíaca y actividad se sincronizan automáticamente cada vez que abrís la app.</div>' +
       '<div style="display:flex;gap:8px">' +
-        '<button class="btn btn-primary" style="flex:1" onclick="' + (provider === 'oura' ? 'syncOura()' : 'showToast(\'Sync disponible próximamente\')') + ';document.getElementById(\'wearableDetailSheet\').remove()">↻ Sincronizar ahora</button>' +
-        '<button class="btn btn-ghost" style="flex:0 0 auto;color:var(--red)" onclick="disconnectWearable(\'' + provider + '\');document.getElementById(\'wearableDetailSheet\').remove()">Desconectar</button>' +
+'<button class="btn btn-primary" style="flex:1" onclick="' + (provider === 'oura' ? 'syncOura()' : provider === 'fitbit' ? 'syncFitbit()' : 'showToast(\'Sync disponible próximamente\')') + ';document.getElementById(\'wearableDetailSheet\').remove()">↻ Sincronizar ahora</button>' +        '<button class="btn btn-ghost" style="flex:0 0 auto;color:var(--red)" onclick="disconnectWearable(\'' + provider + '\');document.getElementById(\'wearableDetailSheet\').remove()">Desconectar</button>' +
       '</div>' +
     '</div>';
   sheet.addEventListener('click', function(e) { if (e.target === sheet) sheet.remove(); });
