@@ -426,10 +426,12 @@ function _syncRecuperacionWater() {
     var goal = typeof getWaterGoal === 'function' ? getWaterGoal() : 3000;
     var ml   = (state && state[TODAY] && state[TODAY].water) || 0;
 
-dstWater.querySelectorAll('span').forEach(function(el) {
-  if (el.textContent.indexOf('OBJETIVO DIARIO') >= 0) {
-    el.textContent = '💧 OBJETIVO DIARIO: ' + goal + 'ML';
-  }
+dstWater.querySelectorAll('.card-title').forEach(function(el) {
+  el.childNodes.forEach(function(node) {
+    if (node.nodeType === 3 && node.textContent.toLowerCase().indexOf('objetivo') >= 0) {
+      node.textContent = ' Objetivo diario: ' + goal + 'ml';
+    }
+  });
 });
 
     var remEl = dstWater.querySelector('#waterRemainingNum');
