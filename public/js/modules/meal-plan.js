@@ -1132,14 +1132,11 @@ function _generateDay(targets, eligible, usedIds, freqSet, dayIndex, weekProtein
 function _getWeeklyLimits(slot) {
   var variety = _wz.variety || 'balanced';
   if (variety === 'varied') {
-    // lunch/dinner: máx 2 veces la misma proteinSource, máx 2 veces la misma categoría
-    // breakfast/snack: máx 2 veces la misma categoría
-    return { maxProtein: 2, maxCategory: 2 };
+    return { maxProtein: 5, maxCategory: 3 };
   } else if (variety === 'mealprep') {
-    return { maxProtein: 7, maxCategory: 7 }; // sin límite efectivo
+    return { maxProtein: 7, maxCategory: 7 };
   } else {
-    // balanced
-    return { maxProtein: 4, maxCategory: 3 };
+    return { maxProtein: 6, maxCategory: 4 };
   }
 }
 
@@ -1180,9 +1177,10 @@ if (!cands.length) {
 
     // Scoring: prioriza macros exactos, penaliza repetición, bonifica favoritos
     var scored = cands.map(function(m) {
-      var score = _macroScore(m, slotTarget);
+         var score = _macroScore(m, slotTarget);
       score += (usedIds[m.id] || 0) * 0.30;              // penalidad repetición
       if (freqSet[m.name.toLowerCase()]) score -= 0.10;  // bonus favorito
+      if (m.proteinSource === 'pescado') score -= 0.15;  // bonus pescado para que aparezca más
       // En intentos tardíos → más variedad (shuffle parcial)
       if (attempt >= 6) score += Math.random() * 0.20;
       return { meal: m, score: score };
