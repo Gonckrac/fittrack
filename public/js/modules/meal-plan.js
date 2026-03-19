@@ -645,10 +645,17 @@ function _renderPlanFinal(plan) {
           ing.map(function(r){ return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text2)">'+r[0]+'</span><span style="color:var(--text3);font-weight:600">'+r[1]+'g</span></div>'; }).join('') +
         '</div>' : '';
    var isToday2 = i===todayIdx;
+   var macroLine = '<div style="font-size:10px;color:var(--text3);margin-top:2px">' +
+        meal.kcal + ' kcal · ' +
+        '<span style="color:#3b82f6">' + meal.protein + 'g P</span> · ' +
+        '<span style="color:#f59e0b">' + meal.carbs + 'g C</span> · ' +
+        '<span style="color:#ef4444">' + meal.fats + 'g G</span>' +
+        '</div>';
       return '<div style="display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--bg4)">' +
         '<div style="font-size:11px;color:var(--text3);min-width:76px;padding-top:2px;flex-shrink:0">'+SLOT_LABELS[slot]+'</div>' +
         '<div style="flex:1;min-width:0;cursor:pointer" onclick="_toggleMealDetail(\'pf_'+i+'_'+slot+'\')">' +
           '<div style="font-size:12px;font-weight:600;color:var(--text);line-height:1.3">'+meal.name+' <span style="font-size:10px;color:var(--text3)">▾</span></div>' +
+          macroLine +
           ingHtml +
         '</div>' +
         '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0;align-items:flex-end">' +
@@ -1100,8 +1107,15 @@ function _generateDay(targets, eligible, usedIds, freqSet, dayIndex) {
   }
 
   // Siempre escalar al target — garantiza ±5% hard
-  bestDay = _scaleDayToTargets(bestDay, targets);
-  return bestDay;
+  // Escalar siempre — preservar id original para que _getMealIngredients funcione
+  var scaled = _scaleDayToTargets(bestDay, targets);
+  var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
+  SLOTS.forEach(function(slot) {
+    if (scaled.meals[slot] && bestDay.meals[slot]) {
+      scaled.meals[slot].id = bestDay.meals[slot].id;
+    }
+  });
+  return scaled;
 }
 
 // ─── INTENTO DE CONSTRUCCIÓN DE UN DÍA ───────────────────────────
