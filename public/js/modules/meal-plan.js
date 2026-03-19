@@ -62,8 +62,45 @@ var MEAL_RECIPE = {
   'dn_tofu_wok':    [['Tofu firme',200,'Varios'],['Arroz integral',180,'Secos'],['Edamame',100,'Frutas y verduras'],['Salsa de soja',15,'Varios'],['Ajo',10,'Frutas y verduras']],
 };
 
-// ─── STATE DEL WIZARD ────────────────────────────────────────────
-var _wz = {
+// ─── HELPER: obtener ingredientes de una comida (nueva DB o MEAL_RECIPE legacy) ──
+function _getMealIngredients(mealId) {
+  // Primero buscar en nueva DB (tiene campo ingredients)
+  var meal = _getAllMeals().find(function(m) { return m.id === mealId; });
+  if (meal && meal.ingredients && meal.ingredients.length) {
+    return meal.ingredients.map(function(i) {
+      // Asignar categoría automática por nombre
+      var cat = _guessFoodCategory(i.name);
+      return [i.name, i.grams, cat];
+    });
+  }
+  // Fallback: MEAL_RECIPE legacy
+  return MEAL_RECIPE[mealId] || [];
+}
+
+// ─── HELPER: obtener preparación de una comida ────────────────────
+function _getMealPrep(mealId) {
+  var meal = _getAllMeals().find(function(m) { return m.id === mealId; });
+  if (meal && meal.prepSteps && meal.prepSteps.length) {
+    return meal.prepSteps.join(' ');
+  }
+  return MEAL_PREP[mealId] || '';
+}
+
+// ─── HELPER: adivinar categoría de lista de compras por nombre ────
+function _guessFoodCategory(name) {
+  var n = name.toLowerCase();
+  if (/pollo|bife|carne|milanesa|cerdo|bondiola|costeleta|pechuga|muslo|suprema|lomo|pavo/.test(n)) return 'Carnes';
+  if (/merluza|salmón|atún|langostino|pescado|filete/.test(n)) return 'Pescados y mariscos';
+  if (/huevo|leche|yogur|queso|ricota|manteca|crema|cottage/.test(n)) return 'Lácteos y huevos';
+  if (/proteína|whey|caseína/.test(n)) return 'Suplementos';
+  if (/pan|tostada|medialuna|galletita|factura/.test(n)) return 'Panadería';
+  if (/arroz|avena|fideos|pasta|lenteja|garbanzo|quinoa|fideo|tallarín|cereal|granola/.test(n)) return 'Secos';
+  if (/lata|enlatado|atún al natural|leche de coco/.test(n)) return 'Enlatados';
+  if (/aceite|miel|sal|pimienta|condimento|salsa|maní|mantequilla de maní|cacao|chocolate|dulce/.test(n)) return 'Varios';
+  return 'Frutas y verduras';
+}
+
+// ─── STATE DEL WIZARD ────────────────────────────────────────────var _wz = {
   step: 'idle',
   dayIdx: 0,
   allergies: [],
@@ -297,13 +334,14 @@ function _openDayReview(dayIdx) {
 
   var mealsHtml = MEAL_SLOTS.map(function(slot) {
     var meal = day.meals[slot]; if (!meal) return '';
-    var ing = MEAL_RECIPE[meal.id] || [];
+var ing = _getMealIngredients(meal.id);
     var ingHtml = ing.length ?
       '<div style="margin-top:8px;padding-top:8px;border-top:1px dashed var(--bg4)">' +
         ing.map(function(i){ return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text2)">'+i[0]+'</span><span style="color:var(--text3);font-weight:600">'+i[1]+'g</span></div>'; }).join('') +
       '</div>' : '';
 
-    return '<div id="meal_'+dayIdx+'_'+slot+'" style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">' +
+    return '<div id="meal_'+dayIdx+'_'+slot+'"
+style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:10px">' +
       '<div style="display:flex;align-items:flex-start;gap:10px">' +
         '<div style="font-size:11px;color:var(--text3);min-width:72px;padding-top:2px;flex-shrink:0">'+SLOT_LABELS[slot]+'</div>' +
         '<div style="flex:1;cursor:pointer" onclick="_toggleMealDetail(\'det_'+dayIdx+'_'+slot+'\')">' +
@@ -389,8 +427,8 @@ function _actionBtn(label, color, fn) {
 function _openDislikeIngredients(dayIdx, slot) {
   document.getElementById('mealActionsMenu').remove();
   var meal = _wz.plan[dayIdx].meals[slot];
-  var ing = MEAL_RECIPE[meal.id] || [];
-  // Ingredientes seleccionados (ninguno por defecto)
+var ing = _getMealIngredients(meal.id);
+  // Ingredientes seleccionados (ninguno por defecto)  // Ingredientes seleccionados (ninguno por defecto)
   var selected = {};
 
   var chips = ing.map(function(i) {
@@ -454,8 +492,7 @@ window._confirmDislikeIngredients = function(dayIdx, slot) {
   sheet.remove();
   // Agregar ingredientes seleccionados a unavailable
   var refMeal = _wz.plan[dayIdx].meals[slot];
-  var refIng = MEAL_RECIPE[refMeal.id] || [];
-  keys.forEach(function(key) {
+var refIng = _getMealIngredients(refMeal.id);  keys.forEach(function(key) {
     var original = refIng.find(function(i){ return i[0].toLowerCase() === key; });
     var name = original ? original[0] : key;
     if (_wz.unavailable.indexOf(name) < 0) _wz.unavailable.push(name);
@@ -467,7 +504,7 @@ window._confirmDislikeIngredients = function(dayIdx, slot) {
     MEAL_SLOTS.forEach(function(s) {
       var m = dayPlan.meals[s];
       if (!m) return;
-      var rec = MEAL_RECIPE[m.id] || [];
+  var rec = _getMealIngredients(m.id);
       var hasExcluded = rec.some(function(i) {
         return _wz.unavailable.some(function(u) {
           return i[0].toLowerCase().indexOf(u.toLowerCase()) >= 0;
@@ -498,7 +535,7 @@ function _excludeAndReplace(dayIdx, slot, reason) {
   if (reason === 'dislike') {
     if (_wz.excluded.indexOf(meal.id) < 0) _wz.excluded.push(meal.id);
   } else {
-    var ing = MEAL_RECIPE[meal.id] || [];
+var ing = _getMealIngredients(meal.id);
     ing.forEach(function(i){ if (_wz.unavailable.indexOf(i[0]) < 0) _wz.unavailable.push(i[0]); });
   }
   var replacement = _getBestReplacement(meal, slot, _wz.plan);
@@ -544,7 +581,7 @@ document.body.appendChild(sheet);
 
 function _applySwap(dayIdx, slot, mealId) {
   var s = document.getElementById('swapSheet'); if(s) s.remove();
-  var newMeal = (FOOD_DB_V2.complete_meals||[]).find(function(m){ return m.id===mealId; });
+var newMeal = _getAllMeals().find(function(m){ return m.id===mealId; });
   if (newMeal) { _wz.plan[dayIdx].meals[slot] = newMeal; showToast('✅ ' + newMeal.name); }
   _openDayReview(dayIdx);
 }
@@ -600,7 +637,7 @@ function _renderPlanFinal(plan) {
 
     var mealsHtml = MEAL_SLOTS.map(function(slot) {
       var meal = dayPlan.meals[slot]; if(!meal) return '';
-      var ing = MEAL_RECIPE[meal.id] || [];
+ var ing = _getMealIngredients(meal.id);
       var ingHtml = ing.length ?
         '<div id="pf_'+i+'_'+slot+'" style="display:none;margin-top:8px;padding-top:8px;border-top:1px dashed var(--bg4)">' +
           ing.map(function(r){ return '<div style="display:flex;justify-content:space-between;font-size:11px;padding:2px 0"><span style="color:var(--text2)">'+r[0]+'</span><span style="color:var(--text3);font-weight:600">'+r[1]+'g</span></div>'; }).join('') +
@@ -712,7 +749,7 @@ function openSwapMeal(dayIdx, slot) {
 function swapMeal(dayIdx, slot, mealId) {
   var plan = loadMealPlan();
   if (!plan||!plan[dayIdx]) return;
-  var newMeal = (FOOD_DB_V2.complete_meals||[]).find(function(m){ return m.id===mealId; });
+var newMeal = _getAllMeals().find(function(m){ return m.id===mealId; });
   if (!newMeal) { showToast('⚠ No se encontró la comida. Generá un nuevo plan.'); return; }
   plan[dayIdx].meals[slot] = newMeal;
   saveMealPlan(plan);
@@ -791,7 +828,7 @@ function openShoppingList() {
   plan.forEach(function(d){
     MEAL_SLOTS.forEach(function(slot){
       var meal = d.meals[slot]; if(!meal) return;
-      var recipe = MEAL_RECIPE[meal.id]; if(!recipe) return;
+var recipe = _getMealIngredients(meal.id); if(!recipe || !recipe.length) return;
       recipe.forEach(function(ing){
         var key = ing[0].toLowerCase();
         if (!totals[key]) totals[key] = { name:ing[0], cat:ing[2], grams:0 };
@@ -870,7 +907,7 @@ function _shareShoppingList() {
   plan.forEach(function(d) {
     MEAL_SLOTS.forEach(function(slot) {
       var meal = d.meals[slot]; if (!meal) return;
-      var recipe = MEAL_RECIPE[meal.id]; if (!recipe) return;
+var recipe = _getMealIngredients(meal.id); if (!recipe || !recipe.length) return;
       recipe.forEach(function(ing) {
         var key = ing[0].toLowerCase();
         if (!totals[key]) totals[key] = { name: ing[0], cat: ing[2], grams: 0 };
@@ -927,8 +964,11 @@ function _openSheet(content) {
 function _closeSheet() { var s=document.getElementById('planWizardSheet'); if(s) s.remove(); }
 
 // ─── ALGORITMO ───────────────────────────────────────────────────
+function _getAllMeals() {
+  return ALL_FOODS_V3 || [];
+}
 function _filterMeals() {
-  var meals = FOOD_DB_V2.complete_meals || [];
+  var meals = _getAllMeals();
   var allergies   = _wz.allergies   || [];
   var excluded    = _wz.excluded    || [];
   var unavailable = _wz.unavailable || [];
@@ -1052,8 +1092,8 @@ function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt) {
       return (usedIds[m.id] || 0) < maxRep;
     });
 
-    if (!cands.length) {
-      cands = eligible.filter(function(m) { return m.mealType.indexOf(slot) >= 0; });
+if (!cands.length) {
+      cands = _getAllMeals().filter(function(m) { return m.mealType.indexOf(slot) >= 0; });
     }
     if (!cands.length) {
       cands = (FOOD_DB_V2.complete_meals || []).filter(function(m) { return m.mealType.indexOf(slot) >= 0; });
@@ -1204,8 +1244,7 @@ function _getBestReplacement(currentMeal, slot, plan) {
 
 function _getSwapOptions(currentMeal, slot, usedIds) {
   var prefs = state.mealPlanPrefs || {};
-  var eligible = (FOOD_DB_V2.complete_meals||[]).filter(function(m){
-    if (m.id===currentMeal.id) return false;
+var eligible = _getAllMeals().filter(function(m){    if (m.id===currentMeal.id) return false;
     if (m.mealType.indexOf(slot)<0) return false;
     var allergies = _wz.allergies.length ? _wz.allergies : (prefs.allergies||[]);
     if (allergies.length) { var t=m.tags||[]; if(allergies.some(function(a){ return (ALLERGY_TAGS[a]||[a]).some(function(at){ return t.indexOf(at)>=0; }); })) return false; }
@@ -1291,8 +1330,8 @@ function downloadPlanPDF() {
     html += '<div class="day"><div class="day-title">' + DAY_NAMES[i] + '</div>';
     MEAL_SLOTS.forEach(function(slot) {
       var meal = dayPlan.meals[slot]; if (!meal) return;
-      var ing = MEAL_RECIPE[meal.id] || [];
-      var prep = MEAL_PREP[meal.id] || '';
+var ing = _getMealIngredients(meal.id);
+      var prep = _getMealPrep(meal.id);
       html += '<div class="meal">';
       html += '<div class="meal-slot">' + slotLabelsClean[slot] + '</div>';
       html += '<div class="meal-header">' + meal.name + '</div>';
