@@ -87,13 +87,33 @@ function renderMealPlan() {
   try {
     var plan = loadMealPlan();
     if (!plan) {
-      container.innerHTML =
-        '<div style="text-align:center;padding:48px 20px 40px">' +
-          '<div style="font-size:52px;margin-bottom:16px">🗓</div>' +
-          '<div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Creá tu plan semanal</div>' +
-          '<div style="font-size:13px;color:var(--text3);margin-bottom:28px;line-height:1.6">Te mostramos cada día y vos lo ajustás a tu gusto.<br>Al final te damos la lista de compras exacta.</div>' +
-          '<button class="btn btn-primary" onclick="startPlanWizard()" style="width:100%;max-width:300px">Armar mi plan →</button>' +
-        '</div>';
+ container.innerHTML =
+  '<div style="padding:24px 0;text-align:center">' +
+    '<div style="font-size:48px;margin-bottom:16px">🥗</div>' +
+    '<div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Tu plan semanal de comidas</div>' +
+    '<div style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:24px;padding:0 16px">' +
+      'Generamos un menú completo de 7 días adaptado a tus macros, objetivo y preferencias.<br>Al final te damos la lista de compras exacta.' +
+    '</div>' +
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:28px;text-align:left;padding:0 8px">' +
+      '<div style="background:var(--bg3);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:flex-start">' +
+        '<span style="font-size:20px">🎯</span>' +
+        '<div><div style="font-size:12px;font-weight:700;color:var(--text)">Adaptado a tus macros</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Calculado según tu objetivo</div></div>' +
+      '</div>' +
+      '<div style="background:var(--bg3);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:flex-start">' +
+        '<span style="font-size:20px">🛒</span>' +
+        '<div><div style="font-size:12px;font-weight:700;color:var(--text)">Lista de compras</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Ingredientes exactos por día</div></div>' +
+      '</div>' +
+      '<div style="background:var(--bg3);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:flex-start">' +
+        '<span style="font-size:20px">⚡</span>' +
+        '<div><div style="font-size:12px;font-weight:700;color:var(--text)">Rápido de armar</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Listo en menos de 2 minutos</div></div>' +
+      '</div>' +
+      '<div style="background:var(--bg3);border-radius:14px;padding:14px;display:flex;gap:10px;align-items:flex-start">' +
+        '<span style="font-size:20px">🔄</span>' +
+        '<div><div style="font-size:12px;font-weight:700;color:var(--text)">Ajustable</div><div style="font-size:11px;color:var(--text3);margin-top:2px">Cambiá lo que no te gusta</div></div>' +
+      '</div>' +
+    '</div>' +
+    '<button onclick="startMealPlanWizard()" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px">Armar mi plan →</button>' +
+  '</div>';
     } else {
       _renderPlanFinal(plan);
     }

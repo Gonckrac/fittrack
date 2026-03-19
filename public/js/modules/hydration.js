@@ -26,6 +26,9 @@ function resetWater() {
 }
 
 function renderWater(animate) {
+// Actualizar el objetivo mostrado en pantalla
+var goalLabelEl = document.getElementById('waterGoalLabel');
+if (goalLabelEl) goalLabelEl.textContent = '💧 OBJETIVO DIARIO: ' + getWaterGoal() + 'ML';
   const ml = getWater();
   const pct = Math.min(100, Math.round(ml / getWaterGoal() * 100));
   const glasses = Math.floor(ml / 250);
