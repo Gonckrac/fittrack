@@ -1122,6 +1122,7 @@ function _generateDay(targets, eligible, usedIds, freqSet, dayIndex) {
 function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt) {
   var meals = {};
   var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
+  var usedThisDay = {}; // evita repetir la misma comida dentro del mismo día
 
   SLOTS.forEach(function(slot) {
     var slotTarget = {
@@ -1131,9 +1132,9 @@ function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt) {
       fats:    Math.round(targets.fat     * SLOT_DIST_V4[slot]),
     };
 
-    var cands = eligible.filter(function(m) {
+ var cands = eligible.filter(function(m) {
       if (m.mealType.indexOf(slot) < 0) return false;
-      // Variar repetición según preferencia del wizard
+      if (usedThisDay[m.id]) return false; // nunca repetir en el mismo día
       var maxRep = _wz.variety === 'varied' ? 1 : _wz.variety === 'mealprep' ? 4 : 2;
       return (usedIds[m.id] || 0) < maxRep;
     });
@@ -1160,7 +1161,9 @@ if (!cands.length) {
     // Primeros intentos: tomar el mejor. Intentos medios: pool de 3. Tardíos: pool de 5.
     var poolSize = attempt < 4 ? 1 : attempt < 8 ? 3 : 5;
     poolSize = Math.min(poolSize, scored.length);
-    meals[slot] = scored[Math.floor(Math.random() * poolSize)].meal;
+    var chosen = scored[Math.floor(Math.random() * poolSize)].meal;
+    meals[slot] = chosen;
+    usedThisDay[chosen.id] = true; // marcar como usada en este día
   });
 
   return { meals: meals };
