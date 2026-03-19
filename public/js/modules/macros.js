@@ -456,10 +456,11 @@ function _getGoalWeights() {
 
 // DESPUÉS
 function _hasWearableSteps(snap) {
-  var ouraConnected = typeof isWearableConnected === 'function' && isWearableConnected('oura');
-  var hasOuraData   = snap.sleep && snap.sleep.readiness;
-  var hasSteps      = (snap.steps || 0) > 0;
-  return ouraConnected || hasOuraData || hasSteps;
+  var ouraConnected  = typeof isWearableConnected === 'function' && isWearableConnected('oura');
+  var fitbitConnected = typeof isWearableConnected === 'function' && isWearableConnected('fitbit');
+  var hasOuraData    = snap.sleep && snap.sleep.readiness;
+  var hasSteps       = (snap.steps || 0) > 0;
+  return ouraConnected || fitbitConnected || hasOuraData || hasSteps;
 }
 
 // ─── SCORE KCAL SEGÚN OBJETIVO ────────────────────────────────────

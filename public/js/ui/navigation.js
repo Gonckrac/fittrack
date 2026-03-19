@@ -321,8 +321,8 @@ function _syncRecuperacionSleep() {
   var dst = document.getElementById('recuperacion-sleep-content');
   if (!dst) return;
 
-  var hasWearable = typeof isWearableConnected === 'function' && isWearableConnected('oura');
-
+var hasWearable = typeof isWearableConnected === 'function' && 
+  (isWearableConnected('oura') || isWearableConnected('fitbit'));
   dst.innerHTML = [
     // Card manual — oculto si hay wearable
     '<div class="card" id="rec_manualSleepCard" style="' + (hasWearable ? 'display:none' : '') + '">',
