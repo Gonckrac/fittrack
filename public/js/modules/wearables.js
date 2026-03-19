@@ -21,7 +21,7 @@ var WEARABLE_CONFIG = {
   fitbit: {
     name: 'Fitbit',
     emoji: '🟦',
-    clientId: 'TU_FITBIT_CLIENT_ID',
+    clientId: '23V82Y',
     authUrl: 'https://www.fitbit.com/oauth2/authorize',
     tokenUrl: 'https://api.fitbit.com/oauth2/token',
     scope: 'activity heartrate sleep profile',
@@ -141,7 +141,9 @@ renderWearablesCard();
 if (typeof renderHome === 'function') renderHome();
 if (typeof _syncRecuperacionSleep === 'function') _syncRecuperacionSleep();
 showToast('✓ ' + WEARABLE_CONFIG[provider].name + ' conectado');
-if (provider === 'oura') syncOura();
+
+if (provider === 'oura')   syncOura();
+if (provider === 'fitbit') syncFitbit();
   } catch(e) {
     showToast('⚠ Error al conectar. Intentá de nuevo.');
   }
@@ -226,7 +228,37 @@ if (typeof renderSleep === 'function') renderSleep();
     showToast('⚠ Error al sincronizar: ' + e.message);
   }
 }
-
+async function syncFitbit() {
+  var token = getWearableToken('fitbit');
+  if (!token) { showToast('⚠ Fitbit no conectado'); return; }
+  showToast('↻ Sincronizando Fitbit…');
+  try {
+    var res = await fetch('https://fittrack-backend-one.vercel.app/api/fitbit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: token })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!state[TODAY]) state[TODAY] = {};
+    if (!state[TODAY].sleep) state[TODAY].sleep = {};
+    var sl = state[TODAY].sleep;
+    sl.hours      = data.sleep?.total_hours      || sl.hours;
+    sl.efficiency = data.sleep?.efficiency       || sl.efficiency;
+    sl.deep       = data.sleep?.deep_hours       || sl.deep;
+    sl.hrv        = data.sleep?.hrv_avg          || sl.hrv;
+    sl.rhr        = data.sleep?.resting_hr       || sl.rhr;
+    if (data.activity?.steps) state[TODAY].steps = data.activity.steps;
+    saveState(state);
+    if (typeof renderSleep === 'function') renderSleep();
+    if (typeof renderHome  === 'function') renderHome();
+    if (typeof _syncRecuperacionSleep === 'function') _syncRecuperacionSleep();
+    showToast('✓ Fitbit sincronizado');
+  } catch(e) {
+    showToast('⚠ Error al sincronizar: ' + e.message);
+  }
+}
+window.syncFitbit = syncFitbit;
 window.connectWearable     = connectWearable;
 window.disconnectWearable  = disconnectWearable;
 window.openWearableDetail  = openWearableDetail;
