@@ -113,10 +113,11 @@ function _confirmDisconnect(provider) {
 
   delete state.wearables[provider];
   saveState(state);
-  renderWearablesCard();
-  if (typeof renderSleep === 'function') renderSleep();
-  if (typeof renderHome  === 'function') renderHome();
-  showToast(WEARABLE_CONFIG[provider].name + ' desconectado');
+renderWearablesCard();
+if (typeof renderSleep === 'function') renderSleep();
+if (typeof renderHome  === 'function') renderHome();
+if (typeof _syncRecuperacionSleep === 'function') _syncRecuperacionSleep();
+showToast(WEARABLE_CONFIG[provider].name + ' desconectado');
 }
 
 async function _exchangeWearableCode(provider, code) {
@@ -136,9 +137,11 @@ async function _exchangeWearableCode(provider, code) {
       connectedAt: Date.now(),
     };
     saveState(state);
-    renderWearablesCard();
-    showToast('✓ ' + WEARABLE_CONFIG[provider].name + ' conectado');
-    if (provider === 'oura') syncOura();
+renderWearablesCard();
+if (typeof renderHome === 'function') renderHome();
+if (typeof _syncRecuperacionSleep === 'function') _syncRecuperacionSleep();
+showToast('✓ ' + WEARABLE_CONFIG[provider].name + ' conectado');
+if (provider === 'oura') syncOura();
   } catch(e) {
     showToast('⚠ Error al conectar. Intentá de nuevo.');
   }

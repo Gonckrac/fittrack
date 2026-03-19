@@ -454,10 +454,12 @@ function _getGoalWeights() {
   return SCORE_WEIGHTS_BASE;
 }
 
+// DESPUÉS
 function _hasWearableSteps(snap) {
-  var hasOura = snap.sleep && snap.sleep.readiness;
-  var hasSteps = (snap.steps || 0) > 0;
-  return hasOura || hasSteps;
+  var ouraConnected = typeof isWearableConnected === 'function' && isWearableConnected('oura');
+  var hasOuraData   = snap.sleep && snap.sleep.readiness;
+  var hasSteps      = (snap.steps || 0) > 0;
+  return ouraConnected || hasOuraData || hasSteps;
 }
 
 // ─── SCORE KCAL SEGÚN OBJETIVO ────────────────────────────────────
@@ -715,10 +717,13 @@ function renderHome() {
 var dynSuppsForUI = getDynamicSupps();
 
   // ── Peso: se oculta solo cuando hay suplementos Y wearable (7 items → 6) ──
-  var weightCard = document.getElementById('homeWeightCard');
-  if (weightCard) {
-    weightCard.style.display = (scores.stepsFromWearable && dynSuppsForUI.length > 0) ? 'none' : '';
-  }
+// Actualizar cards de sueño al conectar/desconectar Oura
+// ── Peso: se oculta cuando hay wearable conectado ──
+var weightCard = document.getElementById('homeWeightCard');
+if (weightCard) {
+  weightCard.style.display = scores.stepsFromWearable ? 'none' : '';
+}
+if (typeof _syncRecuperacionSleep === 'function') _syncRecuperacionSleep();
 var _tdow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
   var _tcycle = state.config && state.config.cycle && state.config.cycle[_tdow];
   var isRestDay = state[TODAY].trainDay === 0 && (_tcycle === undefined || _tcycle === null || _tcycle === -1 || _tcycle === '-1' || _tcycle === 'rest');  var tDaily = calcTotals();
