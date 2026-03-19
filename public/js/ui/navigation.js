@@ -422,10 +422,15 @@ function _syncRecuperacionWater() {
   if (srcWater && dstWater) {
     if (typeof renderWater === 'function') renderWater(false);
 dstWater.innerHTML = srcWater.innerHTML;
-var goalLabel = dstWater.querySelector('#waterGoalLabel');
-if (goalLabel && typeof getWaterGoal === 'function') {
-  goalLabel.textContent = '💧 OBJETIVO DIARIO: ' + getWaterGoal() + 'ML';
-}
+dstWater.querySelectorAll('[id="waterGoalLabel"]').forEach(function(el) {
+  el.textContent = '💧 OBJETIVO DIARIO: ' + (typeof getWaterGoal === 'function' ? getWaterGoal() : 3000) + 'ML';
+});
+dstWater.querySelectorAll('.card-title').forEach(function(el) {
+  if (el.textContent.indexOf('OBJETIVO DIARIO') >= 0) {
+    var span = el.querySelector('span:last-child');
+    if (span) span.textContent = '💧 OBJETIVO DIARIO: ' + (typeof getWaterGoal === 'function' ? getWaterGoal() : 3000) + 'ML';
+  }
+});
 var remEl = dstWater.querySelector('#waterRemainingNum');
 if (remEl && typeof getWaterGoal === 'function') {
   remEl.textContent = Math.max(0, getWaterGoal() - (state[TODAY].water || 0));
