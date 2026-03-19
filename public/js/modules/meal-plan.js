@@ -130,8 +130,8 @@ function renderMealPlan() {
 }
 
 // ─── WIZARD: PANTALLA DE ALERGIAS ────────────────────────────────
-function startPlanWizard() {
-  _wz.allergies   = (state.mealPlanPrefs && state.mealPlanPrefs.allergies)   || [];
+function startMealPlanWizard() { startPlanWizard(); }
+function startPlanWizard() {  _wz.allergies   = (state.mealPlanPrefs && state.mealPlanPrefs.allergies)   || [];
   _wz.excluded    = (state.mealPlanPrefs && state.mealPlanPrefs.excluded)    || [];
   _wz.unavailable = (state.mealPlanPrefs && state.mealPlanPrefs.unavailable) || [];
   _wz.prepTime    = (state.mealPlanPrefs && state.mealPlanPrefs.prepTime)    || 'any';
