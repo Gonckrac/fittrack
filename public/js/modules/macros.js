@@ -700,15 +700,9 @@ function renderHome() {
 
   // ── Tile de Pasos: solo visible con wearable ─────────────────────
 // ── Tile de Pasos: solo visible con wearable ─────────────────────
+// ── Tile de Pasos: solo visible con wearable ─────────────────────
   var stepsCard = document.getElementById('homeStepsCard');
   if (stepsCard) stepsCard.style.display = scores.stepsFromWearable ? '' : 'none';
-
-  // ── Peso: se oculta solo cuando hay suplementos Y wearable (7 items → 6) ──
-  var weightCard = document.getElementById('homeWeightCard');
-  if (weightCard) {
-    var hideWeight = scores.stepsFromWearable && dynSuppsForUI.length > 0;
-    weightCard.style.display = hideWeight ? 'none' : '';
-  }
   if (scores.stepsFromWearable) {
     var stepsEl = document.getElementById('dayStepsScore');
     var stepsStatus = document.getElementById('dayStepsStatus');
@@ -718,14 +712,12 @@ function renderHome() {
   }
 
   // ── Tarjetas de métricas ─────────────────────────────────────────
-  var dynSuppsForUI = getDynamicSupps();
 var dynSuppsForUI = getDynamicSupps();
 
   // ── Peso: se oculta solo cuando hay suplementos Y wearable (7 items → 6) ──
   var weightCard = document.getElementById('homeWeightCard');
   if (weightCard) {
-    var hideWeight = scores.stepsFromWearable && dynSuppsForUI.length > 0;
-    weightCard.style.display = hideWeight ? 'none' : '';
+    weightCard.style.display = (scores.stepsFromWearable && dynSuppsForUI.length > 0) ? 'none' : '';
   }
 var _tdow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
   var _tcycle = state.config && state.config.cycle && state.config.cycle[_tdow];

@@ -167,8 +167,9 @@ async function syncOura() {
 
     
     saveState(state);
-    if (typeof renderSleep === 'function') renderSleep();
+if (typeof renderSleep === 'function') renderSleep();
     if (typeof renderKcal  === 'function') renderKcal();
+    if (typeof renderHome  === 'function') renderHome();  // ← agregar
     showToast('✓ Oura sincronizado');
   } catch(e) {
     showToast('⚠ Error al sincronizar: ' + e.message);
