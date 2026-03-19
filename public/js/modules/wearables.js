@@ -164,9 +164,7 @@ async function syncOura() {
     sl.deep       = data.sleep?.deep_hours       || sl.deep;
     sl.hrv        = data.sleep?.hrv_avg          || sl.hrv;
     sl.rhr        = data.sleep?.resting_hr       || sl.rhr;
-    if (data.activity?.total_calories) {
-      if (!state[TODAY].kcal) state[TODAY].kcal = {};
-      state[TODAY].kcal.burned = data.activity.total_calories;
+
     }
     saveState(state);
     if (typeof renderSleep === 'function') renderSleep();
