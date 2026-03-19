@@ -963,73 +963,233 @@ function _getPlanIngredients(plan) {
   return used;
 }
 
+
+// ═══════════════════════════════════════════════════════════════════
+// GENERADOR DE PLAN SEMANAL v4 — Tolerancia ±5% en todos los macros
+// Reemplaza _generatePlan() en meal-plan.js
+// ═══════════════════════════════════════════════════════════════════
+
+// ─── CONSTANTES ───────────────────────────────────────────────────
+var SLOT_DIST_V4 = {
+  breakfast: 0.25,
+  lunch:     0.35,
+  snack:     0.10,
+  dinner:    0.30,
+};
+
+// Tolerancia máxima por día (±5% = 0.05)
+var MACRO_TOLERANCE = 0.05;
+
+// ─── FUNCIÓN PRINCIPAL ────────────────────────────────────────────
+// Reemplaza la función _generatePlan() existente en meal-plan.js
+// Misma firma: (targets, goal, freqFoodNames) → plan[7]
 function _generatePlan(targets, goal, freqFoodNames) {
   var eligible = _filterMeals();
   if (eligible.length < 8) eligible = FOOD_DB_V2.complete_meals || [];
-  var usedIds = {}, plan = [], freqSet = {};
-  (freqFoodNames||[]).forEach(function(n){ freqSet[n.toLowerCase()]=true; });
-  var kcalTarget = targets.kcal;
 
-  for (var d=0; d<7; d++) {
-    var dayMeals = {};
-    var usedIngredients = _getPlanIngredients(plan); // ingredientes ya en el plan
+  var freqSet = {};
+  (freqFoodNames || []).forEach(function(n) { freqSet[n.toLowerCase()] = true; });
 
-    // Intentar hasta 5 veces que el día cumpla el objetivo calórico (±12%)
-    for (var attempt=0; attempt<5; attempt++) {
-      dayMeals = {};
-      var dayKcal = 0;
-      MEAL_SLOTS.forEach(function(slot) {
-        var tgt = { kcal:Math.round(kcalTarget*SLOT_DIST[slot]), protein:Math.round(targets.prot*SLOT_DIST[slot]), carbs:Math.round(targets.carb*SLOT_DIST[slot]), fats:Math.round(targets.fat*SLOT_DIST[slot]) };
-var maxRep = _wz.variety === 'varied' ? 1 : _wz.variety === 'mealprep' ? 4 : 2;
-        var cands = eligible.filter(function(m){ return m.mealType.indexOf(slot)>=0 && (usedIds[m.id]||0)<maxRep; });        if (!cands.length) cands = eligible.filter(function(m){ return m.mealType.indexOf(slot)>=0; });
-        if (!cands.length) cands = (FOOD_DB_V2.complete_meals||[]).filter(function(m){ return m.mealType.indexOf(slot)>=0; });
+  var usedIds = {};
+  var plan = [];
 
-        var scored = cands.map(function(m) {
-          var dK = Math.abs(m.kcal-tgt.kcal)/tgt.kcal;
-          var dP = Math.abs(m.protein-tgt.protein)/Math.max(tgt.protein,1);
-          var dC = Math.abs(m.carbs-tgt.carbs)/Math.max(tgt.carbs,1);
-          var dF = Math.abs(m.fats-tgt.fats)/Math.max(tgt.fats,1);
-          var macroScore = (dK + dP*2 + dC + dF) / 5;
-          // Bonus por reusar ingredientes ya en el plan (reduce lista de compras)
-          var rec = MEAL_RECIPE[m.id] || [];
-          var sharedIng = rec.filter(function(i){ return usedIngredients[i[0].toLowerCase()]; }).length;
-          var noveltyPenalty = Math.max(0, rec.length - sharedIng - 2) * 0.08; // penaliza ingredientes nuevos en exceso
-          var reuseBonus = -sharedIng * 0.06; // premia compartir ingredientes
-          return { meal:m, score: macroScore + noveltyPenalty + reuseBonus + (freqSet[m.name.toLowerCase()]?-0.12:0) + (usedIds[m.id]||0)*0.25 };
-        });
-        scored.sort(function(a,b){ return a.score-b.score; });
-        // En último intento usar el mejor sin aleatoriedad
-        var poolSize = attempt < 4 ? Math.min(3,scored.length) : 1;
-        var chosen = scored[Math.floor(Math.random()*poolSize)].meal;
-        dayMeals[slot] = chosen;
-        dayKcal += chosen.kcal;
-      });
-      // Verificar que el día cumple ±12% del objetivo calórico
-      // Verificar que el día cumple ±200 kcal del objetivo calórico
-      if (Math.abs(dayKcal - kcalTarget) <= 200) break; // ✅ cumple
-      // Si no cumple y no es el último intento, reintentar
-      // En el último intento, escalar las porciones para acercar al objetivo
-      if (attempt === 4 && Math.abs(dayKcal - kcalTarget) > 200) {
-        var scale = kcalTarget / Math.max(dayKcal, 1);
-        MEAL_SLOTS.forEach(function(slot) {
-          var m = dayMeals[slot];
-          if (!m) return;
-          dayMeals[slot] = {
-            id: m.id, name: m.name, mealType: m.mealType, tags: m.tags,
-            kcal:    Math.round(m.kcal    * scale),
-            protein: Math.round(m.protein * scale),
-            carbs:   Math.round(m.carbs   * scale),
-            fats:    Math.round(m.fats    * scale)
-          };
-        });
-      }
-      // Si no cumple y no es el último intento, reintentar
+  for (var d = 0; d < 7; d++) {
+    var dayResult = _generateDay(targets, eligible, usedIds, freqSet, d);
+    dayResult.meals && Object.keys(dayResult.meals).forEach(function(slot) {
+      var m = dayResult.meals[slot];
+      if (m) usedIds[m.id] = (usedIds[m.id] || 0) + 1;
+    });
+    plan.push({ day: d, meals: dayResult.meals });
+  }
+
+  return plan;
+}
+
+// ─── GENERADOR DE UN DÍA ─────────────────────────────────────────
+function _generateDay(targets, eligible, usedIds, freqSet, dayIndex) {
+  var MAX_ATTEMPTS = 12;
+  var bestDay = null;
+  var bestError = Infinity;
+
+  for (var attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    var candidate = _tryBuildDay(targets, eligible, usedIds, freqSet, attempt);
+    var error = _calcDayError(candidate.meals, targets);
+
+    if (error < bestError) {
+      bestError = error;
+      bestDay = candidate;
     }
 
-    MEAL_SLOTS.forEach(function(slot){ if(dayMeals[slot]) usedIds[dayMeals[slot].id]=(usedIds[dayMeals[slot].id]||0)+1; });
-    plan.push({ day:d, meals:dayMeals });
+    // ±5% en todos los macros → aceptar inmediatamente
+    if (error <= MACRO_TOLERANCE) break;
   }
-  return plan;
+
+  // Si no se pudo dentro de tolerancia, ajustar porciones del mejor resultado
+  if (bestError > MACRO_TOLERANCE) {
+    bestDay = _scaleDayToTargets(bestDay, targets);
+  }
+
+  return bestDay;
+}
+
+// ─── INTENTO DE CONSTRUCCIÓN DE UN DÍA ───────────────────────────
+function _tryBuildDay(targets, eligible, usedIds, freqSet, attempt) {
+  var meals = {};
+  var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
+
+  SLOTS.forEach(function(slot) {
+    var slotTarget = {
+      kcal:    Math.round(targets.kcal    * SLOT_DIST_V4[slot]),
+      protein: Math.round(targets.prot    * SLOT_DIST_V4[slot]),
+      carbs:   Math.round(targets.carb    * SLOT_DIST_V4[slot]),
+      fats:    Math.round(targets.fat     * SLOT_DIST_V4[slot]),
+    };
+
+    var cands = eligible.filter(function(m) {
+      if (m.mealType.indexOf(slot) < 0) return false;
+      // Variar repetición según preferencia del wizard
+      var maxRep = _wz.variety === 'varied' ? 1 : _wz.variety === 'mealprep' ? 4 : 2;
+      return (usedIds[m.id] || 0) < maxRep;
+    });
+
+    if (!cands.length) {
+      cands = eligible.filter(function(m) { return m.mealType.indexOf(slot) >= 0; });
+    }
+    if (!cands.length) {
+      cands = (FOOD_DB_V2.complete_meals || []).filter(function(m) { return m.mealType.indexOf(slot) >= 0; });
+    }
+
+    // Scoring: prioriza macros exactos, penaliza repetición, bonifica favoritos
+    var scored = cands.map(function(m) {
+      var score = _macroScore(m, slotTarget);
+      score += (usedIds[m.id] || 0) * 0.30;              // penalidad repetición
+      if (freqSet[m.name.toLowerCase()]) score -= 0.10;  // bonus favorito
+      // En intentos tardíos → más variedad (shuffle parcial)
+      if (attempt >= 6) score += Math.random() * 0.20;
+      return { meal: m, score: score };
+    });
+
+    scored.sort(function(a, b) { return a.score - b.score; });
+
+    // Primeros intentos: tomar el mejor. Intentos medios: pool de 3. Tardíos: pool de 5.
+    var poolSize = attempt < 4 ? 1 : attempt < 8 ? 3 : 5;
+    poolSize = Math.min(poolSize, scored.length);
+    meals[slot] = scored[Math.floor(Math.random() * poolSize)].meal;
+  });
+
+  return { meals: meals };
+}
+
+// ─── SCORE DE ERROR MACRO (menor = mejor) ────────────────────────
+function _macroScore(meal, target) {
+  var dK = Math.abs(meal.kcal    - target.kcal)    / Math.max(target.kcal,    1);
+  var dP = Math.abs(meal.protein - target.protein) / Math.max(target.protein, 1);
+  var dC = Math.abs(meal.carbs   - target.carbs)   / Math.max(target.carbs,   1);
+  var dF = Math.abs(meal.fats    - target.fats)    / Math.max(target.fats,    1);
+  // Proteína pesa doble: es el macro más crítico en fitness
+  return (dK + dP * 2 + dC + dF) / 5;
+}
+
+// ─── ERROR DEL DÍA COMPLETO (máximo error entre los 4 macros) ────
+function _calcDayError(meals, targets) {
+  var totals = { kcal: 0, prot: 0, carb: 0, fat: 0 };
+  var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
+  SLOTS.forEach(function(slot) {
+    var m = meals[slot];
+    if (!m) return;
+    totals.kcal += m.kcal;
+    totals.prot += m.protein;
+    totals.carb += m.carbs;
+    totals.fat  += m.fats;
+  });
+  var eK = Math.abs(totals.kcal - targets.kcal) / Math.max(targets.kcal, 1);
+  var eP = Math.abs(totals.prot - targets.prot) / Math.max(targets.prot, 1);
+  var eC = Math.abs(totals.carb - targets.carb) / Math.max(targets.carb, 1);
+  var eF = Math.abs(totals.fat  - targets.fat)  / Math.max(targets.fat,  1);
+  // Devuelve el error máximo: todos los macros deben cumplir ±5%
+  return Math.max(eK, eP, eC, eF);
+}
+
+// ─── ESCALADO DE PORCIONES COMO ÚLTIMO RECURSO ───────────────────
+// Si después de 12 intentos no se logra ±5%, escalar proporciones
+// para forzar que kcal y proteína queden dentro de tolerancia.
+// Nota: modifica kcal/macros del objeto clonado, no la DB original.
+function _scaleDayToTargets(day, targets) {
+  var meals = day.meals;
+  var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
+
+  var totals = { kcal: 0, prot: 0 };
+  SLOTS.forEach(function(slot) {
+    var m = meals[slot];
+    if (!m) return;
+    totals.kcal += m.kcal;
+    totals.prot += m.protein;
+  });
+
+  // Factor de escala basado en kcal (eje principal)
+  var scaleKcal = targets.kcal / Math.max(totals.kcal, 1);
+  // Factor de escala basado en proteína
+  var scaleProt = targets.prot / Math.max(totals.prot, 1);
+  // Promedio ponderado: kcal 60%, proteína 40%
+  var scale = scaleKcal * 0.6 + scaleProt * 0.4;
+
+  // Limitar escala a ±30% para no generar porciones absurdas
+  scale = Math.max(0.7, Math.min(1.3, scale));
+
+  var scaledMeals = {};
+  SLOTS.forEach(function(slot) {
+    var m = meals[slot];
+    if (!m) return;
+    scaledMeals[slot] = {
+      id:      m.id,
+      name:    m.name,
+      mealType:m.mealType,
+      tags:    m.tags,
+      prepTime:m.prepTime,
+      simplicity: m.simplicity,
+      kcal:    Math.round(m.kcal    * scale),
+      protein: Math.round(m.protein * scale),
+      carbs:   Math.round(m.carbs   * scale),
+      fats:    Math.round(m.fats    * scale),
+      _scaled: true,  // flag para mostrar "porción ajustada" en UI
+      _scaleFactor: Math.round(scale * 100), // ej: 110 = +10% de porción
+    };
+  });
+
+  return { meals: scaledMeals };
+}
+
+// ─── VALIDADOR DE PLAN (para usar en UI) ─────────────────────────
+// Devuelve un reporte día por día con cumplimiento de macros
+function validatePlan(plan, targets) {
+  if (!plan || !targets) return null;
+
+  return plan.map(function(day, i) {
+    var totals = { kcal: 0, prot: 0, carb: 0, fat: 0 };
+    var SLOTS = ['breakfast', 'lunch', 'snack', 'dinner'];
+    SLOTS.forEach(function(slot) {
+      var m = day.meals[slot];
+      if (!m) return;
+      totals.kcal += m.kcal;
+      totals.prot += m.protein;
+      totals.carb += m.carbs;
+      totals.fat  += m.fats;
+    });
+
+    var errK = (totals.kcal - targets.kcal) / targets.kcal * 100;
+    var errP = (totals.prot - targets.prot) / targets.prot * 100;
+    var errC = (totals.carb - targets.carb) / targets.carb * 100;
+    var errF = (totals.fat  - targets.fat)  / targets.fat  * 100;
+    var maxErr = Math.max(Math.abs(errK), Math.abs(errP), Math.abs(errC), Math.abs(errF));
+
+    return {
+      day:     i,
+      totals:  totals,
+      errors:  { kcal: errK, prot: errP, carb: errC, fat: errF },
+      maxError:maxErr,
+      ok:      maxErr <= 5,
+    };
+  });
 }
 
 function _getBestReplacement(currentMeal, slot, plan) {
