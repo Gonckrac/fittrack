@@ -421,8 +421,15 @@ function _syncRecuperacionWater() {
   var dstWater = document.getElementById('recuperacion-water-content');
   if (srcWater && dstWater) {
     if (typeof renderWater === 'function') renderWater(false);
-    dstWater.innerHTML = srcWater.innerHTML;
-    // Re-bind el glass click que usa addWater()
+dstWater.innerHTML = srcWater.innerHTML;
+var goalLabel = dstWater.querySelector('#waterGoalLabel');
+if (goalLabel && typeof getWaterGoal === 'function') {
+  goalLabel.textContent = '💧 OBJETIVO DIARIO: ' + getWaterGoal() + 'ML';
+}
+var remEl = dstWater.querySelector('#waterRemainingNum');
+if (remEl && typeof getWaterGoal === 'function') {
+  remEl.textContent = Math.max(0, getWaterGoal() - (state[TODAY].water || 0));
+}    // Re-bind el glass click que usa addWater()
     dstWater.querySelectorAll('[onclick*="addWater"]').forEach(function(el) {
       var match = el.getAttribute('onclick') && el.getAttribute('onclick').match(/addWater\((\d+)\)/);
       if (match) {
