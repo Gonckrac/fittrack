@@ -609,8 +609,8 @@ if (_tsZoom !== 1.0) {
         <button class="btn btn-primary" style="width:100%" onclick="saveManualSleep()">Guardar sueño</button>
       </div>
       <!-- OURA SYNC CARD -->
-      <div class="card" style="margin-bottom:12px">
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+<div class="card" id="ouraSleepCard" style="display:none;margin-bottom:12px">  
+   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
           <div class="card-title" style="margin-bottom:0"><span>🌙</span> Sueño de hoy</div>
           <button id="syncBtn" onclick="syncOura()" class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-size:11px">↻ Sync Oura</button>
         </div>
@@ -618,8 +618,7 @@ if (_tsZoom !== 1.0) {
           <span id="syncStatus" style="font-size:11px;color:var(--text3)">● Sin sincronizar</span>
           <span id="lastSync" style="font-size:10px;color:var(--text3)"></span>
         </div>
-
-        <!-- Readiness score (Oura) -->
+ <!-- Readiness score (Oura) -->
         <div id="readinessSection" style="display:flex;align-items:center;gap:16px;margin-bottom:12px">
           <div class="readiness-circle" style="flex-shrink:0;width:80px;height:80px">
             <svg width="80" height="80" viewBox="0 0 100 100">
@@ -635,7 +634,8 @@ if (_tsZoom !== 1.0) {
           </div>
         </div>
 
-        <!-- Sleep stats row -->
+
+               <!-- Sleep stats row -->
         <div class="sleep-grid" style="margin-bottom:0">
           <div class="sleep-card">
             <div class="sleep-icon">😴</div>

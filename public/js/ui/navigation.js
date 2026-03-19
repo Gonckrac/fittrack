@@ -113,7 +113,7 @@ if (id === 'home') {
     _animateScoreIfChanged();
   }
   if (id === 'recuperacion') {
-    _syncRecuperacionContent();
+    _syncRecuperacionSleep();
     renderSuppsV15();
   }
 }
@@ -245,28 +245,177 @@ function _animateScoreIfChanged() {
 
   requestAnimationFrame(step);
 }
-function _syncRecuperacionSleep() {
+function _syncRecuperacionSleep_OLD_UNUSED() {
   var srcSleep = document.getElementById('page-sleep');
   var dstSleep = document.getElementById('recuperacion-sleep-content');
   if (!srcSleep || !dstSleep) return;
-  var hasWearable = !!(
-    (state[TODAY] && state[TODAY].sleep && state[TODAY].sleep.readiness) ||
-    (state.config && state.config.ouraToken)
-  );
-  if (typeof renderSleep === 'function') renderSleep();
-  dstSleep.innerHTML = srcSleep.innerHTML;
-  // Sin wearable: ocultar el card de "Sueño de hoy" (Oura sync), dejar manual + wearables card
-  if (!hasWearable) {
-    var ouraCard = dstSleep.querySelector('.card:nth-child(2)');
-    // Buscar el card que tiene el botón syncOura
-    dstSleep.querySelectorAll('.card').forEach(function(card) {
-      if (card.querySelector('#syncBtn') || card.innerHTML.indexOf('syncOura') >= 0 || card.innerHTML.indexOf('Sync Oura') >= 0) {
-        card.style.display = 'none';
-      }
-    });
-  }
-}
 
+  var hasWearable = !!(
+    (typeof isWearableConnected === 'function' && isWearableConnected('oura')) ||
+    (state[TODAY] && state[TODAY].sleep && state[TODAY].sleep.readiness)
+  );
+
+  // Renderizar en el source primero
+  if (typeof renderSleep === 'function') renderSleep();
+
+  // Clonar al destino
+  dstSleep.innerHTML = srcSleep.innerHTML;
+
+  // Quitar sufijo de IDs clonados para que renderSleep() los encuentre
+  // y en cambio prefixar los del source para que no colisionen
+  dstSleep.querySelectorAll('[id]').forEach(function(el) {
+    el.id = 'rec_' + el.id;
+  });
+  srcSleep.querySelectorAll('[id]').forEach(function(el) {
+    if (el.id.indexOf('src_') !== 0) el.id = 'src_' + el.id;
+  });
+
+  // Ahora renderSleep no tiene IDs destino — re-apuntar manualmente
+  var pairs = [
+    ['readinessDash','readinessDash'],['readinessNum','readinessNum'],['readinessLabel','readinessLabel'],
+    ['sleepHours','sleepHours'],['sleepEff','sleepEff'],['sleepDeep','sleepDeep'],['sleepHRV','sleepHRV'],
+    ['manualSleepCard','manualSleepCard'],['syncBtn','syncBtn']
+  ];
+  pairs.forEach(function(p) {
+    var src = document.getElementById('src_' + p[0]);
+    var dst = document.getElementById('rec_' + p[1]);
+    if (src && dst) dst.innerHTML = src.innerHTML;
+  });
+
+  // Mostrar/ocultar card manual según wearable
+  var manualCard = document.getElementById('rec_manualSleepCard');
+  if (manualCard) manualCard.style.display = hasWearable ? 'none' : '';
+
+  // Mostrar/ocultar card de Oura sync
+  dstSleep.querySelectorAll('.card').forEach(function(card) {
+    if (card.innerHTML.indexOf('syncOura') >= 0 || card.innerHTML.indexOf('Sync Oura') >= 0) {
+      card.style.display = hasWearable ? '' : 'none';
+    }
+  });
+
+  // Re-renderizar sobre los IDs rec_ del destino
+  if (typeof renderSleep === 'function') {
+    var _origId = Element.prototype.__defineGetter__;
+    // Swap temporal: apuntar getElementById al destino para los IDs de sueño
+    var _get = document.getElementById.bind(document);
+    var sleepIds = ['readinessDash','readinessNum','readinessLabel',
+                    'sleepHours','sleepEff','sleepDeep','sleepHRV',
+                    'manSleepHours','manSleepQuality','manSleepDeep','manSleepHRV',
+                    'manualSleepCard'];
+    var _origGetById = document.getElementById;
+    document.getElementById = function(id) {
+      if (sleepIds.indexOf(id) >= 0) {
+        return _origGetById.call(document, 'rec_' + id) || _origGetById.call(document, id);
+      }
+      return _origGetById.call(document, id);
+    };
+    renderSleep();
+    document.getElementById = _origGetById;
+  }
+
+  // Re-conectar botón sync
+  var syncBtn = document.getElementById('rec_syncBtn');
+  if (syncBtn) syncBtn.onclick = function() { if (typeof syncOura === 'function') syncOura(); };
+}
+function _syncRecuperacionSleep() {
+  var dst = document.getElementById('recuperacion-sleep-content');
+  if (!dst) return;
+
+  var hasWearable = typeof isWearableConnected === 'function' && isWearableConnected('oura');
+
+  dst.innerHTML = [
+    // Card manual — oculto si hay wearable
+    '<div class="card" id="rec_manualSleepCard" style="' + (hasWearable ? 'display:none' : '') + '">',
+      '<div class="card-title"><span>✏️</span> Cargar manualmente</div>',
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:14px">Si no tenés wearable, ingresá tus datos acá.</div>',
+      '<div style="display:flex;gap:8px;margin-bottom:14px">',
+        '<div style="flex:1"><label class="input-label">Horas de sueño</label>',
+        '<input class="inp" id="rec_manSleepHours" type="number" step="0.5" placeholder="7.5"></div>',
+        '<div style="flex:1"><label class="input-label">Calidad (1–10)</label>',
+        '<input class="inp" id="rec_manSleepQuality" type="number" step="1" min="1" max="10" placeholder="8"></div>',
+      '</div>',
+      '<button class="btn btn-primary" style="width:100%" onclick="saveManualSleep()">Guardar sueño</button>',
+    '</div>',
+
+    // Card Oura — visible siempre, datos reales si hay wearable
+    '<div class="card" style="margin-bottom:12px">',
+      '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">',
+        '<div class="card-title" style="margin-bottom:0"><span>🌙</span> Sueño de hoy</div>',
+        (hasWearable ? '<button onclick="syncOura()" class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-size:11px">↻ Sync Oura</button>' : ''),
+      '</div>',
+      '<div style="display:flex;align-items:center;gap:16px;margin-bottom:12px">',
+        '<div style="flex-shrink:0;width:80px;height:80px;position:relative">',
+          '<svg width="80" height="80" viewBox="0 0 100 100">',
+            '<circle cx="50" cy="50" r="40" fill="none" stroke="var(--bg4)" stroke-width="8"/>',
+            '<circle cx="50" cy="50" r="40" fill="none" stroke="var(--accent)" stroke-width="8"',
+            ' stroke-dasharray="251.2" id="rec_readinessDash" stroke-dashoffset="251.2" stroke-linecap="round"/>',
+          '</svg>',
+          '<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700" id="rec_readinessNum">—</div>',
+        '</div>',
+        '<div>',
+          '<div style="font-size:12px;font-weight:700;color:var(--text)" id="rec_readinessLabel">' + (hasWearable ? 'Cargando…' : 'Sin datos de Oura') + '</div>',
+          '<div style="font-size:11px;color:var(--text3);margin-top:3px">' + (hasWearable ? '' : 'Conectá Oura o cargá manualmente') + '</div>',
+        '</div>',
+      '</div>',
+      '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px">',
+        '<div class="sleep-card"><div class="sleep-icon">😴</div><div class="sleep-label">Horas</div><div class="sleep-val" id="rec_sleepHours">—</div></div>',
+        '<div class="sleep-card"><div class="sleep-icon">📊</div><div class="sleep-label">Eficiencia</div><div class="sleep-val" id="rec_sleepEff">—</div></div>',
+        '<div class="sleep-card"><div class="sleep-icon">🌊</div><div class="sleep-label">Profundo</div><div class="sleep-val" id="rec_sleepDeep">—</div></div>',
+        '<div class="sleep-card"><div class="sleep-icon">💓</div><div class="sleep-label">HRV</div><div class="sleep-val" id="rec_sleepHRV">—</div></div>',
+      '</div>',
+    '</div>',
+
+    // Wearables card
+    '<div class="card" style="border:1px solid var(--border);background:var(--bg3)">',
+      '<div style="margin-bottom:14px">',
+        '<div class="card-title" style="margin-bottom:4px"><span>⌚</span> Conectar wearable</div>',
+        '<div style="font-size:12px;color:var(--text3)">Conectá tu wearable y FitTrack sincroniza automáticamente.</div>',
+      '</div>',
+      '<div class="wearables-card-container"></div>',
+    '</div>'
+  ].join('');
+
+  // Poblar datos de sueño desde state
+  var s = (state[TODAY] && state[TODAY].sleep) || {};
+  var r = s.readiness;
+  var dash = document.getElementById('rec_readinessDash');
+  var num  = document.getElementById('rec_readinessNum');
+  var lbl  = document.getElementById('rec_readinessLabel');
+  if (r && dash) {
+    dash.style.strokeDashoffset = 251.2 - (251.2 * r / 100);
+    var col = r >= 70 ? 'var(--green)' : r >= 60 ? 'var(--yellow)' : 'var(--red)';
+    dash.style.stroke = col;
+    if (num) { num.textContent = r; num.style.color = col; }
+    if (lbl) { lbl.textContent = r >= 70 ? 'BUENA — Entrenar normal' : r >= 60 ? 'MODERADA — Sin forzar' : 'BAJA — Bajar volumen'; lbl.style.color = col; }
+  }
+  var fill = function(id, val) { var el = document.getElementById('rec_' + id); if (el) el.textContent = val || '—'; };
+  fill('sleepHours', s.hours ? s.hours + 'h' : null);
+  fill('sleepEff',   s.efficiency ? s.efficiency + '%' : null);
+  fill('sleepDeep',  s.deep ? s.deep + 'h' : null);
+  fill('sleepHRV',   s.hrv ? s.hrv + ' ms' : null);
+
+  // Pre-llenar inputs manuales si hay datos guardados
+  var mh = document.getElementById('rec_manSleepHours');
+  var mq = document.getElementById('rec_manSleepQuality');
+  if (mh && s.manHours)   mh.value = s.manHours;
+  if (mq && s.manQuality) mq.value = s.manQuality;
+
+  // Parchear saveManualSleep para leer los inputs rec_
+  window.saveManualSleep = function() {
+    var h = parseFloat(document.getElementById('rec_manSleepHours')?.value) || null;
+    var q = parseInt(document.getElementById('rec_manSleepQuality')?.value) || null;
+    if (!h && !q) { showToast('⚠ Ingresá al menos las horas'); return; }
+    if (!state[TODAY].sleep) state[TODAY].sleep = {};
+    state[TODAY].sleep.manHours   = h;
+    state[TODAY].sleep.manQuality = q;
+    saveState(state);
+    _syncRecuperacionSleep();
+    showToast('🌙 Sueño guardado');
+  };
+
+  // Renderizar wearables card dentro del destino
+  if (typeof renderWearablesCard === 'function') renderWearablesCard();
+}
 function _syncRecuperacionWater() {
   var srcWater = document.getElementById('page-water');
   var dstWater = document.getElementById('recuperacion-water-content');

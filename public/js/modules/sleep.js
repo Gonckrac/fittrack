@@ -40,20 +40,18 @@ function renderSleep() {
 
   // Show sleep quality in readiness circle if no Oura
   // Ocultar carga manual si hay wearable conectado
-const manualCard = document.getElementById('manualSleepCard');
-  if (manualCard) {
-    const hasWearable = !!(s.readiness || state.wearableConnected || state.config && state.config.ouraToken);
-    manualCard.style.display = hasWearable ? 'none' : '';
-    // Sin wearable: mostrar el formulario expandido por default
-    if (!hasWearable) {
-      const formBody = manualCard.querySelector('.manual-sleep-form, [id*="manSleep"]')
-        || manualCard.querySelector('input');
-      if (formBody) manualCard.style.display = '';
-      // Marcar visualmente que es el flujo principal
-      manualCard.classList.add('manual-sleep-primary');
-    }
-  }
+// Después — limpio y correcto
+const hasOuraConnected = typeof isWearableConnected === 'function' && isWearableConnected('oura');
 
+const manualCard = document.getElementById('manualSleepCard');
+if (manualCard) {
+  manualCard.style.display = hasOuraConnected ? 'none' : '';
+}
+
+const ouraCard = document.getElementById('ouraSleepCard');
+if (ouraCard) {
+  ouraCard.style.display = hasOuraConnected ? 'block' : 'none';
+}
   // Show sleep quality in readiness circle if no Oura
   if (!r) {
     const sleepScore = qual ? qual * 10 : (hours ? Math.min(100, Math.round(hours / 8 * 100)) : null);

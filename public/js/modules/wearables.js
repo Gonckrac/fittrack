@@ -67,6 +67,7 @@ function disconnectWearable(provider) {
   delete state.wearables[provider];
   saveState(state);
   renderWearablesCard();
+  if (typeof renderSleep === 'function') renderSleep(); // ← agregar esta línea
   showToast(WEARABLE_CONFIG[provider].name + ' desconectado');
 }
 
@@ -142,7 +143,42 @@ function openWearableDetail(provider) {
   document.body.appendChild(sheet);
 }
 
-window.connectWearable    = connectWearable;
-window.disconnectWearable = disconnectWearable;
-window.openWearableDetail = openWearableDetail;
+async function syncOura() {
+  var token = getWearableToken('oura');
+  if (!token) { showToast('⚠ Oura no conectado'); return; }
+  showToast('↻ Sincronizando Oura…');
+  try {
+    var res = await fetch('https://fittrack-backend-one.vercel.app/api/oura', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ access_token: token })
+    });
+    var data = await res.json();
+    if (data.error) throw new Error(data.error);
+    if (!state[TODAY]) state[TODAY] = {};
+    if (!state[TODAY].sleep) state[TODAY].sleep = {};
+    var sl = state[TODAY].sleep;
+    sl.readiness  = data.readiness?.score       || sl.readiness;
+    sl.hours      = data.sleep?.total_hours      || sl.hours;
+    sl.efficiency = data.sleep?.efficiency       || sl.efficiency;
+    sl.deep       = data.sleep?.deep_hours       || sl.deep;
+    sl.hrv        = data.sleep?.hrv_avg          || sl.hrv;
+    sl.rhr        = data.sleep?.resting_hr       || sl.rhr;
+    if (data.activity?.total_calories) {
+      if (!state[TODAY].kcal) state[TODAY].kcal = {};
+      state[TODAY].kcal.burned = data.activity.total_calories;
+    }
+    saveState(state);
+    if (typeof renderSleep === 'function') renderSleep();
+    if (typeof renderKcal  === 'function') renderKcal();
+    showToast('✓ Oura sincronizado');
+  } catch(e) {
+    showToast('⚠ Error al sincronizar: ' + e.message);
+  }
+}
+
+window.connectWearable     = connectWearable;
+window.disconnectWearable  = disconnectWearable;
+window.openWearableDetail  = openWearableDetail;
 window.renderWearablesCard = renderWearablesCard;
+window.syncOura            = syncOura;
