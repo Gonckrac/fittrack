@@ -338,7 +338,7 @@ function _syncRecuperacionSleep() {
     '</div>',
 
     // Card Oura — visible siempre, datos reales si hay wearable
-    '<div class="card" style="margin-bottom:12px">',
+'<div class="card" id="rec_ouraSleepCard" style="' + (!hasWearable ? 'display:none' : 'margin-bottom:12px') + '">',
       '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">',
         '<div class="card-title" style="margin-bottom:0"><span>🌙</span> Sueño de hoy</div>',
         (hasWearable ? '<button onclick="syncOura()" class="btn btn-sm" style="background:var(--bg3);border:1px solid var(--border);color:var(--accent);font-size:11px">↻ Sync Oura</button>' : ''),
