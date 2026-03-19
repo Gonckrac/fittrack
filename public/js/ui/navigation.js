@@ -422,8 +422,7 @@ function _syncRecuperacionWater() {
   if (srcWater && dstWater) {
     if (typeof renderWater === 'function') renderWater(false);
 dstWater.innerHTML = srcWater.innerHTML;
-dstWater.querySelectorAll('[id="waterGoalLabel"]').forEach(function(el) {
-  el.textContent = '💧 OBJETIVO DIARIO: ' + (typeof getWaterGoal === 'function' ? getWaterGoal() : 3000) + 'ML';
+dstWater.querySelectorAll('[id="waterGoalLabel"], [id="rec_waterGoalLabel"]').forEach(function(el) {  el.textContent = '💧 OBJETIVO DIARIO: ' + (typeof getWaterGoal === 'function' ? getWaterGoal() : 3000) + 'ML';
 });
 dstWater.querySelectorAll('.card-title').forEach(function(el) {
   if (el.textContent.indexOf('OBJETIVO DIARIO') >= 0) {
