@@ -1,4 +1,3 @@
-
 // ─── V15 NAV: 5 tabs con sub-tabs en Nutrición ───────────────────
 
 // Mapa de tab antigua → nueva tab + sub-tab opcional
@@ -421,19 +420,21 @@ function _syncRecuperacionWater() {
   var dstWater = document.getElementById('recuperacion-water-content');
   if (srcWater && dstWater) {
     if (typeof renderWater === 'function') renderWater(false);
-dstWater.innerHTML = srcWater.innerHTML;
-dstWater.querySelectorAll('[id="waterGoalLabel"], [id="rec_waterGoalLabel"]').forEach(function(el) {  el.textContent = '💧 OBJETIVO DIARIO: ' + (typeof getWaterGoal === 'function' ? getWaterGoal() : 3000) + 'ML';
-});
-dstWater.querySelectorAll('.card-title').forEach(function(el) {
-  if (el.textContent.indexOf('OBJETIVO DIARIO') >= 0) {
-    var span = el.querySelector('span:last-child');
-    if (span) span.textContent = '💧 OBJETIVO DIARIO: ' + (typeof getWaterGoal === 'function' ? getWaterGoal() : 3000) + 'ML';
-  }
-});
-var remEl = dstWater.querySelector('#waterRemainingNum');
-if (remEl && typeof getWaterGoal === 'function') {
-  remEl.textContent = Math.max(0, getWaterGoal() - (state[TODAY].water || 0));
-}    // Re-bind el glass click que usa addWater()
+    dstWater.innerHTML = srcWater.innerHTML;
+
+    // Patch dynamic water goal — use querySelector('#id') which is reliable on cloned DOM
+    var goal = typeof getWaterGoal === 'function' ? getWaterGoal() : 3000;
+    var ml   = (state && state[TODAY] && state[TODAY].water) || 0;
+
+    var goalLabelEl = dstWater.querySelector('#waterGoalLabel');
+    if (goalLabelEl) {
+      goalLabelEl.textContent = '💧 OBJETIVO DIARIO: ' + goal + 'ML';
+    }
+
+    var remEl = dstWater.querySelector('#waterRemainingNum');
+    if (remEl) {
+      remEl.textContent = Math.max(0, goal - ml);
+    }    // Re-bind el glass click que usa addWater()
     dstWater.querySelectorAll('[onclick*="addWater"]').forEach(function(el) {
       var match = el.getAttribute('onclick') && el.getAttribute('onclick').match(/addWater\((\d+)\)/);
       if (match) {
