@@ -379,18 +379,105 @@ var id = 'spcard_' + s.name.replace(/\s/g,'_');
     + categoriesHtml
     + '<button onclick="document.getElementById(\'sportPickerSheet\').remove()" class="btn btn-ghost" style="width:100%;margin-top:12px">Cancelar</button>'
     + '</div>';
-  sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
+  sheet.addEventListener('click', function(e){
+    if (e.target === sheet) { sheet.remove(); return; }
+    var emojiEl = e.target.closest('[data-emoji]');
+    if (emojiEl && emojiEl.closest('#customEmojiGrid')) {
+      _customSportPickEmoji(emojiEl, emojiEl.getAttribute('data-emoji'));
+    }
+  });
   document.body.appendChild(sheet);
 // Asignar eventos después de insertar en DOM
   categories.forEach(function(cat) {
     cat.items.forEach(function(s) {
       var id = 'spcard_' + s.name.replace(/\s/g,'_');
       var el = document.getElementById(id);
-      if (el) el.addEventListener('click', function() {
-        _assignSportDay(dow, s.name, s.type, s.detail);
-      });
+      if (el) (function(sport) {
+        el.addEventListener('click', function() {
+          if (sport.name === 'Otro') {
+            _showCustomSportSheet(dow);
+          } else {
+            _assignSportDay(dow, sport.name, sport.type, sport.detail);
+          }
+        });
+      })(s);
     });
   });
+}
+
+function _showCustomSportSheet(dow) {
+  document.getElementById('sportPickerSheet') && document.getElementById('sportPickerSheet').remove();
+  window._customSportEmoji = '🏅';
+
+  var allEmojis = ['🏃','🚴','🏊','🧘','🚶','🔥','🏋️','⚽','🎾','🏓','🏸','🥊','🤸','🧗','🏄','🚣','🤺','🎿','⛷️','🛹','🏇','🤼','🏒','🥋','🎯','🏌️','🪂','🤿','🏆','💪','⚡','🌊','🏔️','🌲','🎽','🧢','👟','🎱','🏹','🥅'];
+
+  var sheet = document.createElement('div');
+  sheet.id = 'customSportSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:99999;display:flex;align-items:flex-end;justify-content:center';
+  sheet.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 20px 36px;width:100%;max-width:480px">'
+    + '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px"></div>'
+    + '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:12px">Actividad personalizada</div>'
+    + '<div style="font-size:11px;color:var(--text3);margin-bottom:6px;font-weight:600">NOMBRE (máx. 20 caracteres)</div>'
+    + '<input id="customSportName" class="inp" placeholder="Ej: Esquí, Surf, Boxeo…" maxlength="20" style="margin-bottom:16px">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">'
+      + '<div style="font-size:11px;color:var(--text3);font-weight:600">EMOJI (máx. 1)</div>'
+      + '<div style="font-size:28px" id="customEmojiPreview">🏅</div>'
+    + '</div>'
+    + '<div id="customEmojiGrid" style="display:grid;grid-template-columns:repeat(8,1fr);gap:6px;margin-bottom:16px;max-height:180px;overflow-y:auto">' + allEmojis.map(function(e,i){ var sel = e===window._customSportEmoji ? 'background:rgba(77,138,255,0.2);border-color:var(--accent);' : ''; return '<div data-idx="'+i+'" data-emoji="' + e + '" style="height:44px;display:flex;align-items:center;justify-content:center;font-size:24px;border-radius:10px;border:2px solid transparent;cursor:pointer;' + sel + '">' + e + '</div>'; }).join('') + '</div>'
+    + '<button onclick="_confirmCustomSport(\'' + dow + '\')" style="width:100%;padding:12px;border-radius:12px;background:var(--accent);border:none;color:#fff;font-size:14px;font-weight:700;cursor:pointer">✓ Agregar actividad</button>'
+    + '<button onclick="document.getElementById(\'customSportSheet\').remove()" class="btn btn-ghost" style="width:100%;margin-top:8px">Cancelar</button>'
+    + '</div>';
+  sheet.addEventListener('click', function(e){
+    if (e.target === sheet) { sheet.remove(); return; }
+    var emojiEl = e.target.closest ? e.target.closest('[data-emoji]') : null;
+    if (emojiEl && emojiEl.closest('#customEmojiGrid')) {
+      _customSportPickEmoji(emojiEl, emojiEl.getAttribute('data-emoji'));
+    }
+  });
+  document.body.appendChild(sheet);
+}
+
+function _customSportPickEmoji(el, emoji) {
+  window._customSportEmoji = emoji;
+  var grid = document.getElementById('customEmojiGrid');
+  if (grid) grid.querySelectorAll('[data-emoji]').forEach(function(e){
+    e.style.background = 'none';
+    e.style.borderColor = 'transparent';
+  });
+  if (el) { el.style.background = 'rgba(77,138,255,0.2)'; el.style.borderColor = 'var(--accent)'; }
+  var preview = document.getElementById('customEmojiPreview');
+  if (preview) preview.textContent = emoji;
+}
+
+function _customSportEmojiPage(page) {
+  var emojiCategories = [
+    ['🏃','🚴','🏊','🧘','🚶','🔥','🏋️','⚽','🎾','🏓','🏸','🥊','🤸','🧗','🏄','🚣','🤺','🎿','⛷️','🛹'],
+    ['🏇','🤼','🏒','🥋','🎯','🏌️','🪂','🤿','🧜','🏆','💪','🦵','🫀','🧠','⚡','🌊','🏔️','🌲','🛤️','🎽']
+  ];
+  var grid = document.getElementById('customEmojiGrid');
+  if (!grid) return;
+  grid.innerHTML = emojiCategories[page].map(function(e) {
+    var selected = e === window._customSportEmoji ? 'background:rgba(77,138,255,0.2);border-color:var(--accent);' : '';
+    return '<div onclick="_customSportPickEmoji(this,\'' + e + '\')" data-emoji="' + e + '" style="width:44px;height:44px;display:flex;align-items:center;justify-content:center;font-size:26px;border-radius:10px;border:2px solid transparent;cursor:pointer;' + selected + '">' + e + '</div>';
+  }).join('');
+  [0,1].forEach(function(i){
+    var btn = document.getElementById('emojiPageBtn'+i);
+    if (!btn) return;
+    if (i === page) { btn.style.borderColor='var(--accent)'; btn.style.background='rgba(77,138,255,0.15)'; btn.style.color='var(--accent)'; }
+    else { btn.style.borderColor='var(--border)'; btn.style.background='var(--bg3)'; btn.style.color='var(--text3)'; }
+  });
+}
+
+function _confirmCustomSport(dow) {
+  var nameEl = document.getElementById('customSportName');
+  var name = nameEl ? nameEl.value.trim() : '';
+  if (!name) { showToast('⚠ Ingresá un nombre'); return; }
+  var emoji = window._customSportEmoji || '🏅';
+  if (!window._airCustomEmojis) window._airCustomEmojis = {};
+  window._airCustomEmojis[name] = emoji;
+  document.getElementById('customSportSheet') && document.getElementById('customSportSheet').remove();
+  _assignSportDay(dow, name, 'sport', {});
 }
 
 function _assignSportDay(dow, sportName, activityType, activityDetail) {
@@ -578,7 +665,21 @@ function _assignGymDay(dow, routineIdx) {
     }
   });
 
+  // Si había un sport principal en ese día, preservarlo como extra
+  if (cycle[dow] === 'sport') {
+    var _prevSportName = state.config.sportNames && state.config.sportNames[dow];
+    if (_prevSportName) {
+      if (!state.config.extraActivities) state.config.extraActivities = {};
+      if (!state.config.extraActivities[dow]) state.config.extraActivities[dow] = [];
+      if (state.config.extraActivities[dow].indexOf(_prevSportName) === -1)
+        state.config.extraActivities[dow].push(_prevSportName);
+      delete state.config.sportNames[dow];
+    }
+  }
   cycle[dow] = routineIdx;
+  // Si el día asignado es hoy, actualizar trainDay para que renderTraining muestre la rutina correcta
+  var _todayDowGA = (function(){ var k=['Sun','Mon','Tue','Wed','Thu','Fri','Sat']; return k[new Date().getDay()]; })();
+  if (dow === _todayDowGA) { state[TODAY].trainDay = routineIdx + 1; }
 saveState(state);
   renderWeekStrip();
   renderRoutineCards();
@@ -746,6 +847,10 @@ function _ndwConfirm(dow) {
   state.config.cycle[dow] = newIdx;
   saveState(state);
   document.getElementById('newDayWizardDow') && document.getElementById('newDayWizardDow').remove();
+  document.getElementById('gymPickerSheet') && document.getElementById('gymPickerSheet').remove();
+  document.getElementById('weekDayModal') && document.getElementById('weekDayModal').remove();
+  var overlayBody = document.getElementById('editWeekOverlayBody');
+  if (overlayBody) _renderEditWeekInto(overlayBody);
   renderWeekStrip();
   renderRoutineCards();
   renderTraining();
@@ -948,7 +1053,7 @@ var isToday = item.dow === todayDow;
             : 'border:1.5px solid var(--accent);background:rgba(77,138,255,0.07);')
         : 'border:1px solid var(--border);background:var(--bg3);';
       var todayBadge = isToday ? '<span style="font-size:9px;background:var(--accent);color:#fff;border-radius:4px;padding:1px 6px;font-weight:700">TOCA HOY</span>' : '';
-      var doneBadge = sportDone ? '<span style="font-size:9px;background:var(--green);color:#000;border-radius:4px;padding:1px 6px;font-weight:700">✓ HECHO</span>' : '';
+      var doneBadge = sportDone ? '<span onclick="event.stopPropagation();completeSportDay(\''+k+'\',\''+sName+'\')" style="font-size:9px;background:var(--green);color:#000;border-radius:4px;padding:1px 6px;font-weight:700;cursor:pointer">✓ HECHO</span>' : '';
 
       var statsLine = '';
       if (sportDone && sportData) {
@@ -1144,7 +1249,7 @@ function toggleEditWeekMode() {
     if (existing) existing.remove();
     var overlay = document.createElement('div');
     overlay.id = 'editWeekOverlay';
-    overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)';
     overlay.innerHTML = '<div style="position:sticky;top:0;z-index:1;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'
       + '<div><div style="font-size:15px;font-weight:700;color:var(--text)">✏️ Editar semana</div><div style="font-size:11px;color:var(--text3);margin-top:1px">Arrastrá actividades entre días</div></div>'
       + '<button onclick="toggleEditWeekMode()" style="background:var(--accent);border:none;border-radius:10px;padding:8px 16px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">✓ Listo</button>'
@@ -1161,34 +1266,60 @@ function toggleEditWeekMode() {
 }
 
 function _initDragDrop() {
-  var cells = document.querySelectorAll('.ew-day-cell');
-  cells.forEach(function(cell) {
-    cell.addEventListener('dragover', function(e) {
-      e.preventDefault();
-      cell.classList.add('ew-drag-over');
-    });
-    cell.addEventListener('dragleave', function() {
-      cell.classList.remove('ew-drag-over');
-    });
-    cell.addEventListener('drop', function(e) {
-      e.preventDefault();
-      cell.classList.remove('ew-drag-over');
-      var data = e.dataTransfer.getData('text/plain');
-      if (!data) return;
-      var parsed = JSON.parse(data);
-      var targetDow = cell.getAttribute('data-dow');
-      _dropActivityOnDay(parsed, targetDow);
-    });
-  });
+  var _dragging = null;
+  var _clone = null;
+  var _startX = 0, _startY = 0;
+
+  function _getCell(x, y) {
+    var els = document.elementsFromPoint(x, y);
+    for (var i = 0; i < els.length; i++) {
+      if (els[i].classList.contains('ew-day-cell')) return els[i];
+    }
+    return null;
+  }
 
   var chips = document.querySelectorAll('.ew-chip[draggable]');
   chips.forEach(function(chip) {
-    chip.addEventListener('dragstart', function(e) {
-      e.dataTransfer.setData('text/plain', chip.getAttribute('data-payload'));
-      chip.classList.add('ew-chip-dragging');
-    });
-    chip.addEventListener('dragend', function() {
-      chip.classList.remove('ew-chip-dragging');
+    chip.addEventListener('touchstart', function(e) {
+      // ignore if tapping a button inside chip
+      if (e.target.tagName === 'BUTTON') return;
+      var t = e.touches[0];
+      _startX = t.clientX; _startY = t.clientY;
+      _dragging = chip;
+      // clone visual
+      _clone = chip.cloneNode(true);
+      _clone.style.cssText = 'position:fixed;z-index:99999;opacity:0.85;pointer-events:none;transition:none;left:' + (t.clientX - chip.offsetWidth/2) + 'px;top:' + (t.clientY - chip.offsetHeight/2) + 'px';
+      document.body.appendChild(_clone);
+      chip.style.opacity = '0.3';
+    }, { passive: true });
+
+    chip.addEventListener('touchmove', function(e) {
+      if (!_dragging || !_clone) return;
+      e.preventDefault();
+      var t = e.touches[0];
+      _clone.style.left = (t.clientX - _dragging.offsetWidth/2) + 'px';
+      _clone.style.top  = (t.clientY - _dragging.offsetHeight/2) + 'px';
+      // highlight cell below
+      document.querySelectorAll('.ew-day-cell').forEach(function(c){ c.classList.remove('ew-drag-over'); });
+      var cell = _getCell(t.clientX, t.clientY);
+      if (cell) cell.classList.add('ew-drag-over');
+    }, { passive: false });
+
+    chip.addEventListener('touchend', function(e) {
+      if (!_dragging || !_clone) return;
+      var t = e.changedTouches[0];
+      if (_clone) { _clone.remove(); _clone = null; }
+      _dragging.style.opacity = '';
+      document.querySelectorAll('.ew-day-cell').forEach(function(c){ c.classList.remove('ew-drag-over'); });
+      var cell = _getCell(t.clientX, t.clientY);
+      if (cell) {
+        var payload = _dragging.getAttribute('data-payload');
+        if (payload) {
+          try { _dropActivityOnDay(JSON.parse(payload), cell.getAttribute('data-dow')); }
+          catch(err) {}
+        }
+      }
+      _dragging = null;
     });
   });
 }
@@ -1244,6 +1375,7 @@ function _ewAddActivity(dow) {
 }
 
 function _ewRemoveActivity(dow, type, identifier) {
+  if (!confirm('¿Eliminar esta actividad del día?')) return;
   var overlayBody = document.getElementById('editWeekOverlayBody');  var cfg = state.config;
   if (!cfg || !cfg.cycle) return;
   if (type === 'gym') {
@@ -1258,9 +1390,13 @@ function _ewRemoveActivity(dow, type, identifier) {
     }
   }
 saveState(state);
+  var _todayDowRem = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
+  if (dow === _todayDowRem && type === 'gym') { state[TODAY].trainDay = 0; saveState(state); }
   if (overlayBody) {
     _renderEditWeekInto(overlayBody);
   }
+  renderTraining();
+  renderHome();
 }
 
 function _ewOpenGymEditor(routineIdx) {
@@ -1386,12 +1522,23 @@ if (_editWeekMode) return; // overlay handles it
   var weekLabel = monday.getDate() + ' al ' + sunday.getDate() + ' ' + months[sunday.getMonth()];
 
   // Calcular sesiones completadas en la semana
-  var weekDone = days.filter(function(d){ return d.done; }).length;
-  var weekTotal = days.filter(function(d){
-    var cfg = state.config; if (!cfg) return false;
+  var weekTotal = 0;
+  var weekDone = 0;
+  days.forEach(function(d){
+    var cfg = state.config; if (!cfg) return;
     var val = cfg.cycle && cfg.cycle[d.dow];
-    return val && val !== -1 && val !== '-1';
-  }).length;
+    if (!val || val === -1 || val === '-1') return; // descanso, no cuenta
+    weekTotal++;
+    // Gym: tiene trainSets_ con al menos un set done
+    if (val !== 'sport') {
+      if (d.done) weekDone++;
+      return;
+    }
+    // Sport puro: sportDone_ guardado
+    var sName = cfg.sportNames && cfg.sportNames[d.dow];
+    var ds = state[d.date];
+    if (ds && sName && ds['sportDone_' + sName]) weekDone++;
+  });
   var weekPct = weekTotal > 0 ? Math.round(weekDone / weekTotal * 100) : 0;
 
   // Week strip
@@ -1426,7 +1573,7 @@ if (_editWeekMode) return; // overlay handles it
           + '<div class="prem-card-name">' + w.name + '</div>'
           + '<div class="prem-card-action">'
           + (w.done
-              ? '<span class="prem-done-badge">✓ Hecho</span>'
+              ? '<span class="prem-done-badge" onclick="completeSportDay(\'sport\',\''+w.name+'\')" style="cursor:pointer">✓ Hecho</span>'
               : '<button class="prem-btn-go" onclick="completeSportDay(\'sport\',\'' + w.name + '\')">▶ Completar</button>')
           + '</div>'
           + '</div>';
@@ -1468,7 +1615,7 @@ if (_editWeekMode) return; // overlay handles it
 
   // AI + edit buttons
 var hasRoutine = state.config && state.config.training && state.config.training.length > 0;
-  var actionsHtml = '<div class="prem-actions">'
+  var actionsHtml = '<div class="prem-actions" id="trainingActionsBar">'
     + (hasRoutine
         ? '<button onclick="openAIRoutine()" class="prem-action-btn"><span>🤖</span>Nueva rutina IA</button>'
         : '<button onclick="openAIRoutine()" class="prem-action-btn prem-action-primary"><span style="font-size:18px">🤖</span>Generar rutina con IA</button>')
@@ -1481,13 +1628,9 @@ var hasRoutine = state.config && state.config.training && state.config.training.
           + '<div class="premium-week-label">Semana del ' + weekLabel + '</div>'
           + '<div class="premium-title">Tu semana de<br><em>entrenamiento</em></div>'
         + '</div>'
-        + '<div class="premium-summary">'
-          + '<div class="prem-sum-val">' + weekPct + '%</div>'
-          + '<div class="prem-sum-label">Completado</div>'
-          + '<div class="prem-sum-sub">' + weekDone + ' de ' + (weekTotal || days.length) + ' sesiones</div>'
-        + '</div>'
+
       + '</div>'
-      + '<div class="premium-week-strip">' + stripHtml + '</div>'
+      + '<div class="premium-week-strip" id="trainingWeekStrip">' + stripHtml + '</div>'
       + actionsHtml
       + '<div class="premium-today-block">' + todayCardsHtml + '</div>'
       + upcomingHtml
@@ -1529,10 +1672,7 @@ if(day===0){
       list.innerHTML='';
       return;
     }
-    var _isActualRest = !_todayCycle || _todayCycle === -1 || _todayCycle === '-1';
-    list.innerHTML=_isActualRest
-      ? `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;margin-top:4px"><span style="font-size:20px">🛋</span><span style="font-size:13px;color:var(--text3);font-weight:600">Día de descanso</span><span style="margin-left:auto;font-size:11px;color:var(--text3);opacity:0.6">El músculo crece hoy</span></div>`
-      : '';
+    list.innerHTML = '';
     return;
   }
   // Check if current day is a sport day
@@ -1854,6 +1994,7 @@ function adjustWeight(exIdx, sIdx, delta) {
 }
 
 function toggleSet(exIdx, sIdx) {
+  haptic('medium');
   const day = state[TODAY].trainDay;
 // asegurar que la sesión esté iniciada
 if (!state[TODAY].trainingStarted) {
@@ -2092,7 +2233,18 @@ var storeKey = sportName || dow;
     ? Math.round((distancia / tiempo * 60) * 10) / 10
     : 0;
 
-state[TODAY]['sportDone_' + storeKey] = true;
+  // Toggle: si ya estaba hecho, deshacer
+  if (state[TODAY]['sportDone_' + storeKey]) {
+    delete state[TODAY]['sportDone_' + storeKey];
+    delete state[TODAY]['sportData_' + storeKey];
+    saveState(state);
+    showToast('↩ ' + sportName + ' desmarcado');
+    renderTraining();
+    renderRoutineCards();
+    if (typeof renderHome === 'function') renderHome();
+    return;
+  }
+  state[TODAY]['sportDone_' + storeKey] = true;
   if (tiempo || distancia) {
     state[TODAY]['sportData_' + storeKey] = {
       tiempo:    tiempo    || null,

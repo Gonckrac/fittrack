@@ -2,21 +2,23 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0, viewport-fit=cover">
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="FitTrack">
   <meta name="theme-color" content="#05080f">
   <link rel="manifest" href="manifest.json">
   <link rel="apple-touch-icon" href="icon-192.png">
   <title>FitTrack</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&family=Nunito:wght@300;400;500;600;700&family=Outfit:wght@300;400;500;600;700&family=Geist:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
   <!-- Styles -->
   <link rel="stylesheet" href="/src/styles/base.css">
   <link rel="stylesheet" href="/src/styles/layout.css">
   <link rel="stylesheet" href="/src/styles/components.css">
   <link rel="stylesheet" href="/src/styles/pages.css">
  <link rel="stylesheet" href="/src/styles/themes.css">
-  <link rel="stylesheet" href="/src/styles/widgets.css"><script>
+  <link rel="stylesheet" href="/src/styles/widgets.css">
+<script>
     // Detectar PWA standalone y agregar clase al html
     (function(){
       if (window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches) {
@@ -44,11 +46,13 @@ if (_tsZoom !== 1.0) {
 </head>
 <body>
 
+
+
 <!-- ═══════════════════════════════════════════════════════
      SETUP WIZARD (from mama) — shown on first launch
 ═══════════════════════════════════════════════════════ -->
 <div id="setupOverlay" style="display:none">
-  <div class="setup-inner" style="display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)">
+  <div class="setup-inner" style="display:flex;flex-direction:column;height:100dvh;overflow:hidden;padding-top:env(safe-area-inset-top);padding-left:env(safe-area-inset-left);padding-right:env(safe-area-inset-right)">
     <!-- INTRO — visible solo antes de arrancar el wizard -->
     <div id="setupIntro" style="text-align:center;padding:20px 0 10px">
       <div style="font-size:56px;margin-bottom:16px">💪</div>
@@ -90,7 +94,7 @@ if (_tsZoom !== 1.0) {
       <div class="setup-hint">Con estos datos calculamos tu plan de alimentación personalizado.</div>
       <div class="setup-field"><label>Tu nombre</label><input class="inp" id="cfgName" placeholder="Ej: Gonza" type="text"></div>
       <div class="inp-row">
-        <div class="setup-field"><label>Edad</label><input class="inp" id="cfgAge" placeholder="25" type="number" min="15" max="90" oninput="calcPlanLive()"></div>
+        <div class="setup-field"><label>Edad</label><input class="inp" id="cfgAge" placeholder="25" type="number" min="15" max="90" inputmode="numeric" oninput="calcPlanLive()"></div>
  <div class="setup-field"><label>Peso (kg)</label><input class="inp" id="cfgWeight" placeholder="80" type="number" step="0.1" inputmode="decimal" oninput="calcPlanLive()"></div>
         <div class="setup-field"><label>Altura (cm)</label><input class="inp" id="cfgHeight" placeholder="175" type="number" inputmode="numeric" oninput="calcPlanLive()"></div>
       </div>
@@ -109,10 +113,10 @@ if (_tsZoom !== 1.0) {
     <!-- PASO 2: Rutina de entrenamiento -->
     <div class="setup-page" id="sp-3">
       <!-- SUB-STEP A: Elegir método -->
-      <div id="sp3-choose">
+      <div id="sp3-choose" style="display:flex;flex-direction:column;justify-content:flex-start;gap:0">
         <div class="setup-label">Tu rutina de entrenamiento</div>
         <div class="setup-hint" style="margin-bottom:20px">¿Cómo querés armar tu rutina?</div>
-        <div style="display:flex;flex-direction:column;gap:12px">
+        <div style="display:flex;flex-direction:column;gap:12px;justify-content:flex-start;margin-top:auto;margin-bottom:auto">
           <button onclick="sp3SelectMode('manual')" style="text-align:left;padding:16px;border-radius:12px;border:1.5px solid var(--border);background:var(--bg3);cursor:pointer;width:100%">
             <div style="font-size:22px;margin-bottom:6px">✏️</div>
             <div style="font-weight:700;font-size:14px;color:var(--text);margin-bottom:4px">Crear mi propia rutina</div>
@@ -155,7 +159,7 @@ if (_tsZoom !== 1.0) {
       </div>
     </div>
 
-<div class="setup-nav" id="setupNav" style="flex-shrink:0;display:flex;gap:10px;padding:16px 20px;padding-bottom:16px;border-top:1px solid var(--border);position:sticky;bottom:0;z-index:10">   <button class="btn btn-ghost" id="setupBack" onclick="setupPrev()" style="display:none;flex:1">← Atrás</button>
+<div class="setup-nav" id="setupNav" style="flex-shrink:0;display:flex;gap:10px;padding:16px 20px;padding-bottom:calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--border);position:sticky;bottom:0;z-index:10">   <button class="btn btn-ghost" id="setupBack" onclick="setupPrev()" style="display:none;flex:1">← Atrás</button>
       <button class="btn btn-primary" id="setupNext" onclick="setupNext()" style="flex:1">Continuar →</button>
     </div>
     </div><!-- /setupWizardContent -->
@@ -171,31 +175,6 @@ if (_tsZoom !== 1.0) {
     <div class="pr-popup-type" id="prPopupType"></div>
   </div>
 
-  <!-- REST TIMER OVERLAY -->
-<!-- REST TIMER OVERLAY — desactivado, el timer vive en el banner -->
-<div id="restTimerOverlay" class="rest-timer-overlay" style="display:none!important">    <div class="rest-timer-box">
-      <div class="rest-timer-exname" id="rtExName"></div>
-      <div class="rest-timer-label" id="rtLabel"></div>
-      <div class="rest-timer-done" id="rtDone">✅ ¡Listo para la próxima serie!</div>
-      <div class="rest-timer-ring">
-        <svg width="160" height="160" viewBox="0 0 160 160">
-          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--bg4)" stroke-width="10"/>
-          <circle cx="80" cy="80" r="68" fill="none" stroke="var(--accent)" stroke-width="10"
-            stroke-dasharray="427" stroke-dashoffset="0" stroke-linecap="round" id="rtRingFill"/>
-        </svg>
-        <div class="rest-timer-num">
-          <div class="rest-timer-secs" id="rtSecs" style="color:var(--accent)">90</div>
-          <div class="rest-timer-unit">seg</div>
-        </div>
-      </div>
-      <div class="rest-timer-reason" id="rtReason"></div>
-      <div class="rest-timer-btns">
-        <button class="rest-timer-btn add" onclick="addRestTime(30)">+30s</button>
-        <button class="rest-timer-btn add" onclick="playBeep()" style="background:rgba(77,255,180,0.1);color:var(--green);border-color:rgba(77,255,180,0.3)">🔔 Test</button>
-        <button class="rest-timer-btn skip" onclick="dismissRestTimer()">Saltar ✕</button>
-      </div>
-    </div>
-  </div>
   <!-- HEADER -->
   <div class="header">
     <div>
@@ -333,11 +312,11 @@ if (_tsZoom !== 1.0) {
       </div>
 
       <div class="card">
-        <div class="card-title"><span>📈</span> Resumen del dia</div>
+        <div class="card-title"><span>📈</span> Resumen del día</div>
         <div class="macro-overview">
           <div class="macro-stat">
             <div class="macro-val prot-color" id="totalProt">0</div>
-            <div class="macro-label">Proteina</div>
+            <div class="macro-label">Proteína</div>
             <div class="macro-sub" id="targetProtLbl">/ 190g</div>
           </div>
           <div class="macro-stat">
@@ -352,7 +331,7 @@ if (_tsZoom !== 1.0) {
           </div>
         </div>
         <div class="prog-row">
-          <div class="prog-header"><span class="prog-label">Proteina</span><span class="prog-val" id="protPct">0%</span></div>
+          <div class="prog-header"><span class="prog-label">Proteína</span><span class="prog-val" id="protPct">0%</span></div>
           <div class="prog-bar"><div class="prog-fill prot" id="protBar" style="width:0%"></div></div>
         </div>
         <div class="prog-row">
@@ -379,12 +358,12 @@ if (_tsZoom !== 1.0) {
       </button>
       <div style="display:flex;gap:8px;margin-top:8px">
         <button class="btn btn-ghost" style="flex:1;font-size:12px" onclick="openAddFood()">+ Manual</button>
-<button class="btn btn-ghost" style="flex:0 0 auto;font-size:12px;border-color:var(--accent);color:var(--accent)" onclick="openBarcodeScanner()" title="Escanear código de barras">📷 Scanner</button>        <button class="btn btn-ghost" style="flex:1;font-size:12px;border-color:var(--green);color:var(--green)" onclick="openFoodSuggest()">🥗 Sugerencias</button>
+        <button class="btn btn-ghost" style="flex:1;font-size:12px;border-color:var(--green);color:var(--green)" onclick="openFoodSuggest()">🥗 Sugerencias</button>
       </div>
     </div>
 
     <!-- ═══ CALENDAR PAGE ═══ -->
-    <div class="page" id="page-calendar">
+    <div class="page" id="page-calendar" style="display:none">
       <!-- Título + racha -->
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
         <div>
@@ -439,7 +418,7 @@ if (_tsZoom !== 1.0) {
     </div>
 
     <!-- ═══ SUPPLEMENTS PAGE ═══ -->
-    <div class="page" id="page-supps">
+    <div class="page" id="page-supps" style="display:none">
 <div class="card">
   <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
     <div class="card-title" style="margin-bottom:0"><span>💊</span> Estado de hoy</div>
@@ -465,11 +444,11 @@ if (_tsZoom !== 1.0) {
       </div>
 
       <div id="suppsSectionMorning">
-        <div class="section-div">Manana — con el desayuno</div>
+        <div class="section-div">Mañana — con el desayuno</div>
         <div class="supps-grid" id="suppsMorning"></div>
       </div>
       <div id="suppsSectionNoon">
-        <div class="section-div">Mediodia — con el almuerzo</div>
+        <div class="section-div">Mediodía — con el almuerzo</div>
         <div class="supps-grid" id="suppsNoon"></div>
       </div>
       <div id="suppsSectionNight">
@@ -479,7 +458,7 @@ if (_tsZoom !== 1.0) {
     </div>
 
     <!-- ═══ METRICS PAGE ═══ -->
-<div class="page" id="page-metrics">
+<div class="page" id="page-metrics" style="display:none">
 
       <!-- BANNER DE OBJETIVO -->
 
@@ -591,7 +570,7 @@ if (_tsZoom !== 1.0) {
     </div>
 
     <!-- ═══ SLEEP PAGE ═══ -->
-    <div class="page" id="page-sleep">
+    <div class="page" id="page-sleep" style="display:none">
       <!-- MANUAL INPUT CARD -->
 <!-- MANUAL INPUT CARD -->
       <div class="card" id="manualSleepCard">
@@ -673,7 +652,7 @@ if (_tsZoom !== 1.0) {
 
       <!-- WEARABLES CARD -->
       <!-- WEARABLES CARD -->
-<div class="card" style="border:1px solid var(--border);background:var(--bg3)">
+<div class="card" id="kcalWearableCard" style="border:1px solid var(--border);background:var(--bg3)">
   <div style="margin-bottom:14px">
     <div class="card-title" style="margin-bottom:4px"><span>⌚</span> Conectar wearable</div>
     <div style="font-size:12px;color:var(--text3);line-height:1.5">
@@ -732,13 +711,7 @@ if (_tsZoom !== 1.0) {
   </div>
 
   <!-- WEARABLE CARD -->
-<div class="card" style="border:1px solid var(--border);background:var(--bg3)">
-    <div style="margin-bottom:12px">
-      <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">⌚ Conectá tu wearable para más precisión</div>
-      <div style="font-size:11px;color:var(--text3);line-height:1.6">Con un wearable FitTrack usa tu gasto calórico <strong style="color:var(--text2)">real del día</strong>. La diferencia puede ser de 200–500 kcal.</div>
-    </div>
-    <div class="wearables-card-container"></div>
-  </div>
+
 
 
 
@@ -754,28 +727,6 @@ if (_tsZoom !== 1.0) {
 
     <!-- ═══ TRAINING PAGE ═══ --><!-- ═══ TRAINING PAGE ═══ -->
     <div class="page" id="page-training">
-<!-- EDIT WEEK STYLES -->
-      <style>
-        .edit-week-panel{padding:16px}
-        .ew-header{margin-bottom:14px}
-        .ew-grid{display:flex;flex-direction:column;gap:6px}
-        .ew-day-row{display:flex;align-items:flex-start;gap:10px;min-height:40px}
-        .ew-day-label{width:32px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--text3);padding-top:10px;text-transform:uppercase}
-        .ew-day-cell{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-height:38px;padding:5px 6px;border-radius:10px;border:1.5px dashed var(--border);background:var(--bg3);transition:background 0.15s,border-color 0.15s}
-        .ew-day-cell.ew-drag-over{background:rgba(77,138,255,0.12);border-color:var(--accent)}
-        .ew-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:600;cursor:grab;user-select:none;transition:opacity 0.15s;max-width:180px}
-        .ew-chip-gym{background:rgba(77,138,255,0.15);border:1px solid rgba(77,138,255,0.35);color:var(--accent)}
-        .ew-chip-sport{background:rgba(77,220,120,0.15);border:1px solid rgba(77,220,120,0.35);color:var(--green)}
-        .ew-chip-dragging{opacity:0.4}
-.ew-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
-        .ew-chip{gap:2px}        .ew-chip-del,.ew-chip-edit{background:none;border:none;cursor:pointer;font-size:11px;padding:0;line-height:1;flex-shrink:0}
- .ew-chip-del{color:var(--red);opacity:0.9;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;font-size:14px}
-        .ew-chip-edit{color:var(--text3);min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
-        .ew-add-btn{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:3px 6px;border-radius:6px;white-space:nowrap}
-        .ew-add-btn:hover{background:var(--bg4);color:var(--text)}
-        .ew-done-btn{width:100%;margin-top:16px;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer}
-      </style>
-
       <!-- SESSION TIMER BANNER -->      <div id="sessionTimerBanner" style="display:none;align-items:center;padding:8px 12px;background:var(--bg2);border-bottom:1px solid var(--border);position:sticky;top:0;z-index:100"></div>
 
       <!-- PREMIUM HEADER (Apple Fitness+ layout) -->
@@ -827,7 +778,7 @@ if (_tsZoom !== 1.0) {
 
     <!-- ═══ WATER PAGE (ahora dentro de Recuperación — se mueve a page-recuperacion) ═══ -->
     <div class="page" id="page-water" style="display:none">
-      <div class="card" style="text-align:center;padding:24px 20px">
+      <div class="card" id="waterMainCard" style="text-align:center;padding:24px 20px">
         <div class="card-title" style="justify-content:center;margin-bottom:20px"><span>💧</span> Hidratación del día</div>
 
         <!-- BIG GLASS -->
@@ -880,7 +831,7 @@ if (_tsZoom !== 1.0) {
         </div>
 
         <!-- Buttons -->
-        <div class="hydration-quick" style="margin-bottom:12px">
+        <div class="hydration-quick" id="waterQuickBtns" style="margin-bottom:12px">
           <button class="hydration-btn" onclick="addWater(150)">+150ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso chico</div></button>
           <button class="hydration-btn" onclick="addWater(250)">+250ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso normal</div></button>
           <button class="hydration-btn" onclick="addWater(350)">+350ml<div style="font-size:9px;color:var(--text3);margin-top:1px">vaso grande</div></button>
@@ -891,7 +842,7 @@ if (_tsZoom !== 1.0) {
 
       <!-- Goal bar -->
       <div class="card">
-        <div class="card-title"><span>🎯</span> <span id="waterGoalLabel">💧 OBJETIVO DIARIO: 3000ML</span>
+        <div class="card-title"><span>🎯</span> <span id="waterGoalLabel">💧 Objetivo diario</span>
 </div>
         <div style="height:16px;background:var(--bg4);border-radius:8px;overflow:hidden;margin-bottom:8px">
           <div id="waterGoalBar" style="height:100%;border-radius:8px;background:linear-gradient(90deg,var(--accent),var(--green));transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);width:0%"></div>
@@ -920,7 +871,7 @@ if (_tsZoom !== 1.0) {
 
       <!-- Subpage: Suplementos -->
       <div class="v15-subpage" id="sub-recuperacion-suplementos">
-        <div class="card">
+        <div class="card" id="suppStatusCard">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
             <div class="card-title" style="margin-bottom:0"><span>💊</span> Estado de hoy</div>
             <button class="btn btn-primary" onclick="openSuppSetup()" style="padding:5px 12px;font-size:12px">+ Editar</button>
@@ -1008,11 +959,10 @@ if (_tsZoom !== 1.0) {
     <!-- FOOD SEARCH + BARCODE -->
     <div class="input-group" style="position:relative">
       <label class="input-label">Buscar alimento</label>
-      <div style="display:flex;gap:6px">
+      <div>
         <input class="inp" id="foodSearch" placeholder="Pechuga, arroz, huevo..." autocomplete="off"
-          oninput="onFoodSearchInput(this.value)" style="flex:1">
-        <button onclick="openBarcodeScanner()" title="Escanear código de barras"
-          style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:0 12px;cursor:pointer;font-size:18px;flex-shrink:0">⬛</button>
+          oninput="onFoodSearchInput(this.value)" style="width:100%">
+
       </div>
       <div id="foodSearchDropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:10px;z-index:500;max-height:200px;overflow-y:auto;box-shadow:0 4px 20px rgba(0,0,0,0.3);margin-top:2px"></div>
     </div>
@@ -1456,6 +1406,9 @@ if (_tsZoom !== 1.0) {
   </div>
 </div>
     </div>
+    <!-- Nombre y macros primero -->
+    <div style="border-top:1px solid var(--border);margin:16px 0 14px"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">👤 Perfil y nutrición</div>
     <div style="margin-bottom:12px">
       <label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Nombre</label>
       <input class="inp" id="settingName" placeholder="Tu nombre">
@@ -1469,8 +1422,14 @@ if (_tsZoom !== 1.0) {
       <div style="flex:1"><label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Carbos (g)</label><input class="inp" id="settingCarb" type="number"></div>
       <div style="flex:1"><label class="input-label" style="font-size:11px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:6px">Grasas (g)</label><input class="inp" id="settingFat" type="number"></div>
     </div>
-    <button class="btn btn-primary" style="width:100%;margin-bottom:12px" onclick="saveSettings()">Guardar cambios</button>
+    <button class="btn btn-primary" style="width:100%;margin-bottom:16px" onclick="saveSettings()">Guardar cambios</button>
+    <!-- Sección: Peligro -->
+    <div style="border-top:1px solid var(--border);margin-bottom:14px"></div>
+    <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">⚙ Avanzado</div>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="closeModal('settingsModal');backupData()">💾 Hacer backup de mis datos</button>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:16px" onclick="closeModal('settingsModal');restoreData()">📂 Restaurar desde backup</button>
     <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:rgba(255,107,77,0.3)" onclick="openResetConfirm()">Reiniciar configuración</button>
+    <button class="btn btn-ghost" style="width:100%;margin-top:8px" onclick="localStorage.removeItem('fittrack_tutorial_seen');showToast('Tutorial reseteado ✓')">↺ Resetear tutoriales</button>
   </div>
 </div>
 <!-- ═══════════════════════════════════════════════════════

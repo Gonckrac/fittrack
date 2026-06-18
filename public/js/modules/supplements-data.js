@@ -16,10 +16,7 @@ async function syncOura() {
     if (data.sleep?.deep_hours) state[TODAY].sleep.deep = data.sleep.deep_hours;
     if (data.sleep?.hrv_avg) state[TODAY].sleep.hrv = data.sleep.hrv_avg;
     if (data.sleep?.resting_hr) state[TODAY].sleep.restingHr = data.sleep.resting_hr;
-    if (!state[TODAY].kcal) state[TODAY].kcal = {};
-    if (data.activity?.total_calories) state[TODAY].kcal.burned = data.activity.total_calories;
-    if (data.activity?.active_calories) state[TODAY].kcal.active = data.activity.active_calories;
-    if (data.activity?.steps) state[TODAY].steps = data.activity.steps;
+    // Oura solo se usa para sueño — kcal y steps se ignoran
     state[TODAY].lastSync = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
     saveState(state);
     renderSleep();

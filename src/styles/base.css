@@ -17,6 +17,9 @@
   --radius-sm: 10px;
 }
 * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+button, a, [onclick], input, select, textarea, label {
+  touch-action: manipulation;
+}
 html, body { height:100%; background:var(--bg); color:var(--text); font-family:'DM Sans', sans-serif; overflow:hidden; font-size:14px; }
 html { height: -webkit-fill-available; }
 body { min-height: -webkit-fill-available; }html.text-grande { font-size:17px; }
@@ -32,4 +35,40 @@ html.text-muy-grande { font-size:20px; }
 input, textarea, [contenteditable] {
   -webkit-user-select: text;
   user-select: text;
+}
+/* ===== iOS / Capacitor fixes ===== */
+
+/* 1. Evitar zoom al tocar inputs (font-size mínimo 16px) */
+input, select, textarea {
+  font-size: max(16px, 1em) !important;
+}
+
+/* 2. Safe area — respetar bordes del iPhone (notch, home bar) */
+
+
+/* 3. Scroll correcto cuando aparece el teclado */
+html, body {
+  height: 100%;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Fix setup wizard — contenido no tapado por botones */
+.setup-page.active {
+  display: block !important;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom)) !important;
+}
+
+/* ===== Emoji fix para WKWebView ===== */
+@font-face {
+  font-family: 'DM Sans';
+  src: local('Apple Color Emoji');
+  unicode-range: U+1F000-1FFFF, U+2600-27FF, U+2300-23FF, U+FE00-FE0F, U+1F900-1F9FF, U+1FA00-1FA9F;
+}
+
+/* ===== Emoji fix para WKWebView ===== */
+@font-face {
+  font-family: 'DM Sans';
+  src: local('Apple Color Emoji');
+  unicode-range: U+1F000-1FFFF, U+2600-27FF, U+2300-23FF, U+FE00-FE0F, U+1F900-1F9FF, U+1FA00-1FA9F;
 }

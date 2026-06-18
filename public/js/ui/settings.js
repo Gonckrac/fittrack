@@ -438,8 +438,9 @@ state.trainingSplit = _buildSplitFromConfig();
             _nfSplitRowsHTML() +
           '</div>' +
       '</div>' +
+      '</div>' +
 
-      // ── WATER (sin cambios) ──
+      // ── WATER ──
       '<div style="margin-bottom:12px;padding:14px;background:var(--bg3);border-radius:14px">' +
         '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">' +
           '<div><div style="font-weight:700;color:var(--text);font-size:14px">💧 Agua</div>' +
@@ -926,4 +927,110 @@ if (typeof updateHeader    === 'function') updateHeader();
 
   var GOAL_LABELS = { cut: 'Déficit', cut_aggressive: 'Déficit agresivo', maintain: 'Mantenimiento', lean_bulk: 'Superávit', bulk: 'Superávit' };
   showToast('🎯 Objetivo cambiado a ' + (GOAL_LABELS[goalKey] || goalKey) + ' ✓');
+}
+// ─── BACKUP / RESTORE ────────────────────────────────────────────
+function backupData() {
+  try {
+    var data = JSON.stringify(state, null, 2);
+    var date = new Date().toLocaleDateString('es-AR').replace(/\//g, '-');
+    var filename = 'fittrack-backup-' + date + '.json';
+    var blob = new Blob([data], { type: 'application/json' });
+    var url  = URL.createObjectURL(blob);
+
+    // Intentar share nativo primero (iOS)
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+      // Guardar archivo temporal y compartir
+      var reader = new FileReader();
+      reader.onload = function() {
+        window.Capacitor.Plugins.Share.share({
+          title: 'Backup FitTrack',
+          text: 'Mis datos de FitTrack — ' + date,
+          url: url,
+          dialogTitle: 'Guardar backup'
+        }).catch(function() {
+          _fallbackDownload(url, filename);
+        });
+      };
+      reader.readAsDataURL(blob);
+    } else if (navigator.share) {
+      // Web share API
+      var file = new File([data], filename, { type: 'application/json' });
+      navigator.share({ files: [file], title: 'Backup FitTrack' }).catch(function() {
+        _fallbackDownload(url, filename);
+      });
+    } else {
+      _fallbackDownload(url, filename);
+    }
+    showToast('💾 Preparando backup...');
+  } catch(e) {
+    showToast('⚠ Error al crear backup');
+    console.error('Backup error:', e);
+  }
+}
+
+function _fallbackDownload(url, filename) {
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+  showToast('💾 Backup descargado');
+}
+
+function restoreData() {
+  // Crear input file oculto
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json,application/json';
+  input.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(input);
+
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+      try {
+        var parsed = JSON.parse(ev.target.result);
+        // Validar que sea un backup de FitTrack
+        if (!parsed.config && !parsed.setupDone) {
+          showToast('⚠ El archivo no es un backup válido de FitTrack');
+          return;
+        }
+        // Confirmar antes de restaurar
+        var sheet = document.createElement('div');
+        sheet.style.cssText = 'position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:24px';
+        sheet.innerHTML =
+          '<div style="background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:28px 24px;max-width:320px;width:100%;text-align:center">' +
+            '<div style="font-size:36px;margin-bottom:12px">📂</div>' +
+            '<div style="font-size:17px;font-weight:700;color:var(--text);margin-bottom:8px">Restaurar backup</div>' +
+            '<div style="font-size:13px;color:var(--text2);line-height:1.5;margin-bottom:24px">Se van a reemplazar todos tus datos actuales con los del backup. Esta acción no se puede deshacer.</div>' +
+            '<div style="display:flex;gap:10px">' +
+              '<button onclick="this.closest(\'div[style*=fixed]\').remove()" style="flex:1;padding:12px;border-radius:12px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Cancelar</button>' +
+              '<button id="_restoreConfirmBtn" style="flex:1;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Restaurar</button>' +
+            '</div>' +
+          '</div>';
+        document.body.appendChild(sheet);
+
+        document.getElementById('_restoreConfirmBtn').onclick = function() {
+          sheet.remove();
+          // Restaurar datos
+          Object.assign(state, parsed);
+          saveState(state);
+          showToast('✅ Datos restaurados correctamente');
+          setTimeout(function() { location.reload(); }, 1200);
+        };
+
+      } catch(err) {
+        showToast('⚠ No se pudo leer el archivo');
+        console.error('Restore error:', err);
+      }
+    };
+    reader.readAsText(file);
+    document.body.removeChild(input);
+  };
+
+  input.click();
 }

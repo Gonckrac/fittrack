@@ -717,13 +717,22 @@ function renderHome() {
   // ── Tarjetas de métricas ─────────────────────────────────────────
 var dynSuppsForUI = getDynamicSupps();
 
-  // ── Peso: se oculta solo cuando hay suplementos Y wearable (7 items → 6) ──
-// Actualizar cards de sueño al conectar/desconectar Oura
-// ── Peso: se oculta cuando hay wearable conectado ──
-var weightCard = document.getElementById('homeWeightCard');
-if (weightCard) {
-  weightCard.style.display = scores.stepsFromWearable ? 'none' : '';
-}
+  // ── Chips variables: Pasos, Suplemento, Peso ────────────────────
+  // Fijos siempre: Nutrición, Entreno, Sueño, Agua (4)
+  // Pasos: solo si hay wearable conectado
+  // Suplemento: solo si tiene suplementos cargados
+  // Peso: aparece cuando falta alguno de los 2 variables (rellena hasta 6)
+  var hasWearableChip = !!scores.stepsFromWearable;
+  var hasSuppChip     = dynSuppsForUI.length > 0;
+  var needsWeightChip = !hasWearableChip || !hasSuppChip;
+
+  var stepsCardEl2 = document.getElementById('homeStepsCard');
+  var weightCard   = document.getElementById('homeWeightCard');
+  var suppCardEl2  = document.getElementById('homeSuppCard');
+
+  if (stepsCardEl2) stepsCardEl2.style.display = hasWearableChip  ? '' : 'none';
+  if (suppCardEl2)  suppCardEl2.style.display   = hasSuppChip      ? '' : 'none';
+  if (weightCard)   weightCard.style.display    = needsWeightChip  ? '' : 'none';
 if (typeof _syncRecuperacionSleep === 'function') _syncRecuperacionSleep();
 var _tdow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
   var _tcycle = state.config && state.config.cycle && state.config.cycle[_tdow];
@@ -888,6 +897,9 @@ if (trainDay === 0) {
 var _combinedSports = (_sportNames && _sportNames[_todayDow])
       ? _sportNames[_todayDow].split('+').filter(Boolean)
       : [];
+    // Sumar extraActivities al calculo del score
+    var _extraActs = (state.config && state.config.extraActivities && state.config.extraActivities[_todayDow]) || [];
+    _extraActs.forEach(function(ea) { if (_combinedSports.indexOf(ea) === -1) _combinedSports.push(ea); });
     var _hasGymToday = _cycleVal !== 'sport' && _cycleVal !== 'rest' && trainDay > 0 && !_isSportOnly;
     var _hasSportToday = _isSportOnly || _combinedSports.length > 0;
     // Si hay gym hoy Y además hay sports extra en sportNames, sumarlos

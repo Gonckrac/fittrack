@@ -1,4 +1,52 @@
 <!DOCTYPE html>
-<html><body>
-<p style="font-family:sans-serif;text-align:center;margin-top:40px">Conectando...</p>
-</body></html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FitTrack — Conectando</title>
+  <style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family: -apple-system, sans-serif; background: #111a0d; color: #e8eaf6; display: flex; align-items: center; justify-content: center; height: 100vh; flex-direction: column; gap: 16px; padding: 24px; text-align: center; }
+    .icon { font-size: 48px; margin-bottom: 8px; }
+    h2 { font-size: 20px; font-weight: 700; color: #c8a84b; }
+    p { font-size: 14px; color: #7b8ab8; line-height: 1.6; }
+    .btn { margin-top: 24px; background: #c8a84b; color: #111a0d; border: none; border-radius: 12px; padding: 14px 32px; font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
+    .error { color: #ff6b4d; }
+  </style>
+</head>
+<body>
+  <script>
+    var params = new URLSearchParams(window.location.search);
+    var code     = params.get('code');
+    var provider = params.get('state');
+    var error    = params.get('error');
+
+    if (code && provider) {
+      // Guardar código para que la app lo lea al volver
+      try {
+        localStorage.setItem('fittrack_oauth_code_pending', JSON.stringify({ code: code, provider: provider }));
+      } catch(e) {}
+      document.write(
+        '<div class="icon">✅</div>' +
+        '<h2>¡Conectado!</h2>' +
+        '<p>Tu wearable fue autorizado correctamente.<br>Cerrá esta ventana y volvé a FitTrack para completar la conexión.</p>' +
+        '<button class="btn" onclick="window.close()">Volver a FitTrack</button>'
+      );
+    } else if (error) {
+      document.write(
+        '<div class="icon">❌</div>' +
+        '<h2 class="error">Error de conexión</h2>' +
+        '<p>' + error + '</p>' +
+        '<button class="btn" onclick="window.close()">Cerrar</button>'
+      );
+    } else {
+      document.write(
+        '<div class="icon">⚠️</div>' +
+        '<h2>Sin datos</h2>' +
+        '<p>No se recibió código de autorización.</p>' +
+        '<button class="btn" onclick="window.close()">Cerrar</button>'
+      );
+    }
+  </script>
+</body>
+</html>

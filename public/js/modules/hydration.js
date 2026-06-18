@@ -10,6 +10,7 @@ function getWater() {
 }
 
 function addWater(ml) {
+  haptic('light');
   if (!state[TODAY].water) state[TODAY].water = 0;
   ml = Math.max(0, ml);
   state[TODAY].water = Math.min(getWaterGoal() + 500, state[TODAY].water + ml);

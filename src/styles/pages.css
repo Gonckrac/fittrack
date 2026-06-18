@@ -259,7 +259,7 @@
 
 .setup-page {
   display: none;
-  padding: 0 16px 8px;
+  padding: 16px 16px 8px;
   overflow-y: auto;
   overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
@@ -269,7 +269,10 @@
 }
 .setup-page::-webkit-scrollbar { display: none; }
 .setup-page.active {
-  display: block;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
   animation: fadeIn 0.25s ease;
 }
 

@@ -152,3 +152,19 @@ function _buildSplitFromConfig() {
 
   return result;
 }
+
+// ─── HAPTICS ─────────────────────────────────────────────────────
+function haptic(style) {
+  try {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Haptics) {
+      var H = window.Capacitor.Plugins.Haptics;
+      if (style === 'light')   H.impact({ style: 'LIGHT' });
+      else if (style === 'medium') H.impact({ style: 'MEDIUM' });
+      else if (style === 'heavy')  H.impact({ style: 'HEAVY' });
+      else if (style === 'success') H.notification({ type: 'SUCCESS' });
+      else if (style === 'warning') H.notification({ type: 'WARNING' });
+      else if (style === 'error')   H.notification({ type: 'ERROR' });
+      else H.impact({ style: 'LIGHT' });
+    }
+  } catch(_) {}
+}

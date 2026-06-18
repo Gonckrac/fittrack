@@ -405,3 +405,24 @@
   line-height: 1;
   pointer-events: none;
 }
+
+
+/* ─── EDIT WEEK PANEL ─────────────────────────────────────────── */
+.edit-week-panel{padding:16px}
+        .ew-header{margin-bottom:14px}
+        .ew-grid{display:flex;flex-direction:column;gap:6px}
+        .ew-day-row{display:flex;align-items:flex-start;gap:10px;min-height:40px}
+        .ew-day-label{width:32px;flex-shrink:0;font-size:11px;font-weight:700;color:var(--text3);padding-top:10px;text-transform:uppercase}
+        .ew-day-cell{flex:1;display:flex;flex-wrap:wrap;align-items:center;gap:5px;min-height:38px;padding:5px 6px;border-radius:10px;border:1.5px dashed var(--border);background:var(--bg3);transition:background 0.15s,border-color 0.15s}
+        .ew-day-cell.ew-drag-over{background:rgba(77,138,255,0.12);border-color:var(--accent)}
+        .ew-chip{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:20px;font-size:11px;font-weight:600;cursor:grab;user-select:none;transition:opacity 0.15s;max-width:180px}
+        .ew-chip-gym{background:rgba(77,138,255,0.15);border:1px solid rgba(77,138,255,0.35);color:var(--accent)}
+        .ew-chip-sport{background:rgba(77,220,120,0.15);border:1px solid rgba(77,220,120,0.35);color:var(--green)}
+        .ew-chip-dragging{opacity:0.4}
+.ew-chip span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:90px}
+        .ew-chip{gap:2px}        .ew-chip-del,.ew-chip-edit{background:none;border:none;cursor:pointer;font-size:11px;padding:0;line-height:1;flex-shrink:0}
+ .ew-chip-del{color:var(--red);opacity:0.9;min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center;font-size:14px}
+        .ew-chip-edit{color:var(--text3);min-width:28px;min-height:28px;display:flex;align-items:center;justify-content:center}
+        .ew-add-btn{background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:3px 6px;border-radius:6px;white-space:nowrap}
+        .ew-add-btn:hover{background:var(--bg4);color:var(--text)}
+        .ew-done-btn{width:100%;margin-top:16px;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:13px;font-weight:700;cursor:pointer}

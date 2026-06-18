@@ -831,7 +831,7 @@ grid.innerHTML = GOALS.map(function(g) {
         '<div style="font-size:20px">'+g.emoji+'</div>'+
         '<div style="flex:1">'+
           '<div style="font-size:13px;font-weight:700;color:var(--text)">'+g.title+'</div>'+
-          '<div style="font-size:10px;color:'+g.color+';margin-top:1px">'+(isSelected ? g.detail : g.desc)+'</div>'+
+          '<div style="font-size:10px;color:'+g.color+';margin-top:1px">'+g.desc+'</div>'+
         '</div>'+
         '<div style="width:18px;height:18px;flex-shrink:0;border-radius:50%;border:2px solid '+(isSelected?g.color:'var(--border)')+';display:flex;align-items:center;justify-content:center;font-size:10px;color:'+g.color+';">'+(isSelected?'✓':'')+'</div>'+
       '</div>'+
@@ -1272,6 +1272,8 @@ function _launchApp() {
   if (state.config && state.config.theme) applyTheme(state.config.theme);
   document.getElementById('setupOverlay').style.display = 'none';
   document.getElementById('mainApp').style.display = 'flex';
+
+  if (typeof checkAndStartTutorial === 'function') setTimeout(function(){ checkAndStartTutorial('home'); }, 800);
   // Esperar a que todos los módulos estén disponibles
   function _tryInit(attempts) {
     if (typeof renderTraining === 'function' && typeof renderHome === 'function') {
@@ -1286,6 +1288,8 @@ function _launchApp() {
 }
 
 function resetSetup() {
+  // Marcar reset pendiente ANTES de borrar nada (sobrevive al reload)
+  localStorage.setItem('fittrack_force_setup', '1');
   localStorage.removeItem(STORE_KEY);
   localStorage.removeItem('fittrack');
   localStorage.removeItem('fittrack_v2');

@@ -80,6 +80,7 @@ div.className = 'supp-item ' + (taken[s.id] ? 'taken' : '');
 }
 
 function toggleSupp(id) {
+  haptic('light');
   if (!state[TODAY].supps) state[TODAY].supps = {};
   state[TODAY].supps[id] = !state[TODAY].supps[id];
   saveState(state);

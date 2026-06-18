@@ -351,7 +351,7 @@ const BEEP_B64 = 'data:audio/wav;base64,UklGRtAUAABXQVZFZm10IBAAAAABAAEAIlYAAESs
 const _audioPool = [new Audio(BEEP_B64), new Audio(BEEP_B64), new Audio(BEEP_B64)];
 _audioPool.forEach(a => { a.volume = 1.0; a.preload = 'auto'; });
 
-function _unlockAudio() {
+function _unlockAudio() { return; // audio desactivado
   if (_audioUnlocked) return;
   _audioUnlocked = true;
   _audioPool.forEach((a, i) => {
@@ -365,7 +365,7 @@ document.addEventListener('touchstart', _unlockAudio, { capture: true, passive: 
 document.addEventListener('touchend',   _unlockAudio, { capture: true, passive: true });
 document.addEventListener('click',      _unlockAudio, { capture: true, passive: true });
 
-function playBeep() {
+function playBeep() { return; // beep desactivado
   _audioPool.forEach((a, i) => {
     setTimeout(() => {
       a.currentTime = 0;

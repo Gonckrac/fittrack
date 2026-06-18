@@ -111,10 +111,12 @@ if (id === 'progreso') {
 if (id === 'home') {
     _animateScoreIfChanged();
   }
-if (id === 'recuperacion') {
+if (typeof checkAndStartTutorial === 'function') checkAndStartTutorial(id);
+  if (id === 'recuperacion') {
     _syncRecuperacionSleep();
     renderSuppsV15();
     _syncRecuperacionWater();
+    setTimeout(function(){ if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-sueno'); },800);
   }
 }
 
@@ -130,11 +132,12 @@ function switchSubtab(pageId, subId, btn) {
   if (subEl) subEl.classList.add('active');
   // Render on demand cuando el sub-tab se vuelve visible
 if (pageId === 'nutricion' && subId === 'plan' && typeof renderMealPlan === 'function') renderMealPlan();
+  if (pageId === 'nutricion' && subId === 'balance' && typeof checkAndStartTutorial === 'function') checkAndStartTutorial('nutricion-balance');
   if (pageId === 'progreso' && subId === 'metricas')  _syncProgresoContent('metricas');
-  if (pageId === 'progreso' && subId === 'calendario') _syncProgresoContent('calendario');
-  if (pageId === 'recuperacion' && subId === 'sueno')       _syncRecuperacionSleep();
-  if (pageId === 'recuperacion' && subId === 'suplementos') renderSuppsV15();
-  if (pageId === 'recuperacion' && subId === 'agua')        _syncRecuperacionWater();
+  if (pageId === 'progreso' && subId === 'calendario') { _syncProgresoContent('calendario'); setTimeout(function(){ if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('progreso-calendario'); },800); }
+  if (pageId === 'recuperacion' && subId === 'sueno')       { _syncRecuperacionSleep(); if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-sueno'); }
+  if (pageId === 'recuperacion' && subId === 'suplementos') { renderSuppsV15(); if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-suplementos'); }
+  if (pageId === 'recuperacion' && subId === 'agua')        { _syncRecuperacionWater(); if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-agua'); }
 }
 
 // ─── HOME METRIC CARDS → navegación ──────────────────────────────
@@ -184,6 +187,10 @@ if (sub !== 'calendario') return;
   if (srcCal && dstCal) {
     if (typeof renderCalendar === 'function') renderCalendar();
     dstCal.innerHTML = srcCal.innerHTML;
+    // Prefijar IDs del clon para evitar duplicados con el original oculto
+    dstCal.querySelectorAll('[id]').forEach(function(el) {
+      el.id = 'cal_' + el.id;
+    });
     // Re-attach event handlers del calendario (botones de nav mes)
     var prevBtn = dstCal.querySelector('[onclick*="calNav(-1)"]');
     var nextBtn = dstCal.querySelector('[onclick*="calNav(1)"]');
@@ -372,7 +379,7 @@ var hasWearable = typeof isWearableConnected === 'function' &&
     '</div>',
 
     // Wearables card
-    '<div class="card" style="border:1px solid var(--border);background:var(--bg3)">',
+    '<div class="card" id="rec_sleepWearableCard" style="border:1px solid var(--border);background:var(--bg3)">',
       '<div style="margin-bottom:14px">',
         '<div class="card-title" style="margin-bottom:4px"><span>⌚</span> Conectar wearable</div>',
         '<div style="font-size:12px;color:var(--text3)">Conectá tu wearable y FitTrack sincroniza automáticamente.</div>',
@@ -428,6 +435,8 @@ function _syncRecuperacionWater() {
   if (srcWater && dstWater) {
     if (typeof renderWater === 'function') renderWater(false);
     dstWater.innerHTML = srcWater.innerHTML;
+    var _wCard = dstWater.querySelector('#waterMainCard');
+    if (_wCard) _wCard.id = 'rec_waterCard';
 
     // Patch dynamic water goal — use querySelector('#id') which is reliable on cloned DOM
     var goal = typeof getWaterGoal === 'function' ? getWaterGoal() : 3000;

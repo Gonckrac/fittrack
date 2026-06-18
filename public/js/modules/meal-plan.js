@@ -2,6 +2,17 @@
 // MEAL PLAN v3 — Wizard día a día: alergias → plan → ajustar → lista
 // ═══════════════════════════════════════════════════════════════════
 
+// ─── CAPACITOR SHARE ─────────────────────────────────────────────
+function _nativeShare(title, text) {
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Share) {
+    window.Capacitor.Plugins.Share.share({ title: title, text: text, dialogTitle: title });
+  } else if (navigator.share) {
+    navigator.share({ title: title, text: text }).catch(function(){});
+  } else {
+    _fallbackCopy(text);
+  }
+}
+
 var MEAL_SLOTS  = ['breakfast','lunch','snack','dinner'];
 var SLOT_LABELS = { breakfast:'🌅 Desayuno', lunch:'☀️ Almuerzo', snack:'🍎 Merienda', dinner:'🌙 Cena' };
 var DAY_NAMES   = ['Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo'];
@@ -151,6 +162,7 @@ function renderMealPlan() {
       '</div>' +
     '</div>' +
     '<button onclick="startMealPlanWizard()" class="btn btn-primary" style="width:100%;padding:14px;font-size:15px">Armar mi plan →</button>' +
+    '<button onclick="_openCustomLoadMenu()" class="btn btn-ghost" style="width:100%;padding:12px;font-size:13px;margin-top:10px">✏️ Cargar mi propio plan (manual o archivo)</button>' +
   '</div>';
     } else {
       _renderPlanFinal(plan);
@@ -717,9 +729,10 @@ function _renderPlanFinal(plan) {
 
   container.innerHTML =
     '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">' +
-      '<div><div style="font-size:12px;color:var(--text3)">Objetivo: <strong style="color:var(--text2)">'+(GOAL_LABELS[goal]||goal)+'</strong></div>' +
-'</div>' +      '<div style="display:flex;gap:6px">' +
-'<button onclick="downloadPlanPDF()" style="font-size:11px;color:var(--text2);background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer">📄 PDF</button>' +
+      '<div></div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">' +
+'<button onclick="_openCustomLoadMenu()" style="font-size:11px;color:var(--text2);background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer">➕ Cargar</button>' +
+'<button onclick="shareMealPlan()" style="font-size:11px;color:var(--accent);background:var(--bg4);border:1px solid rgba(77,138,255,0.3);border-radius:8px;padding:5px 10px;cursor:pointer;font-weight:600">📤 Compartir plan</button>' +
         '<button onclick="openShoppingList()" style="font-size:11px;color:var(--text2);background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer">🛒 Compras</button>' +        '<button onclick="startPlanWizard()" style="font-size:11px;color:var(--accent);background:var(--bg4);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer">🔄 Nuevo plan</button>' +
       '</div>' +
     '</div>' + summaryHtml + daysHtml;
@@ -910,6 +923,9 @@ function _applyShopItem(el, checked) {
   }
 }
 function _shareShoppingList() {
+  setTimeout(function() { _doShareShoppingList(); }, 0);
+}
+function _doShareShoppingList() {
   var plan = loadMealPlan();
   if (!plan) return;
   var totals = {};
@@ -940,15 +956,7 @@ var recipe = _getMealIngredients(meal.id); if (!recipe || !recipe.length) return
     text += '\n';
   });
   text += 'Generado con FitTrack';
-  if (navigator.share) {
-    navigator.share({ title: 'Lista de compras', text: text }).catch(function(){});
-  } else {
-    navigator.clipboard.writeText(text).then(function() {
-      showToast('📋 Lista copiada al portapapeles');
-    }).catch(function() {
-      showToast('⚠ No se pudo copiar');
-    });
-  }
+  _nativeShare('🛒 Lista de compras — FitTrack', text);
 }
 
 function toggleShopItem(el) {
@@ -1384,67 +1392,105 @@ var MEAL_PREP = {
   'dn_tofu_wok':    'Saltear tofu en cubos. Agregar edamame, ajo y salsa de soja. Servir con arroz integral.',
 };
 
-function downloadPlanPDF() {
+function _buildPlanText() {
   var plan = loadMealPlan();
-  if (!plan) { showToast('No hay plan guardado'); return; }
-
-  var html = '<html><head><meta charset="utf-8"><title>Plan Semanal FitTrack</title><style>' +
-    'body{font-family:Arial,sans-serif;color:#1a1a1a;padding:24px;max-width:800px;margin:0 auto}' +
-    'h1{font-size:22px;margin-bottom:4px}' +
-    '.subtitle{font-size:12px;color:#666;margin-bottom:28px}' +
-    '.day{margin-bottom:28px;page-break-inside:avoid}' +
-    '.day-title{font-size:16px;font-weight:700;border-bottom:2px solid #222;padding-bottom:4px;margin-bottom:12px}' +
-    '.meal{margin-bottom:14px;padding:10px 12px;border:1px solid #ddd;border-radius:8px}' +
-    '.meal-header{font-size:13px;font-weight:700;margin-bottom:2px}' +
-    '.meal-slot{font-size:11px;color:#888;margin-bottom:6px}' +
-    '.meal-macros{font-size:11px;color:#555;margin-bottom:8px}' +
-    '.ing-title{font-size:11px;font-weight:700;color:#333;margin-bottom:4px}' +
-    '.ing-row{display:flex;justify-content:space-between;font-size:11px;padding:2px 0;border-bottom:1px solid #f0f0f0}' +
-    '.prep-title{font-size:11px;font-weight:700;color:#333;margin-top:8px;margin-bottom:3px}' +
-    '.prep{font-size:11px;color:#444;line-height:1.5}' +
-    '@media print{body{padding:12px}.day{page-break-inside:avoid}}' +
-  '</style></head><body>';
-
-  html += '<h1>🥗 Plan Semanal de Comidas</h1>';
-  html += '<div class="subtitle">Generado con FitTrack · ' + new Date().toLocaleDateString('es-AR') + '</div>';
-
-  var slotLabelsClean = { breakfast:'Desayuno', lunch:'Almuerzo', snack:'Merienda', dinner:'Cena' };
-
+  if (!plan) return null;
+  var slotLabels = { breakfast:'🌅 Desayuno', lunch:'☀️ Almuerzo', snack:'🍎 Merienda', dinner:'🌙 Cena' };
+  var lines = [];
+  lines.push('🥗 PLAN SEMANAL DE COMIDAS');
+  lines.push('Generado con FitTrack · ' + new Date().toLocaleDateString('es-AR'));
+  lines.push('');
   plan.forEach(function(dayPlan, i) {
-    html += '<div class="day"><div class="day-title">' + DAY_NAMES[i] + '</div>';
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
+    lines.push('📅 ' + DAY_NAMES[i].toUpperCase());
+    lines.push('━━━━━━━━━━━━━━━━━━━━━━━');
     MEAL_SLOTS.forEach(function(slot) {
       var meal = dayPlan.meals[slot]; if (!meal) return;
-var ing = _getMealIngredients(meal.id);
+      var ing = _getMealIngredients(meal.id);
       var prep = _getMealPrep(meal.id);
-      html += '<div class="meal">';
-      html += '<div class="meal-slot">' + slotLabelsClean[slot] + '</div>';
-      html += '<div class="meal-header">' + meal.name + '</div>';
-      html += '<div class="meal-macros">' + meal.kcal + ' kcal · ' + meal.protein + 'g proteína · ' + meal.carbs + 'g carbos · ' + meal.fats + 'g grasas</div>';
+      lines.push('');
+      lines.push(slotLabels[slot] + ': ' + meal.name);
+      lines.push(meal.kcal + ' kcal · ' + meal.protein + 'g P · ' + meal.carbs + 'g C · ' + meal.fats + 'g G');
       if (ing.length) {
-        html += '<div class="ing-title">Ingredientes</div>';
-        ing.forEach(function(r) {
-          html += '<div class="ing-row"><span>' + r[0] + '</span><span>' + r[1] + 'g</span></div>';
-        });
+        lines.push('Ingredientes:');
+        ing.forEach(function(r) { lines.push('  • ' + r[0] + ': ' + r[1] + 'g'); });
       }
       if (prep) {
-        html += '<div class="prep-title">Preparación</div>';
-        html += '<div class="prep">' + prep + '</div>';
+        lines.push('Preparación:');
+        lines.push('  ' + prep);
       }
-      html += '</div>';
     });
-    html += '</div>';
+    lines.push('');
   });
+  return lines.join('\n');
+}
 
-  html += '</body></html>';
+var _cachedPlanText = null;
+function shareMealPlan() {
+  var plan = loadMealPlan();
+  if (!plan) { showToast('No hay plan guardado'); return; }
+  _cachedPlanText = _buildPlanText();
+  setTimeout(function() { _openShareSheet(); }, 0);
+}
+function _openShareSheet() {
+  var plan = loadMealPlan();
+  if (!plan) return;
+  var text = _cachedPlanText || _buildPlanText();
 
-  var blob = new Blob([html], { type: 'text/html' });
-  var url = URL.createObjectURL(blob);
-  var a = document.createElement('a');
-  a.href = url; a.download = 'plan-semanal-fittrack.html';
-  document.body.appendChild(a); a.click();
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-  showToast('📄 Plan descargado');
+  // Panel bottom sheet
+  var existing = document.getElementById('sharePlanSheet');
+  if (existing) existing.remove();
+
+  var sheet = document.createElement('div');
+  sheet.id = 'sharePlanSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;z-index:8000;background:rgba(0,0,0,0.6);display:flex;align-items:flex-end;justify-content:center';
+  sheet.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px;width:100%;max-width:500px;max-height:80vh;display:flex;flex-direction:column">' +
+      '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px"></div>' +
+      '<div style="font-size:16px;font-weight:700;color:var(--text);margin-bottom:6px">📤 Compartir plan semanal</div>' +
+      '<div style="font-size:12px;color:var(--text3);margin-bottom:16px">Tu plan completo con ingredientes y preparación</div>' +
+      '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;overflow-y:auto;flex:1;margin-bottom:16px">' +
+        '<pre style="font-size:11px;color:var(--text2);white-space:pre-wrap;font-family:inherit;margin:0;line-height:1.6">' + text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</pre>' +
+      '</div>' +
+      '<div style="display:flex;flex-direction:column;gap:8px">' +
+        '<button onclick="_doSharePlan()" style="background:var(--accent);color:#fff;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit">📤 Compartir por WhatsApp / Mail / etc.</button>' +
+        '<button onclick="_copyPlanText()" style="background:var(--bg3);color:var(--text);border:1px solid var(--border);border-radius:12px;padding:12px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">📋 Copiar texto</button>' +
+        '<button onclick="document.getElementById(\'sharePlanSheet\').remove()" style="background:none;color:var(--text3);border:none;padding:8px;font-size:13px;cursor:pointer;font-family:inherit">Cerrar</button>' +
+      '</div>' +
+    '</div>';
+  sheet.addEventListener('click', function(e){ if(e.target===sheet) sheet.remove(); });
+  document.body.appendChild(sheet);
+}
+
+function _doSharePlan() {
+  var btn = document.querySelector('#sharePlanSheet button[onclick="_doSharePlan()"]');
+  if (btn) { btn.textContent = '⏳ Abriendo...'; btn.style.opacity = '0.7'; }
+  var text = _cachedPlanText || _buildPlanText();
+  if (btn) { btn.textContent = '📤 Compartir por WhatsApp / Mail / etc.'; btn.style.opacity = '1'; }
+  _nativeShare('🥗 Mi Plan Semanal de Comidas — FitTrack', text);
+}
+
+function _copyPlanText() {
+  var text = _cachedPlanText || _buildPlanText();
+  var btn = document.querySelector('#sharePlanSheet button[onclick="_copyPlanText()"]');
+  if (btn) { btn.textContent = '✓ Texto copiado'; btn.style.color = 'var(--green)'; }
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(function(){
+      showToast('✓ Texto copiado');
+    }).catch(function(){ _fallbackCopy(text); });
+  } else {
+    _fallbackCopy(text);
+  }
+}
+
+function _fallbackCopy(text) {
+  var ta = document.createElement('textarea');
+  ta.value = text;
+  ta.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(ta);
+  ta.select();
+  try { document.execCommand('copy'); showToast('📋 Plan copiado'); } catch(_){}
+  document.body.removeChild(ta);
 }
 
 // ─── UTILS ───────────────────────────────────────────────────────
@@ -1460,4 +1506,374 @@ function _renderMacroBar(totals, targets) {
       var pct=Math.min(100,Math.round(b[1]/Math.max(b[2],1)*100)), diff=b[1]-b[2], sign=diff>0?'+':'';
       return '<div style="flex:1"><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-bottom:2px"><span>'+b[0]+' '+b[1]+'g</span><span style="color:'+(Math.abs(diff)<b[2]*0.1?'var(--green)':'var(--text3)')+'">'+sign+diff+'g</span></div><div style="height:4px;background:var(--bg4);border-radius:2px"><div style="height:4px;width:'+pct+'%;background:'+b[3]+';border-radius:2px"></div></div></div>';
     }).join('')+'</div>';
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// CARGA MANUAL / IMPORTACIÓN DE PLAN PROPIO
+// ═══════════════════════════════════════════════════════════════════
+
+function _buildEmptyPlan() {
+  var days = [];
+  for (var i = 0; i < 7; i++) days.push({ day: i, meals: {} });
+  return days;
+}
+
+function _escapeHtml(s) {
+  return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ─── MENÚ DE ENTRADA: MANUAL O ARCHIVO ───────────────────────────
+function _openCustomLoadMenu() {
+  var existing = document.getElementById('customLoadMenu'); if (existing) existing.remove();
+  var menu = document.createElement('div');
+  menu.id = 'customLoadMenu';
+  menu.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:10000;display:flex;align-items:flex-end;justify-content:center';
+  menu.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px">' +
+      '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px"></div>' +
+      '<div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:4px">Cargar tu propio plan</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:20px">Agregá comidas a mano o importá un archivo con tu plan completo.</div>' +
+      _actionBtn('✏️&nbsp;&nbsp;Agregar comida manualmente', 'var(--accent)', "document.getElementById('customLoadMenu').remove();_openManualMealSheet()") +
+      _actionBtn('📁&nbsp;&nbsp;Importar desde archivo (CSV)', 'var(--accent)', "document.getElementById('customLoadMenu').remove();_openCsvImportSheet()") +
+      '<button onclick="document.getElementById(\'customLoadMenu\').remove()" class="btn btn-ghost" style="width:100%;margin-top:8px;font-size:13px">Cancelar</button>' +
+    '</div>';
+  menu.addEventListener('click', function(e){ if (e.target === menu) menu.remove(); });
+  document.body.appendChild(menu);
+}
+
+// ─── CARGA MANUAL: día + momento + nombre + macros ───────────────
+var _manualEntry = { day: 0, slot: 'breakfast' };
+
+function _openManualMealSheet() {
+  _manualEntry.day = _manualEntry.day || 0;
+  _manualEntry.slot = _manualEntry.slot || 'breakfast';
+  _renderManualMealSheet();
+}
+
+function _renderManualMealSheet() {
+  var dayBtns = DAY_NAMES.map(function(name, i) {
+    var sel = _manualEntry.day === i;
+    return '<button onclick="_setManualDay('+i+')" style="padding:8px 12px;border-radius:10px;margin:3px;border:1.5px solid '+(sel?'var(--accent)':'var(--border)')+';background:'+(sel?'rgba(77,138,255,0.10)':'var(--bg3)')+';color:'+(sel?'var(--accent)':'var(--text2)')+';cursor:pointer;font-size:12px">'+name+'</button>';
+  }).join('');
+
+  var slotBtns = MEAL_SLOTS.map(function(slot) {
+    var sel = _manualEntry.slot === slot;
+    return '<button onclick="_setManualSlot(\''+slot+'\')" style="padding:9px 12px;border-radius:10px;margin:3px;border:1.5px solid '+(sel?'var(--accent)':'var(--border)')+';background:'+(sel?'rgba(77,138,255,0.10)':'var(--bg3)')+';color:'+(sel?'var(--accent)':'var(--text2)')+';cursor:pointer;font-size:12px">'+SLOT_LABELS[slot]+'</button>';
+  }).join('');
+
+  var existing = _getManualSlotMeal();
+  var nameVal = existing ? existing.name : '';
+  var kcalVal = existing ? existing.kcal : '';
+  var protVal = existing ? existing.protein : '';
+  var carbVal = existing ? existing.carbs : '';
+  var fatVal  = existing ? existing.fats : '';
+
+  var content =
+    '<div style="padding:0 20px;flex:1;overflow-y:auto">' +
+      '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">Agregar comida manual</div>' +
+      '<div style="font-size:13px;color:var(--text3);margin-bottom:16px">Elegí el día, el momento, y completá nombre y macros. Si ese día y momento ya tenían una comida cargada, se reemplaza.</div>' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Día</div>' +
+      '<div style="display:flex;flex-wrap:wrap;margin:-3px;margin-bottom:16px">'+dayBtns+'</div>' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Momento</div>' +
+      '<div style="display:flex;flex-wrap:wrap;margin:-3px;margin-bottom:20px">'+slotBtns+'</div>' +
+      '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;margin-bottom:6px">Comida</div>' +
+      '<input id="manualMealName" type="text" placeholder="Ej: Pollo con arroz" value="'+_escapeHtml(nameVal)+'" style="width:100%;padding:12px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;margin-bottom:14px;box-sizing:border-box">' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:8px">' +
+        _macroInput('manualMealKcal', 'Kcal', kcalVal) +
+        _macroInput('manualMealProt', 'Proteínas (g)', protVal) +
+        _macroInput('manualMealCarb', 'Carbohidratos (g)', carbVal) +
+        _macroInput('manualMealFat',  'Grasas (g)', fatVal) +
+      '</div>' +
+    '</div>' +
+    '<div style="padding:16px 20px 32px;flex-shrink:0;display:flex;gap:8px">' +
+      '<button onclick="_closeSheet()" class="btn btn-ghost" style="flex:1">Cancelar</button>' +
+      '<button onclick="_saveManualMeal()" class="btn btn-primary" style="flex:2">Agregar al plan →</button>' +
+    '</div>';
+
+  _openSheet(content);
+}
+
+function _macroInput(id, label, val) {
+  var v = (val !== '' && val !== undefined && val !== null) ? val : '';
+  return '<div><div style="font-size:11px;color:var(--text3);margin-bottom:4px">'+label+'</div>' +
+    '<input id="'+id+'" type="number" min="0" inputmode="decimal" value="'+v+'" style="width:100%;padding:11px;border-radius:10px;border:1px solid var(--border);background:var(--bg3);color:var(--text);font-size:14px;box-sizing:border-box"></div>';
+}
+
+function _setManualDay(i) { _manualEntry.day = i; _renderManualMealSheet(); }
+function _setManualSlot(slot) { _manualEntry.slot = slot; _renderManualMealSheet(); }
+
+function _getManualSlotMeal() {
+  var plan = loadMealPlan();
+  if (!plan || !plan[_manualEntry.day] || !plan[_manualEntry.day].meals) return null;
+  return plan[_manualEntry.day].meals[_manualEntry.slot] || null;
+}
+
+function _saveManualMeal() {
+  var name = (document.getElementById('manualMealName').value || '').trim();
+  var kcal = parseFloat(document.getElementById('manualMealKcal').value);
+  var prot = parseFloat(document.getElementById('manualMealProt').value);
+  var carb = parseFloat(document.getElementById('manualMealCarb').value);
+  var fat  = parseFloat(document.getElementById('manualMealFat').value);
+
+  if (!name) { showToast('⚠ Escribí el nombre de la comida'); return; }
+  if ([kcal, prot, carb, fat].some(function(v){ return isNaN(v) || v < 0; })) {
+    showToast('⚠ Completá los macros con números válidos');
+    return;
+  }
+
+  var plan = loadMealPlan() || _buildEmptyPlan();
+  var dayIdx = _manualEntry.day, slot = _manualEntry.slot;
+  if (!plan[dayIdx]) plan[dayIdx] = { day: dayIdx, meals: {} };
+  if (!plan[dayIdx].meals) plan[dayIdx].meals = {};
+
+  plan[dayIdx].meals[slot] = {
+    id: 'manual_' + dayIdx + '_' + slot + '_' + Date.now(),
+    name: name,
+    mealType: [slot],
+    kcal: Math.round(kcal),
+    protein: Math.round(prot),
+    carbs: Math.round(carb),
+    fats: Math.round(fat),
+    custom: true,
+  };
+
+  saveMealPlan(plan);
+  _closeSheet();
+  showToast('✅ ' + name + ' agregada — ' + DAY_NAMES[dayIdx]);
+  var planBtn = document.getElementById('subtab-plan');
+  if (typeof switchSubtab === 'function') switchSubtab('nutricion', 'plan', planBtn);
+  else _renderPlanFinal(plan);
+}
+
+// ─── IMPORTACIÓN DESDE ARCHIVO CSV ────────────────────────────────
+var _csvImportPreview = null;
+
+function _openCsvImportSheet() {
+  var content =
+    '<div style="padding:0 20px;flex:1;overflow-y:auto">' +
+      '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">Importar plan desde archivo</div>' +
+      '<div style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Subí un CSV con una fila por comida. Columnas esperadas:</div>' +
+      '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:16px;overflow-x:auto">' +
+        '<code style="font-size:11px;color:var(--text2);white-space:nowrap;display:block">Día,Comida,Alimento,kcal,P,C,G</code>' +
+        '<code style="font-size:11px;color:var(--text3);white-space:nowrap;display:block">Lunes,Desayuno,Avena con banana,350,12,55,8</code>' +
+      '</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:20px">Día: Lunes a Domingo. Comida: Desayuno, Almuerzo, Merienda o Cena. Si ya tenés un plan cargado, el archivo reemplaza solo los días/comidas que incluya — el resto queda igual.</div>' +
+      '<button onclick="_downloadCsvTemplate()" class="btn btn-ghost" style="width:100%;margin-bottom:10px;font-size:13px">⬇️ Descargar plantilla de ejemplo</button>' +
+      '<button onclick="_triggerCsvFileInput()" class="btn btn-primary" style="width:100%;font-size:14px">📁 Elegir archivo CSV</button>' +
+    '</div>' +
+    '<div style="padding:16px 20px 32px;flex-shrink:0">' +
+      '<button onclick="_closeSheet()" class="btn btn-ghost" style="width:100%">Cerrar</button>' +
+    '</div>';
+  _openSheet(content);
+}
+
+function _downloadCsvTemplate() {
+  var rows = [
+    ['Día','Comida','Alimento','kcal','P','C','G'],
+    ['Lunes','Desayuno','Avena con banana',350,12,55,8],
+    ['Lunes','Almuerzo','Pollo con arroz',600,45,60,15],
+    ['Lunes','Merienda','Yogur con nueces',250,15,18,12],
+    ['Lunes','Cena','Salmón con batata',550,38,45,20],
+  ];
+  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  _fallbackDownload(url, 'plantilla-plan-comidas.csv');
+}
+
+function _triggerCsvFileInput() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv,text/csv';
+  input.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(input);
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    document.body.removeChild(input);
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) { _handleCsvImport(ev.target.result); };
+    reader.onerror = function() { showToast('⚠ No se pudo leer el archivo'); };
+    reader.readAsText(file, 'UTF-8');
+  };
+  input.click();
+}
+
+function _handleCsvImport(text) {
+  var parsed = _parseMealPlanCSV(text);
+  if (!parsed.meals.length) {
+    showToast('⚠ No se encontraron filas válidas en el archivo' + (parsed.errors.length ? ' (' + parsed.errors.length + ' con errores)' : ''));
+    return;
+  }
+  _csvImportPreview = parsed;
+  _openCsvConfirmSheet(parsed);
+}
+
+function _openCsvConfirmSheet(parsed) {
+  var summary = parsed.meals.length + ' comida' + (parsed.meals.length > 1 ? 's' : '') + ' lista' + (parsed.meals.length > 1 ? 's' : '') + ' para cargar';
+  var errHtml = parsed.errors.length ?
+    '<div style="background:rgba(255,196,0,0.08);border:1px solid var(--yellow);border-radius:10px;padding:10px 12px;margin-bottom:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:4px">⚠ ' + parsed.errors.length + ' fila' + (parsed.errors.length > 1 ? 's' : '') + ' con problemas (se van a ignorar)</div>' +
+      parsed.errors.slice(0, 6).map(function(e){ return '<div style="font-size:11px;color:var(--text3)">• ' + _escapeHtml(e) + '</div>'; }).join('') +
+      (parsed.errors.length > 6 ? '<div style="font-size:11px;color:var(--text3)">… y ' + (parsed.errors.length - 6) + ' más</div>' : '') +
+    '</div>' : '';
+
+  var preview = parsed.meals.slice(0, 8).map(function(m) {
+    return '<div style="display:flex;justify-content:space-between;font-size:12px;padding:6px 0;border-bottom:1px solid var(--bg4)">' +
+      '<span style="color:var(--text2)">' + DAY_NAMES[m.dayIdx] + ' · ' + SLOT_LABELS[m.slot] + ' · ' + _escapeHtml(m.name) + '</span>' +
+      '<span style="color:var(--text3);font-weight:600">' + Math.round(m.kcal) + ' kcal</span>' +
+    '</div>';
+  }).join('') + (parsed.meals.length > 8 ? '<div style="font-size:11px;color:var(--text3);margin-top:6px">… y ' + (parsed.meals.length - 8) + ' más</div>' : '');
+
+  var existingSheet = document.getElementById('csvConfirmSheet'); if (existingSheet) existingSheet.remove();
+  var sheet = document.createElement('div');
+  sheet.id = 'csvConfirmSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:flex-end;justify-content:center';
+  sheet.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column">' +
+      '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;flex-shrink:0"></div>' +
+      '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;flex-shrink:0">' + summary + '</div>' +
+      '<div style="overflow-y:auto;flex:1;margin-bottom:12px">' + errHtml + preview + '</div>' +
+      '<button onclick="_confirmCsvImport()" class="btn btn-primary" style="width:100%;margin-bottom:8px;flex-shrink:0">✅ Cargar al plan</button>' +
+      '<button onclick="document.getElementById(\'csvConfirmSheet\').remove()" class="btn btn-ghost" style="width:100%;flex-shrink:0">Cancelar</button>' +
+    '</div>';
+  sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
+  document.body.appendChild(sheet);
+}
+
+function _confirmCsvImport() {
+  var parsed = _csvImportPreview;
+  var s = document.getElementById('csvConfirmSheet'); if (s) s.remove();
+  if (!parsed || !parsed.meals.length) return;
+
+  var plan = loadMealPlan() || _buildEmptyPlan();
+  parsed.meals.forEach(function(m, idx) {
+    if (!plan[m.dayIdx]) plan[m.dayIdx] = { day: m.dayIdx, meals: {} };
+    if (!plan[m.dayIdx].meals) plan[m.dayIdx].meals = {};
+    plan[m.dayIdx].meals[m.slot] = {
+      id: 'csv_' + m.dayIdx + '_' + m.slot + '_' + Date.now() + '_' + idx,
+      name: m.name,
+      mealType: [m.slot],
+      kcal: Math.round(m.kcal),
+      protein: Math.round(m.protein),
+      carbs: Math.round(m.carbs),
+      fats: Math.round(m.fats),
+      custom: true,
+    };
+  });
+
+  saveMealPlan(plan);
+  _closeSheet();
+  showToast('✅ ' + parsed.meals.length + ' comidas cargadas desde archivo');
+  _csvImportPreview = null;
+  var planBtn = document.getElementById('subtab-plan');
+  if (typeof switchSubtab === 'function') switchSubtab('nutricion', 'plan', planBtn);
+  else _renderPlanFinal(plan);
+}
+
+// ─── PARSER CSV ────────────────────────────────────────────────────
+var _DAY_NAME_MAP = {
+  'lunes':0, 'monday':0, 'mon':0,
+  'martes':1, 'tuesday':1, 'tue':1,
+  'miercoles':2, 'wednesday':2, 'wed':2,
+  'jueves':3, 'thursday':3, 'thu':3,
+  'viernes':4, 'friday':4, 'fri':4,
+  'sabado':5, 'saturday':5, 'sat':5,
+  'domingo':6, 'sunday':6, 'sun':6,
+};
+var _SLOT_NAME_MAP = {
+  'desayuno':'breakfast', 'breakfast':'breakfast',
+  'almuerzo':'lunch', 'lunch':'lunch',
+  'merienda':'snack', 'snack':'snack', 'colacion':'snack',
+  'cena':'dinner', 'dinner':'dinner',
+};
+
+function _normalizeKey(s) {
+  return String(s || '').toLowerCase().trim().normalize('NFD').replace(/[̀-ͯ]/g, '');
+}
+
+function _dayNameToIndex(s) {
+  var k = _normalizeKey(s);
+  if (_DAY_NAME_MAP.hasOwnProperty(k)) return _DAY_NAME_MAP[k];
+  var n = parseInt(s, 10);
+  if (!isNaN(n)) {
+    if (n >= 1 && n <= 7) return n - 1; // 1=Lunes … 7=Domingo
+    if (n >= 0 && n <= 6) return n;
+  }
+  return -1;
+}
+
+function _mealNameToSlot(s) {
+  var k = _normalizeKey(s);
+  return _SLOT_NAME_MAP.hasOwnProperty(k) ? _SLOT_NAME_MAP[k] : null;
+}
+
+function _splitCsvLine(line, delim) {
+  var out = [], cur = '', inQuotes = false;
+  for (var i = 0; i < line.length; i++) {
+    var ch = line[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (line[i+1] === '"') { cur += '"'; i++; }
+        else inQuotes = false;
+      } else cur += ch;
+    } else {
+      if (ch === '"') inQuotes = true;
+      else if (ch === delim) { out.push(cur); cur = ''; }
+      else cur += ch;
+    }
+  }
+  out.push(cur);
+  return out.map(function(c){ return c.trim(); });
+}
+
+function _parseMealPlanCSV(text) {
+  var meals = [], errors = [];
+  if (!text) return { meals: meals, errors: errors };
+
+  var lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(function(l){ return l.trim().length; });
+  if (!lines.length) return { meals: meals, errors: errors };
+
+  // Detectar delimitador (Excel en español suele exportar con ";")
+  var firstLine = lines[0];
+  var commaCount = (firstLine.match(/,/g) || []).length;
+  var semiCount  = (firstLine.match(/;/g) || []).length;
+  var delim = semiCount > commaCount ? ';' : ',';
+  var numDelim = delim === ';' ? ',' : null; // decimales con coma si el separador de columnas es ";"
+
+  function parseNum(v) {
+    if (numDelim) v = String(v).replace(numDelim, '.');
+    return parseFloat(v);
+  }
+
+  // Detectar si la primera fila es encabezado
+  var headerCells = _splitCsvLine(firstLine, delim).map(_normalizeKey);
+  var looksLikeHeader = headerCells.some(function(c){ return ['dia','comida','alimento','kcal'].indexOf(c) >= 0; });
+  var startIdx = looksLikeHeader ? 1 : 0;
+
+  for (var i = startIdx; i < lines.length; i++) {
+    var rowNum = i + 1;
+    var cells = _splitCsvLine(lines[i], delim);
+    if (cells.length < 7) {
+      errors.push('Fila ' + rowNum + ': faltan columnas (se esperan 7: Día,Comida,Alimento,kcal,P,C,G)');
+      continue;
+    }
+
+    var dayIdx = _dayNameToIndex(cells[0]);
+    var slot   = _mealNameToSlot(cells[1]);
+    var name   = (cells[2] || '').trim();
+    var kcal = parseNum(cells[3]), prot = parseNum(cells[4]), carb = parseNum(cells[5]), fat = parseNum(cells[6]);
+
+    if (dayIdx < 0) { errors.push('Fila ' + rowNum + ': día no reconocido ("' + cells[0] + '")'); continue; }
+    if (!slot)      { errors.push('Fila ' + rowNum + ': comida no reconocida ("' + cells[1] + '")'); continue; }
+    if (!name)      { errors.push('Fila ' + rowNum + ': falta el nombre del alimento'); continue; }
+    if ([kcal, prot, carb, fat].some(function(n){ return isNaN(n) || n < 0; })) {
+      errors.push('Fila ' + rowNum + ': macros inválidos');
+      continue;
+    }
+
+    meals.push({ dayIdx: dayIdx, slot: slot, name: name, kcal: kcal, protein: prot, carbs: carb, fats: fat });
+  }
+
+  return { meals: meals, errors: errors };
 }

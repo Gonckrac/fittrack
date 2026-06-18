@@ -310,7 +310,7 @@ function isDeloadWeek(dateStr) {
   return week > 0 && (week + 1) % DELOAD_INTERVAL_WEEKS === 0; // Weeks 3, 7, 11...
 }
 
-function checkDeloadWeek() {
+function checkDeloadWeek() { return;
   const banner = document.getElementById('deloadBanner');
   if (!banner) return;
 

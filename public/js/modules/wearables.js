@@ -6,7 +6,7 @@ var WEARABLE_CONFIG = {
     clientId: '466a8c8a-ab40-4985-8158-c32965717e89',
     authUrl: 'https://cloud.ouraring.com/oauth/authorize',
     tokenUrl: 'https://api.ouraring.com/oauth/token',
-    scope: 'personal daily heartrate workout tag session spo2 ring_configuration',
+    scope: 'personal daily heartrate workout tag session spo2',
     color: 'var(--accent)',
   },
   garmin: {
@@ -40,26 +40,37 @@ function isWearableConnected(provider) {
 function connectWearable(provider) {
   var cfg = WEARABLE_CONFIG[provider];
   if (!cfg) return;
-  var redirectUri = encodeURIComponent(window.location.origin + '/oauth-callback.html');
+  var REDIRECT = 'https://fittrack-backend-one.vercel.app/api/oauth-callback';
+  var redirectUri = encodeURIComponent(REDIRECT);
   var url = cfg.authUrl +
     '?response_type=code' +
     '&client_id=' + cfg.clientId +
     '&redirect_uri=' + redirectUri +
     '&scope=' + encodeURIComponent(cfg.scope) +
     '&state=' + provider;
-  var popup = window.open(url, 'wearable_oauth', 'width=500,height=700,left=100,top=100');
-  var timer = setInterval(function() {
-    try {
-      if (popup && popup.location && popup.location.href.indexOf('oauth-callback') >= 0) {
-        clearInterval(timer);
-        var params = new URL(popup.location.href).searchParams;
-        var code = params.get('code');
-        popup.close();
-        if (code) _exchangeWearableCode(provider, code);
-      }
-    } catch(e) {}
-    if (!popup || popup.closed) clearInterval(timer);
-  }, 500);
+
+  // Guardar provider pendiente para el callback
+  localStorage.setItem('fittrack_oauth_pending', provider);
+
+  // Usar Capacitor Browser — soporta deep links en iOS
+  if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+    var Browser = window.Capacitor.Plugins.Browser;
+    Browser.open({ url: url, presentationStyle: 'fullscreen' });
+  } else {
+    window.open(url, '_system');
+  }
+}
+
+// Llamada desde oauth-callback cuando vuelve el código
+function handleOAuthCallback(code, provider) {
+  localStorage.removeItem('fittrack_oauth_pending');
+  if (code && provider) {
+    if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.Browser) {
+      window.Capacitor.Plugins.Browser.close();
+    }
+    showToast('🔗 Conectando ' + (WEARABLE_CONFIG[provider] ? WEARABLE_CONFIG[provider].name : provider) + '...');
+    _exchangeWearableCode(provider, code);
+  }
 }
 
 function disconnectWearable(provider) {
@@ -125,7 +136,7 @@ async function _exchangeWearableCode(provider, code) {
     var res = await fetch('https://fittrack-backend-one.vercel.app/api/wearable-token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ provider: provider, code: code, redirectUri: window.location.origin + '/oauth-callback.html' })
+      body: JSON.stringify({ provider: provider, code: code, redirectUri: 'https://fittrack-backend-one.vercel.app/api/oauth-callback' })
     });
     var data = await res.json();
     if (!data.access_token) throw new Error('Sin token');
@@ -163,7 +174,7 @@ function _buildWearablesCardHTML() {
     return '<div style="background:var(--bg2);border:1.5px solid ' + (connected ? cfg.color : 'var(--border)') + ';border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;cursor:pointer" onclick="' + (connected ? 'openWearableDetail(\'' + p + '\')' : 'connectWearable(\'' + p + '\')') + '">' +
       '<span style="font-size:22px">' + cfg.emoji + '</span>' +
       '<div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--text)">' + cfg.name + '</div>' +
-      '<div style="font-size:10px;margin-top:2px;color:' + (connected ? cfg.color : 'var(--text3)') + '">' + (connected ? 'Conectado ✓' : 'Toca para conectar') + '</div></div>' +
+      '<div style="font-size:10px;margin-top:2px;color:' + (connected ? cfg.color : 'var(--text3)') + '">' + (connected ? 'Conectado ✓' : (p === 'garmin' ? 'Próximamente' : 'Toca para conectar')) + '</div></div>' +
       (connected ? '<button onclick="event.stopPropagation();disconnectWearable(\'' + p + '\')" style="background:none;border:none;color:var(--text3);font-size:11px;cursor:pointer;padding:4px">✕</button>' : '') +
     '</div>';
   }).join('');
@@ -216,8 +227,8 @@ async function syncOura() {
     sl.deep       = data.sleep?.deep_hours       || sl.deep;
     sl.hrv        = data.sleep?.hrv_avg          || sl.hrv;
     sl.rhr        = data.sleep?.resting_hr       || sl.rhr;
-
-    
+    // Guardar pasos de Oura si vienen
+    if (data.activity?.steps) state[TODAY].steps = data.activity.steps;
     saveState(state);
 if (typeof renderSleep === 'function') renderSleep();
     if (typeof renderKcal  === 'function') renderKcal();

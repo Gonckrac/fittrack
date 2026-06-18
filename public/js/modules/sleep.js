@@ -160,11 +160,10 @@ function deleteActivity(idx) {
 function updateKcalBalance() { renderKcal(); }
 function renderKcal() {
   const consumed   = Math.round(calcTotals().kcal);
-  const ouraKcal   = state[TODAY]?.kcal?.burned || 0;
   const activities = state[TODAY]?.activities || [];
   const actKcal    = activities.reduce((s, a) => s + (a.kcal || 0), 0);
-  const burned     = ouraKcal || actKcal;
-  const hasOura    = ouraKcal > 0;
+  const burned     = actKcal;
+  const hasOura    = false;
   const cfg        = state.config || {};
 
   const goal       = cfg.goal || 'cut';
