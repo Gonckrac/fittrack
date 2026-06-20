@@ -1351,7 +1351,10 @@ if (_tsZoom !== 1.0) {
     <div class="modal-title">✏️ <span id="reModalDayName">Editar día</span> <button class="modal-close" onclick="closeModal('routineEditorModal')">✕</button></div>
     <div id="reDayNameWrap" style="margin-bottom:10px"></div>
     <div id="reExList" style="margin-bottom:8px"></div>
-    <button onclick="reAddExercise()" style="width:100%;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer;margin-bottom:4px">+ Ejercicio</button>
+    <div style="display:flex;gap:6px;margin-bottom:4px">
+      <button onclick="reAddExercise()" style="flex:1;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer">+ Ejercicio</button>
+      <button onclick="reAddSuperset()" style="flex:1;padding:8px;border-radius:8px;border:1px dashed var(--green);background:none;color:var(--green);font-size:12px;cursor:pointer">⚡ + Superserie</button>
+    </div>
     <button onclick="saveRoutineEditor()" style="width:100%;margin-top:10px;padding:12px;border-radius:12px;border:none;background:var(--accent);color:#fff;font-size:14px;font-weight:700;cursor:pointer">✓ Guardar</button>
     <div id="rePanelDays" style="display:none"><div id="reDayTabs"></div></div>
     <div id="rePanelCycle" style="display:none"><div id="reCycleBuilder"></div></div>

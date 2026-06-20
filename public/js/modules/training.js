@@ -161,12 +161,20 @@ function getConfigTraining() {
     if (!d) return null;
     // Day with no exercises = rest day
     if (!d.exercises || d.exercises.length === 0) return null;
+    var mappedExercises = d.exercises.map(function(ex) {
+      return { name: ex.name, muscle: ex.muscle || '', sets: parseInt(ex.sets) || 3, reps: ex.reps || '8-12', noTopRep: false, ssGroup: ex.ssGroup || null, ssPart: ex.ssPart || null, ssRestSec: ex.ssRestSec || null };
+    });
+    var supersets = [];
+    mappedExercises.forEach(function(ex) {
+      if (ex.ssGroup && ex.ssPart === 'a') {
+        var partnerB = mappedExercises.find(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'b'; });
+        if (partnerB) supersets.push({ id: ex.ssGroup, label: 'Superserie — ' + ex.name + ' + ' + partnerB.name });
+      }
+    });
     return {
       name: d.name,
-      supersets: [],
-      exercises: d.exercises.map(function(ex) {
-        return { name: ex.name, muscle: ex.muscle || '', sets: parseInt(ex.sets) || 3, reps: ex.reps || '8-12', noTopRep: false, ssGroup: null };
-      })
+      supersets: supersets,
+      exercises: mappedExercises
     };
   }
   return null;
@@ -1848,7 +1856,7 @@ const target = getProgressionTarget(ex.name, ex);
     // Feature 1: Progression bar
     const progBarHtml = buildProgressionBar(exSets, ex);
     // Feature 2: Weight suggestion (show if any set is done)
-const weightSuggHtml = (doneCount > 0 && !target) ? buildWeightSuggestion(ex.name, ex, exSets) : (doneCount > 0 ? buildWeightSuggestionUpgradeOnly(ex.name, ex, exSets) : '');
+const weightSuggHtml = doneCount > 0 ? buildWeightSuggestionUpgradeOnly(ex.name, ex, exSets) : '';
 function buildWeightSuggestionUpgradeOnly(exName, ex, currentSets) {
   // Solo muestra el cartel de subir peso — nunca el "apuntá al máximo" (ya lo cubre targetHtml)
   const history = (state.exerciseHistory || {})[exName] || [];
@@ -1882,8 +1890,8 @@ function buildWeightSuggestionUpgradeOnly(exName, ex, currentSets) {
 <div class="exercise-muscle">${_translateMuscle(ex.muscle)} · ${ex.sets}×${ex.reps}</div>        </div>
     <div style="display:flex;align-items:center;gap:4px;">
           ${isPR?`<span class="tag tag-green">🏆 PR</span>`:doneCount>0?`<span class="tag tag-green">${doneCount}/${ex.sets}</span>`:''}
-          <button onclick="event.stopPropagation();reorderExercise(${exIdx},-1)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" ${exIdx===0?'disabled style="opacity:0.2;background:none;border:none;cursor:default;font-size:13px;padding:0 2px"':''}>↑</button>
-          <button onclick="event.stopPropagation();reorderExercise(${exIdx},1)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" ${exIdx===d.exercises.length-1?'disabled style="opacity:0.2;background:none;border:none;cursor:default;font-size:13px;padding:0 2px"':''}>↓</button>
+          <button onclick="event.stopPropagation();reorderExercise(${exIdx},-1)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" ${(exIdx===0||ex.ssGroup)?'disabled style="opacity:0.2;background:none;border:none;cursor:default;font-size:13px;padding:0 2px"':''}>↑</button>
+          <button onclick="event.stopPropagation();reorderExercise(${exIdx},1)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" ${(exIdx===d.exercises.length-1||ex.ssGroup)?'disabled style="opacity:0.2;background:none;border:none;cursor:default;font-size:13px;padding:0 2px"':''}>↓</button>
           <div class="exercise-chevron">▾</div>
         </div>
       </div>
@@ -2048,10 +2056,9 @@ s.done = !s.done;
       const wsList = card.querySelectorAll('.weight-suggestion');
       wsList.forEach(function(ws){ ws.remove(); });
       const addSetBtn = card.querySelector('.add-set-btn');
-      const target2 = getProgressionTarget(ex2.name, ex2);
       const doneCount2 = allSets.filter(function(s){ return s.done; }).length;
       const newWsHtml = doneCount2 > 0
-        ? (!target2 ? buildWeightSuggestion(ex2.name, ex2, allSets) : buildWeightSuggestionUpgradeOnly(ex2.name, ex2, allSets))
+        ? buildWeightSuggestionUpgradeOnly(ex2.name, ex2, allSets)
         : '';
       if (newWsHtml && addSetBtn) {
         const tmp2 = document.createElement('div');
@@ -2083,8 +2090,8 @@ s.done = !s.done;
     }
   }
 
-  // Re-render completo solo cuando termina el ejercicio
-  if (allDone) {
+  // Re-render completo solo cuando termina el ejercicio o inicia la sesión
+  if (allDone || !state[TODAY].trainingStarted) {
     renderTraining();
     renderHome();
     populateExSelect();
@@ -2139,53 +2146,14 @@ s.done = !s.done;
       }
     }
   }
-
-
-  // Re-render completo solo cuando termina el ejercicio o inicia la sesión
-  if (allDone || !state[TODAY].trainingStarted) {
-    renderTraining();
-    renderHome();
-    populateExSelect();
-    const refreshedCard = document.getElementById('excard-' + exIdx);
-    if (refreshedCard) refreshedCard.classList.add('open');
-  } else {
-    // Actualización parcial de progreso global
-    const d = getConfigTraining();
-    if (d) {
-      const savedSets = state[TODAY]['trainSets_'+day] || {};
-      const prog = _calcExProgress(savedSets, d.exercises);
-      const progEl = document.getElementById('trainingProgressWrap');
-      if (progEl) {
-        progEl.style.display = 'block';
-        const pct = prog.total > 0 ? Math.round(prog.done / prog.total * 100) : 0;
-        const progBar = document.getElementById('trainingProgressBar');
-        const progLbl = document.getElementById('trainingProgressLabel');
-        if (progBar) { progBar.style.width = pct + '%'; progBar.style.background = pct === 100 ? 'var(--green)' : 'var(--accent)'; }
-        if (progLbl) progLbl.textContent = prog.done + ' de ' + prog.total + ' ejercicios completos';
-      }
-    }
-  }
-
-  if (s.done && !allDone && ex) {
-    if (ex.ssGroup && ex.ssPart === 'a') {
-      startSSTimer(ex, allSets, sIdx);
-    } else if (!ex.ssGroup) {
-      startRestTimer(ex, allSets, sIdx);
-    }
-  }
-if (allDone) {
-    if (ex && checkIfPR(ex.name, allSets)) {
-      showToast('🏆 ¡NUEVO PR en ' + ex.name + '!');
-    } else {
-      showToast('✓ Ejercicio completado');
-    }
-  }
 }
 function reorderExercise(exIdx, dir) {
   const day = state[TODAY].trainDay;
   const d = getConfigTraining();
   if (!d) return;
   const exercises = state.config.training[day - 1].exercises;
+  // No reordenar ejercicios de una superserie desde la vista en vivo — separarlos rompe el agrupamiento visual del timer
+  if (exercises[exIdx] && exercises[exIdx].ssGroup) return;
   const newIdx = exIdx + dir;
   if (newIdx < 0 || newIdx >= exercises.length) return;
 

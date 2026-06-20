@@ -542,6 +542,19 @@ function calcRestTime(ex, completedSets, setIdx) {
  *   isolation + isolation → 45–60s rest
  */
 function calcSSRestTime(exA, exB, setIdx) {
+  // Descanso configurado a mano por el usuario en el editor: el ciclo completo
+  // A→(hacé B)→(descanso)→A de nuevo dura exactamente lo que pidió.
+  if (typeof exA.ssRestSec === 'number' && isFinite(exA.ssRestSec) && exA.ssRestSec > 0) {
+    const bDurationManual = estimateSetDuration(exB);
+    const restAfterBManual = Math.max(0, exA.ssRestSec - bDurationManual);
+    return {
+      total: exA.ssRestSec,
+      restAfterB: restAfterBManual,
+      bDuration: bDurationManual,
+      label: `Descanso configurado — ~${bDurationManual}s ${exB ? exB.name : 'ej B'} + ${restAfterBManual}s descanso`
+    };
+  }
+
   const typeA = classifyExercise(exA);
   const typeB = exB ? classifyExercise(exB) : 'push_isolation';
   const repsA = parseRepRange(String(exA.reps || ''));

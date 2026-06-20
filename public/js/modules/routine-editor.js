@@ -35,23 +35,106 @@ function _reRenderDayOnly() {
   if (!d) return;
   var nameWrap = document.getElementById('reDayNameWrap');
   if (nameWrap) nameWrap.innerHTML = '<input class="inp" placeholder="Nombre del día" value="' + (d.name||'') + '" oninput="_reDays[_reCurrentDay].name=this.value;var t=document.getElementById(\'reModalDayName\');if(t)t.textContent=this.value" style="margin-bottom:0">';
-  var exHtml = '';
-  (d.exercises||[]).forEach(function(ex, i) {
-    exHtml += '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
-      +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].name=this.value">'
-+'<input class="inp" style="width:44px;margin-bottom:0;font-size:15px;font-weight:700;text-align:center;padding:8px 4px;font-family:DM Sans,sans-serif" placeholder="4" type="text" inputmode="numeric" value="'+(ex.sets||3)+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value.replace(/[^0-9]/g,\'\')">'      +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||"8-12")+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
-      +'<button onclick="_reDays[_reCurrentDay].exercises.splice('+i+',1);_reRenderDayOnly()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>'
-      +'</div>';
-  });
-  if (!d.exercises || d.exercises.length===0) exHtml = '<div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">Sin ejercicios. Agregá uno ↓</div>';
+  _reBuildExerciseListHtml();
+}
+
+// ─── LISTA DE EJERCICIOS (con soporte de superserie) ──────────────
+// Recorre _reDays[_reCurrentDay].exercises y escribe #reExList directamente.
+// Los ejercicios con ssGroup se agrupan en un bloque visual A+B con un
+// único campo de descanso compartido (se guarda en la entrada 'a').
+function _reBuildExerciseListHtml() {
+  var d = _reDays[_reCurrentDay];
+  var exercises = (d && d.exercises) || [];
   var exList = document.getElementById('reExList');
-  if (exList) exList.innerHTML = exHtml;
+  if (!exList) return;
+  if (!exercises.length) {
+    exList.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">Sin ejercicios. Agregá uno ↓</div>';
+    return;
+  }
+  var html = '';
+  var renderedGroups = {};
+  exercises.forEach(function(ex, i) {
+    if (ex.ssGroup) {
+      if (renderedGroups[ex.ssGroup]) return;
+      renderedGroups[ex.ssGroup] = true;
+      var aIdx = exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'a'; });
+      var bIdx = exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'b'; });
+      html += _reSupersetBlockHtml(aIdx, bIdx);
+      return;
+    }
+    html += _reExerciseRowHtml(i);
+  });
+  exList.innerHTML = html;
+}
+
+function _reExerciseRowHtml(i) {
+  var ex = _reDays[_reCurrentDay].exercises[i];
+  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+    +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].name=this.value">'
+    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value">'
+    +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
+    +'<button onclick="_reRemoveExercise('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>'
+    +'</div>';
+}
+
+function _reSSExerciseRowHtml(i, letter) {
+  var ex = _reDays[_reCurrentDay].exercises[i];
+  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+    +'<span style="font-size:11px;font-weight:700;color:var(--accent);width:14px;flex-shrink:0">'+letter+'</span>'
+    +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].name=this.value">'
+    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value">'
+    +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
+    +'</div>';
+}
+
+function _reSupersetBlockHtml(aIdx, bIdx) {
+  var exA = _reDays[_reCurrentDay].exercises[aIdx];
+  var restMin = (typeof exA.ssRestSec === 'number' && exA.ssRestSec > 0) ? (exA.ssRestSec/60) : '';
+  return '<div style="border:1.5px solid var(--accent);border-radius:10px;padding:8px;margin-bottom:8px;background:rgba(77,138,255,0.05)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    +   '<span style="font-size:11px;font-weight:700;color:var(--accent)">⚡ Superserie</span>'
+    +   '<button onclick="_reRemoveSuperset(\''+exA.ssGroup+'\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px">✕ Quitar superserie</button>'
+    + '</div>'
+    + _reSSExerciseRowHtml(aIdx, 'A')
+    + _reSSExerciseRowHtml(bIdx, 'B')
+    + '<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'
+    +   '<span style="font-size:11px;color:var(--text3)">⏱ Descanso total del ciclo:</span>'
+    +   '<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center" type="number" min="0" step="0.5" placeholder="ej: 3" value="'+restMin+'" oninput="_reSetSSRest(\''+exA.ssGroup+'\',this.value)">'
+    +   '<span style="font-size:11px;color:var(--text3)">min</span>'
+    + '</div>'
+    + '</div>';
+}
+
+function _reSetSSRest(ssGroup, val) {
+  var min = parseFloat(val);
+  var secs = (isNaN(min) || min <= 0) ? null : Math.round(min*60);
+  _reDays[_reCurrentDay].exercises.forEach(function(ex) {
+    if (ex.ssGroup === ssGroup && ex.ssPart === 'a') ex.ssRestSec = secs;
+  });
+}
+
+function _reRemoveExercise(i) {
+  _reDays[_reCurrentDay].exercises.splice(i, 1);
+  _reBuildExerciseListHtml();
+}
+
+function _reRemoveSuperset(ssGroup) {
+  _reDays[_reCurrentDay].exercises = _reDays[_reCurrentDay].exercises.filter(function(e) { return e.ssGroup !== ssGroup; });
+  _reBuildExerciseListHtml();
 }
 
 function reAddExercise() {
   if (!_reDays[_reCurrentDay].exercises) _reDays[_reCurrentDay].exercises = [];
   _reDays[_reCurrentDay].exercises.push({name:'',sets:3,reps:'8-12'});
-  _reRenderDayOnly();
+  _reBuildExerciseListHtml();
+}
+
+function reAddSuperset() {
+  if (!_reDays[_reCurrentDay].exercises) _reDays[_reCurrentDay].exercises = [];
+  var ssGroup = 'ss_' + Date.now();
+  _reDays[_reCurrentDay].exercises.push({name:'', sets:3, reps:'8-12', ssGroup:ssGroup, ssPart:'a', ssRestSec:null});
+  _reDays[_reCurrentDay].exercises.push({name:'', sets:3, reps:'8-12', ssGroup:ssGroup, ssPart:'b'});
+  _reBuildExerciseListHtml();
 }
 
 function _reRenderDays() {
@@ -86,15 +169,7 @@ function _reRenderDays() {
   } else {
     document.getElementById('reDayNameWrap').innerHTML = toggleHtml
       + '<input class="inp" placeholder="Nombre del día (ej: Push, Piernas…)" value="'+d.name+'" oninput="_reDays[_reCurrentDay].name=this.value;_reRenderDays()" style="margin-bottom:0">';
-    var exHtml = '';
-    (d.exercises||[]).forEach(function(ex, i) {
-      exHtml += '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
-        +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].name=this.value">'
-+'<input class="inp" style="width:44px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px;font-family:var(--font-sans,DM Sans,sans-serif)" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value">'+'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||"8-12")+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'        +'<button onclick="_reDays[_reCurrentDay].exercises.splice('+i+',1);_reRenderDays()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>'
-        +'</div>';
-    });
-    if (!d.exercises || d.exercises.length===0) exHtml = '<div style="color:var(--text3);font-size:12px;padding:12px 0;text-align:center">Sin ejercicios. Agregá uno ↓</div>';
-    document.getElementById('reExList').innerHTML = exHtml;
+    _reBuildExerciseListHtml();
   }
 }
 
@@ -184,12 +259,6 @@ function _reAddCustomSportExtra(key) {
   if (window._reSportExtras[key].indexOf(name) === -1) window._reSportExtras[key].push(name);
   inp.value = '';
   _reRenderCycle();
-}
-
-function reAddExercise() {
-  if (!_reDays[_reCurrentDay].exercises) _reDays[_reCurrentDay].exercises = [];
-  _reDays[_reCurrentDay].exercises.push({name:'',sets:3,reps:'8-12'});
-  _reRenderDays();
 }
 
 function reAddDay() {
