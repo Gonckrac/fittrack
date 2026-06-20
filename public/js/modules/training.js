@@ -809,7 +809,10 @@ function _showNewDayWizardForDow(dow) {
     +   '<input id="ndwName" class="inp" placeholder="Nombre del día (ej: Push, Piernas…)" style="margin-bottom:12px">'
     +   '<div style="font-size:11px;color:var(--text3);margin-bottom:8px;font-weight:600">EJERCICIOS</div>'
     +   '<div id="ndwExList"></div>'
-    +   '<button onclick="_ndwAddEx()" style="width:100%;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer;margin-top:4px">+ Agregar ejercicio</button>'
+    +   '<div style="display:flex;gap:6px;margin-top:4px">'
+    +     '<button onclick="_ndwAddEx()" style="flex:1;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer">+ Ejercicio</button>'
+    +     '<button onclick="_ndwAddSuperset()" style="flex:1;padding:8px;border-radius:8px;border:1px dashed var(--green);background:none;color:var(--green);font-size:12px;cursor:pointer">⚡ + Superserie</button>'
+    +   '</div>'
     +   '<button onclick="_ndwConfirm(\'' + dow + '\')" style="width:100%;padding:10px;border-radius:10px;background:var(--accent);color:#fff;font-weight:700;font-size:13px;border:none;cursor:pointer;margin-top:14px">✓ Crear y asignar</button>'
     + '</div>';
   document.body.appendChild(overlay);
@@ -823,23 +826,107 @@ function _ndwAddEx() {
   _ndwRenderExList();
 }
 
+function _ndwAddSuperset() {
+  if (!window._ndwExercises) window._ndwExercises = [];
+  var ssGroup = 'ss_' + Date.now();
+  window._ndwExercises.push({name:'', sets:3, reps:'8-12', ssGroup:ssGroup, ssPart:'a', ssRestSec:null});
+  window._ndwExercises.push({name:'', sets:3, reps:'8-12', ssGroup:ssGroup, ssPart:'b'});
+  _ndwRenderExList();
+}
+
+// Misma lógica de agrupamiento que _reBuildExerciseListHtml() (routine-editor.js),
+// adaptada a window._ndwExercises / #ndwExList — este es el wizard real que se
+// abre al crear un día nuevo desde "Editar semana → Agregar rutina gym".
 function _ndwRenderExList() {
-  var html = (window._ndwExercises||[]).map(function(ex, i){
-return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
-      +'<input class="inp" style="flex:1;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="window._ndwExercises['+i+'].name=this.value">'
-      +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
-      +'<span style="font-size:9px;color:var(--text3)">Series</span>'
-      +'<input class="inp" style="width:46px;margin-bottom:0;font-size:12px;text-align:center;padding:4px" type="number" min="1" value="'+(ex.sets||3)+'" oninput="window._ndwExercises['+i+'].sets=+this.value">'
-      +'</div>'
-      +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
-      +'<span style="font-size:9px;color:var(--text3)">Reps</span>'
-      +'<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center;padding:4px" value="'+(ex.reps||"8-12")+'" oninput="window._ndwExercises['+i+'].reps=this.value">'
-      +'</div>'
-      +'<button onclick="window._ndwExercises.splice('+i+',1);_ndwRenderExList()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0;margin-top:10px">✕</button>'
-      +'</div>';
-  }).join('');
+  var exercises = window._ndwExercises || [];
   var el = document.getElementById('ndwExList');
-  if (el) el.innerHTML = html || '<div style="color:var(--text3);font-size:12px;padding:8px 0;text-align:center">Sin ejercicios todavía</div>';
+  if (!el) return;
+  if (!exercises.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0;text-align:center">Sin ejercicios todavía</div>';
+    return;
+  }
+  var html = '';
+  var renderedGroups = {};
+  exercises.forEach(function(ex, i) {
+    if (ex.ssGroup) {
+      if (renderedGroups[ex.ssGroup]) return;
+      renderedGroups[ex.ssGroup] = true;
+      var aIdx = exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'a'; });
+      var bIdx = exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'b'; });
+      html += _ndwSupersetBlockHtml(aIdx, bIdx);
+      return;
+    }
+    html += _ndwExerciseRowHtml(i);
+  });
+  el.innerHTML = html;
+}
+
+function _ndwExerciseRowHtml(i) {
+  var ex = window._ndwExercises[i];
+  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+    +'<input class="inp" style="flex:1;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="window._ndwExercises['+i+'].name=this.value">'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<span style="font-size:9px;color:var(--text3)">Series</span>'
+    +'<input class="inp" style="width:46px;margin-bottom:0;font-size:12px;text-align:center;padding:4px" type="number" min="1" value="'+(ex.sets||3)+'" oninput="window._ndwExercises['+i+'].sets=+this.value">'
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<span style="font-size:9px;color:var(--text3)">Reps</span>'
+    +'<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center;padding:4px" value="'+(ex.reps||"8-12")+'" oninput="window._ndwExercises['+i+'].reps=this.value">'
+    +'</div>'
+    +'<button onclick="_ndwRemoveExercise('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0;margin-top:10px">✕</button>'
+    +'</div>';
+}
+
+function _ndwSSExerciseRowHtml(i, letter) {
+  var ex = window._ndwExercises[i];
+  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+    +'<span style="font-size:11px;font-weight:700;color:var(--accent);width:14px;flex-shrink:0">'+letter+'</span>'
+    +'<input class="inp" style="flex:1;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="window._ndwExercises['+i+'].name=this.value">'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<span style="font-size:9px;color:var(--text3)">Series</span>'
+    +'<input class="inp" style="width:46px;margin-bottom:0;font-size:12px;text-align:center;padding:4px" type="number" min="1" value="'+(ex.sets||3)+'" oninput="window._ndwExercises['+i+'].sets=+this.value">'
+    +'</div>'
+    +'<div style="display:flex;flex-direction:column;align-items:center;gap:2px">'
+    +'<span style="font-size:9px;color:var(--text3)">Reps</span>'
+    +'<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center;padding:4px" value="'+(ex.reps||"8-12")+'" oninput="window._ndwExercises['+i+'].reps=this.value">'
+    +'</div>'
+    +'</div>';
+}
+
+function _ndwSupersetBlockHtml(aIdx, bIdx) {
+  var exA = window._ndwExercises[aIdx];
+  var restMin = (typeof exA.ssRestSec === 'number' && exA.ssRestSec > 0) ? (exA.ssRestSec/60) : '';
+  return '<div style="border:1.5px solid var(--accent);border-radius:10px;padding:8px;margin-bottom:8px;background:rgba(77,138,255,0.05)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    +   '<span style="font-size:11px;font-weight:700;color:var(--accent)">⚡ Superserie</span>'
+    +   '<button onclick="_ndwRemoveSuperset(\''+exA.ssGroup+'\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px">✕ Quitar superserie</button>'
+    + '</div>'
+    + _ndwSSExerciseRowHtml(aIdx, 'A')
+    + _ndwSSExerciseRowHtml(bIdx, 'B')
+    + '<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'
+    +   '<span style="font-size:11px;color:var(--text3)">⏱ Descanso total del ciclo:</span>'
+    +   '<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center" type="number" min="0" step="0.5" placeholder="ej: 3" value="'+restMin+'" oninput="_ndwSetSSRest(\''+exA.ssGroup+'\',this.value)">'
+    +   '<span style="font-size:11px;color:var(--text3)">min</span>'
+    + '</div>'
+    + '</div>';
+}
+
+function _ndwSetSSRest(ssGroup, val) {
+  var min = parseFloat(val);
+  var secs = (isNaN(min) || min <= 0) ? null : Math.round(min*60);
+  (window._ndwExercises || []).forEach(function(ex) {
+    if (ex.ssGroup === ssGroup && ex.ssPart === 'a') ex.ssRestSec = secs;
+  });
+}
+
+function _ndwRemoveExercise(i) {
+  window._ndwExercises.splice(i, 1);
+  _ndwRenderExList();
+}
+
+function _ndwRemoveSuperset(ssGroup) {
+  window._ndwExercises = (window._ndwExercises || []).filter(function(e) { return e.ssGroup !== ssGroup; });
+  _ndwRenderExList();
 }
 
 function _ndwConfirm(dow) {

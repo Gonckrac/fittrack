@@ -284,20 +284,67 @@ function _renderExBuilderUI() {
     if (idx === -1) return;
     var d = _wizardDays[idx];
 
+    function _exRow(ei) {
+      var ex = d.exercises[ei];
+      return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+        + '<input class="inp" style="flex:2;margin-bottom:0;font-size:13px" placeholder="Ejercicio" value="' + (ex.name || '') + '" '
+        + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].name=this.value">'
+        + '<input class="inp" style="width:46px;margin-bottom:0;font-size:13px;text-align:center" type="number" min="1" placeholder="4" value="' + (ex.sets || 3) + '" '
+        + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].sets=+this.value">'
+        + '<input class="inp" style="width:62px;margin-bottom:0;font-size:13px;text-align:center" placeholder="8-12" value="' + (ex.reps || '8-12') + '" '
+        + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].reps=this.value">'
+        + '<button onclick="_manualDelEx(' + idx + ',' + ei + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:17px;flex-shrink:0;padding:0">✕</button>'
+        + '</div>';
+    }
+
+    function _ssExRow(ei, letter) {
+      var ex = d.exercises[ei];
+      return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+        + '<span style="font-size:11px;font-weight:700;color:var(--accent);width:14px;flex-shrink:0">' + letter + '</span>'
+        + '<input class="inp" style="flex:2;margin-bottom:0;font-size:13px" placeholder="Ejercicio" value="' + (ex.name || '') + '" '
+        + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].name=this.value">'
+        + '<input class="inp" style="width:46px;margin-bottom:0;font-size:13px;text-align:center" type="number" min="1" placeholder="4" value="' + (ex.sets || 3) + '" '
+        + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].sets=+this.value">'
+        + '<input class="inp" style="width:62px;margin-bottom:0;font-size:13px;text-align:center" placeholder="8-12" value="' + (ex.reps || '8-12') + '" '
+        + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].reps=this.value">'
+        + '</div>';
+    }
+
+    function _ssBlockRow(aIdx, bIdx) {
+      var exA = d.exercises[aIdx];
+      var restMin = (typeof exA.ssRestSec === 'number' && exA.ssRestSec > 0) ? (exA.ssRestSec / 60) : '';
+      return '<div style="border:1.5px solid var(--accent);border-radius:10px;padding:8px;margin-bottom:8px;background:rgba(77,138,255,0.05)">'
+        + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+        +   '<span style="font-size:11px;font-weight:700;color:var(--accent)">⚡ Superserie</span>'
+        +   '<button onclick="_manualRemoveSuperset(' + idx + ',\'' + exA.ssGroup + '\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px">✕ Quitar superserie</button>'
+        + '</div>'
+        + _ssExRow(aIdx, 'A')
+        + _ssExRow(bIdx, 'B')
+        + '<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'
+        +   '<span style="font-size:11px;color:var(--text3)">⏱ Descanso total del ciclo:</span>'
+        +   '<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center" type="number" min="0" step="0.5" placeholder="ej: 3" value="' + restMin + '" oninput="_manualSetSSRest(' + idx + ',\'' + exA.ssGroup + '\',this.value)">'
+        +   '<span style="font-size:11px;color:var(--text3)">min</span>'
+        + '</div>'
+        + '</div>';
+    }
+
     function _exRows() {
       if (!d.exercises || d.exercises.length === 0)
         return '<div style="color:var(--text3);font-size:12px;text-align:center;padding:12px 0">Sin ejercicios. Agregá uno abajo.</div>';
-      return d.exercises.map(function(ex, ei) {
-        return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
-          + '<input class="inp" style="flex:2;margin-bottom:0;font-size:13px" placeholder="Ejercicio" value="' + (ex.name || '') + '" '
-          + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].name=this.value">'
-          + '<input class="inp" style="width:46px;margin-bottom:0;font-size:13px;text-align:center" type="number" min="1" placeholder="4" value="' + (ex.sets || 3) + '" '
-          + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].sets=+this.value">'
-          + '<input class="inp" style="width:62px;margin-bottom:0;font-size:13px;text-align:center" placeholder="8-12" value="' + (ex.reps || '8-12') + '" '
-          + 'oninput="_wizardDays[' + idx + '].exercises[' + ei + '].reps=this.value">'
-          + '<button onclick="_manualDelEx(' + idx + ',' + ei + ')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:17px;flex-shrink:0;padding:0">✕</button>'
-          + '</div>';
-      }).join('');
+      var html = '';
+      var renderedGroups = {};
+      d.exercises.forEach(function(ex, ei) {
+        if (ex.ssGroup) {
+          if (renderedGroups[ex.ssGroup]) return;
+          renderedGroups[ex.ssGroup] = true;
+          var aIdx = d.exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'a'; });
+          var bIdx = d.exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'b'; });
+          html += _ssBlockRow(aIdx, bIdx);
+          return;
+        }
+        html += _exRow(ei);
+      });
+      return html;
     }
 
     function _sheetHtml() {
@@ -315,7 +362,10 @@ function _renderExBuilderUI() {
           + (d.exercises && d.exercises.length ? '<span style="font-size:10px;color:var(--text3)">Nombre · Series · Reps</span>' : '')
         + '</div>'
         + '<div id="sheetExList">' + _exRows() + '</div>'
-        + '<button onclick="_manualAddEx(\'' + dow + '\')" style="width:100%;padding:9px;border-radius:10px;border:1.5px dashed var(--accent);background:none;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer;margin-top:4px">+ Añadir ejercicio</button>'
+        + '<div style="display:flex;gap:6px;margin-top:4px">'
+        +   '<button onclick="_manualAddEx(\'' + dow + '\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px dashed var(--accent);background:none;color:var(--accent);font-size:13px;font-weight:700;cursor:pointer">+ Ejercicio</button>'
+        +   '<button onclick="_manualAddSuperset(\'' + dow + '\')" style="flex:1;padding:9px;border-radius:10px;border:1.5px dashed var(--green);background:none;color:var(--green);font-size:13px;font-weight:700;cursor:pointer">⚡ + Superserie</button>'
+        + '</div>'
         + '</div>';
     }
 
@@ -329,6 +379,32 @@ function _renderExBuilderUI() {
     if (!_wizardDays[idx].exercises) _wizardDays[idx].exercises = [];
     _wizardDays[idx].exercises.push({ name: '', sets: 3, reps: '8-12' });
     _manualOpenDaySheet(dow);
+    _renderGrid();
+  };
+
+  window._manualAddSuperset = function(dow) {
+    var idx = _gymDayIdx(dow);
+    if (idx === -1) return;
+    if (!_wizardDays[idx].exercises) _wizardDays[idx].exercises = [];
+    var ssGroup = 'ss_' + Date.now();
+    _wizardDays[idx].exercises.push({ name: '', sets: 3, reps: '8-12', ssGroup: ssGroup, ssPart: 'a', ssRestSec: null });
+    _wizardDays[idx].exercises.push({ name: '', sets: 3, reps: '8-12', ssGroup: ssGroup, ssPart: 'b' });
+    _manualOpenDaySheet(dow);
+    _renderGrid();
+  };
+
+  window._manualSetSSRest = function(dayIdx, ssGroup, val) {
+    var min = parseFloat(val);
+    var secs = (isNaN(min) || min <= 0) ? null : Math.round(min * 60);
+    (_wizardDays[dayIdx].exercises || []).forEach(function(ex) {
+      if (ex.ssGroup === ssGroup && ex.ssPart === 'a') ex.ssRestSec = secs;
+    });
+  };
+
+  window._manualRemoveSuperset = function(dayIdx, ssGroup) {
+    var dow2 = _wizardDays[dayIdx]._dow;
+    _wizardDays[dayIdx].exercises = _wizardDays[dayIdx].exercises.filter(function(e) { return e.ssGroup !== ssGroup; });
+    _manualOpenDaySheet(dow2);
     _renderGrid();
   };
 

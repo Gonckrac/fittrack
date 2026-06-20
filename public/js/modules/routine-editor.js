@@ -287,7 +287,10 @@ function _showNewDayWizard() {
     +   '<div id="nwGymBody">'
     +     '<input id="nwName" class="inp" placeholder="Nombre del día (ej: Push, Piernas…)" style="margin-bottom:10px">'
     +     '<div id="nwExList"></div>'
-    +     '<button onclick="_nwAddEx()" style="width:100%;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer;margin-top:4px">+ Ejercicio</button>'
+    +     '<div style="display:flex;gap:6px;margin-top:4px">'
+    +       '<button onclick="_nwAddEx()" style="flex:1;padding:8px;border-radius:8px;border:1px dashed var(--accent);background:none;color:var(--accent);font-size:12px;cursor:pointer">+ Ejercicio</button>'
+    +       '<button onclick="_nwAddSuperset()" style="flex:1;padding:8px;border-radius:8px;border:1px dashed var(--green);background:none;color:var(--green);font-size:12px;cursor:pointer">⚡ + Superserie</button>'
+    +     '</div>'
     +   '</div>'
     +   '<div id="nwSportBody" style="display:none">'
     +     '<input id="nwSportName" class="inp" placeholder="Nombre del deporte (ej: Tenis, Fútbol…)" style="margin-bottom:8px">'
@@ -339,17 +342,94 @@ function _nwAddEx() {
   _nwRenderExList();
 }
 
+function _nwAddSuperset() {
+  if (!window._nwExercises) window._nwExercises = [];
+  var ssGroup = 'ss_' + Date.now();
+  window._nwExercises.push({name:'', sets:3, reps:'8-12', ssGroup:ssGroup, ssPart:'a', ssRestSec:null});
+  window._nwExercises.push({name:'', sets:3, reps:'8-12', ssGroup:ssGroup, ssPart:'b'});
+  _nwRenderExList();
+}
+
+// Misma lógica de agrupamiento que _reBuildExerciseListHtml(), pero sobre
+// window._nwExercises (lista del wizard "+ Nuevo día") en vez de _reDays.
 function _nwRenderExList() {
-  var html = (window._nwExercises||[]).map(function(ex, i){
-    return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
-      +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="window._nwExercises['+i+'].name=this.value">'
-      +'<input class="inp" style="width:44px;margin-bottom:0;font-size:12px;text-align:center" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="window._nwExercises['+i+'].sets=+this.value">'
-      +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="window._nwExercises['+i+'].reps=this.value">'
-      +'<button onclick="window._nwExercises.splice('+i+',1);_nwRenderExList()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>'
-      +'</div>';
-  }).join('');
+  var exercises = window._nwExercises || [];
   var el = document.getElementById('nwExList');
-  if (el) el.innerHTML = html || '<div style="color:var(--text3);font-size:12px;padding:8px 0;text-align:center">Sin ejercicios. Agregá uno ↑</div>';
+  if (!el) return;
+  if (!exercises.length) {
+    el.innerHTML = '<div style="color:var(--text3);font-size:12px;padding:8px 0;text-align:center">Sin ejercicios. Agregá uno ↑</div>';
+    return;
+  }
+  var html = '';
+  var renderedGroups = {};
+  exercises.forEach(function(ex, i) {
+    if (ex.ssGroup) {
+      if (renderedGroups[ex.ssGroup]) return;
+      renderedGroups[ex.ssGroup] = true;
+      var aIdx = exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'a'; });
+      var bIdx = exercises.findIndex(function(e) { return e.ssGroup === ex.ssGroup && e.ssPart === 'b'; });
+      html += _nwSupersetBlockHtml(aIdx, bIdx);
+      return;
+    }
+    html += _nwExerciseRowHtml(i);
+  });
+  el.innerHTML = html;
+}
+
+function _nwExerciseRowHtml(i) {
+  var ex = window._nwExercises[i];
+  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+    +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="window._nwExercises['+i+'].name=this.value">'
+    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:12px;text-align:center" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="window._nwExercises['+i+'].sets=+this.value">'
+    +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="window._nwExercises['+i+'].reps=this.value">'
+    +'<button onclick="_nwRemoveExercise('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>'
+    +'</div>';
+}
+
+function _nwSSExerciseRowHtml(i, letter) {
+  var ex = window._nwExercises[i];
+  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+    +'<span style="font-size:11px;font-weight:700;color:var(--accent);width:14px;flex-shrink:0">'+letter+'</span>'
+    +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="window._nwExercises['+i+'].name=this.value">'
+    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:12px;text-align:center" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="window._nwExercises['+i+'].sets=+this.value">'
+    +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="window._nwExercises['+i+'].reps=this.value">'
+    +'</div>';
+}
+
+function _nwSupersetBlockHtml(aIdx, bIdx) {
+  var exA = window._nwExercises[aIdx];
+  var restMin = (typeof exA.ssRestSec === 'number' && exA.ssRestSec > 0) ? (exA.ssRestSec/60) : '';
+  return '<div style="border:1.5px solid var(--accent);border-radius:10px;padding:8px;margin-bottom:8px;background:rgba(77,138,255,0.05)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    +   '<span style="font-size:11px;font-weight:700;color:var(--accent)">⚡ Superserie</span>'
+    +   '<button onclick="_nwRemoveSuperset(\''+exA.ssGroup+'\')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:11px">✕ Quitar superserie</button>'
+    + '</div>'
+    + _nwSSExerciseRowHtml(aIdx, 'A')
+    + _nwSSExerciseRowHtml(bIdx, 'B')
+    + '<div style="display:flex;align-items:center;gap:6px;margin-top:2px">'
+    +   '<span style="font-size:11px;color:var(--text3)">⏱ Descanso total del ciclo:</span>'
+    +   '<input class="inp" style="width:56px;margin-bottom:0;font-size:12px;text-align:center" type="number" min="0" step="0.5" placeholder="ej: 3" value="'+restMin+'" oninput="_nwSetSSRest(\''+exA.ssGroup+'\',this.value)">'
+    +   '<span style="font-size:11px;color:var(--text3)">min</span>'
+    + '</div>'
+    + '</div>';
+}
+
+function _nwSetSSRest(ssGroup, val) {
+  var min = parseFloat(val);
+  var secs = (isNaN(min) || min <= 0) ? null : Math.round(min*60);
+  (window._nwExercises || []).forEach(function(ex) {
+    if (ex.ssGroup === ssGroup && ex.ssPart === 'a') ex.ssRestSec = secs;
+  });
+}
+
+function _nwRemoveExercise(i) {
+  window._nwExercises.splice(i, 1);
+  _nwRenderExList();
+}
+
+function _nwRemoveSuperset(ssGroup) {
+  window._nwExercises = (window._nwExercises || []).filter(function(e) { return e.ssGroup !== ssGroup; });
+  _nwRenderExList();
 }
 
 function _nwConfirm() {
