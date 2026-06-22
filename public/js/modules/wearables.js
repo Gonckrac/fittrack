@@ -229,12 +229,19 @@ async function syncOura() {
     sl.rhr        = data.sleep?.resting_hr       || sl.rhr;
     // Guardar pasos de Oura si vienen
     if (data.activity?.steps) state[TODAY].steps = data.activity.steps;
+    state[TODAY].lastSync = new Date().toLocaleTimeString('es-AR', {hour:'2-digit', minute:'2-digit'});
     saveState(state);
 if (typeof renderSleep === 'function') renderSleep();
     if (typeof renderKcal  === 'function') renderKcal();
     if (typeof renderHome  === 'function') renderHome();  // ← agregar
+    var st = document.getElementById('syncStatus');
+    var ls = document.getElementById('lastSync');
+    if (st) { st.textContent = '● Conectado'; st.style.color = 'var(--green)'; }
+    if (ls) ls.textContent = 'Última sync: ' + state[TODAY].lastSync;
     showToast('✓ Oura sincronizado');
   } catch(e) {
+    var stErr = document.getElementById('syncStatus');
+    if (stErr) { stErr.textContent = '● Error de sincronización'; stErr.style.color = 'var(--red)'; }
     showToast('⚠ Error al sincronizar: ' + e.message);
   }
 }

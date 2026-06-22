@@ -7,6 +7,7 @@ async function bootstrap() {
  if (!state.metricsHistory) state.metricsHistory = [];
   if (!state.kcalHistory) state.kcalHistory = [];
   if (!state.exerciseHistory) state.exerciseHistory = {};
+  window._airCustomEmojis = (state.config && state.config.customSportEmojis) || {};
 if (!state.notifications) state.notifications = {
     meals:    { enabled: true,  mode: 'auto', times: ['08:00','13:00','20:00'] },
     training: { enabled: true,  days: [1,2,3,4,5], hour: 8 },
@@ -151,7 +152,6 @@ if (window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App
         if (error) {
           showToast('⚠ Error al conectar: ' + error);
         } else if (code && provider) {
-          alert('DEBUG: code=' + code.substring(0,10) + ' provider=' + provider);
           if (window.Capacitor.Plugins.Browser) {
             window.Capacitor.Plugins.Browser.close().catch(function(){});
           }

@@ -1674,15 +1674,5 @@ document.addEventListener('DOMContentLoaded', function() {
 // PATCH 3 desactivado — lógica movida a setup.js _renderExBuilderUI
 });
 </script>
-<!-- Auto-sync Oura al iniciar -->
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-  setTimeout(function() {
-    if (typeof isWearableConnected === 'function' && isWearableConnected('oura')) {
-      if (typeof syncOura === 'function') syncOura();
-    }
-  }, 1200);
-});
-</script>
 </body>
 </html>

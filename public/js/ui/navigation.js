@@ -510,7 +510,7 @@ div.className = 'supp-item' + (isDone ? ' supp-done' : '');
       '</div>' +
       '<div class="supp-info" style="pointer-events:none"><div class="supp-name">' + s.name + '</div>' +
       (s.dose ? '<div class="supp-dose">' + s.dose + '</div>' : '') + '</div>';
-    var group = groups[s.time] || groups.morning;
+    var group = groups[s.group] || groups.morning;
     if (group) group.appendChild(div);
   });
 
@@ -555,7 +555,7 @@ function init() {
   populateExSelect();
 renderCalendar();
   checkDeloadWeek();
-  syncOura();
+  if (typeof isWearableConnected === 'function' && isWearableConnected('oura') && typeof syncOura === 'function') syncOura();
   if (!state.wearables) state.wearables = {};
   renderWearablesCard();
   _resumeSessionTimerIfNeeded();

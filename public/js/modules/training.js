@@ -484,6 +484,9 @@ function _confirmCustomSport(dow) {
   var emoji = window._customSportEmoji || '🏅';
   if (!window._airCustomEmojis) window._airCustomEmojis = {};
   window._airCustomEmojis[name] = emoji;
+  if (!state.config) state.config = {};
+  if (!state.config.customSportEmojis) state.config.customSportEmojis = {};
+  state.config.customSportEmojis[name] = emoji;
   document.getElementById('customSportSheet') && document.getElementById('customSportSheet').remove();
   _assignSportDay(dow, name, 'sport', {});
 }
@@ -1548,7 +1551,7 @@ function _buildEditWeekHTML() {
   var training = (cfg && cfg.training) || [];
   var sportNames = (cfg && cfg.sportNames) || {};
   var extraActivities = (cfg && cfg.extraActivities) || {};
-  var sportEmojis = { Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' };
+  var sportEmojis = Object.assign({ Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' }, window._airCustomEmojis || {});
   var dowKeys  = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
   var dowNames = ['Lun','Mar','Mié','Jue','Vie','Sáb','Dom'];
 

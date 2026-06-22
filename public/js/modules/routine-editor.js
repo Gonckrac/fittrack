@@ -228,7 +228,7 @@ function _reRenderExtrasHtml(key, isMainSport) {
     ? '<div style="font-size:10px;color:var(--text3);margin-bottom:4px">Actividades del día (podés agregar varias)</div>'
     : '<div style="font-size:10px;color:var(--text3);margin-bottom:4px">+ Actividades extra (opcional)</div>';
   var chips = extras.map(function(name, i) {
-    var emoji = SE[name] || '🏅';
+    var emoji = (window._airCustomEmojis && window._airCustomEmojis[name]) || SE[name] || (typeof _getSportEmoji === 'function' ? _getSportEmoji(name) : '🏅');
     return '<span style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:rgba(77,200,120,0.12);border:1px solid rgba(77,200,120,0.35);font-size:11px;color:var(--green);margin:2px">'
       + emoji + ' ' + name
       + '<button onclick="window._reSportExtras[\''+key+'\'].splice('+i+',1);_reRenderCycle()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:12px;line-height:1;padding:0 0 0 3px">✕</button>'

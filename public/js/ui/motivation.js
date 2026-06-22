@@ -127,7 +127,7 @@ function getDynamicSupps() {
     return cfg.supps.map(function(s, i) {
       var group = s.time === 'morning' ? 'morning' : s.time === 'noon' ? 'noon' : 'night';
       var timeLabel = s.time === 'morning' ? 'Mañana' : s.time === 'noon' ? 'Mediodía' : 'Noche';
-      return { id:'cfg_supp_'+i, name:s.name, dose:s.dose, time:timeLabel, group:group };
+      return { id:s.id || ('cfg_supp_'+i), name:s.name, dose:s.dose, time:timeLabel, group:group };
     });
   }
   return [];
