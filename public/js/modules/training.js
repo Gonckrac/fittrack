@@ -1785,7 +1785,6 @@ var _sportDone = state[TODAY] && (state[TODAY]['sportDone_' + _sName] || state[T
       + (_sportDone
           ? '<div style="display:inline-flex;align-items:center;gap:8px;background:rgba(50,220,100,0.15);border:1.5px solid var(--green);border-radius:12px;padding:12px 24px;font-size:15px;font-weight:700;color:var(--green)">✓ ¡Actividad completada!</div>'
 : '<button onclick="completeSportDay(\'sport\',\'' + _sName + '\')" style="width:100%;padding:14px;background:var(--accent);border:none;border-radius:12px;color:#fff;font-size:15px;font-weight:700;cursor:pointer;margin-bottom:12px">' + _sEmoji + ' Completar ' + _sName + '</button>')
-     + '<div style="margin-top:14px"><button onclick="openKcalManual()" style="background:rgba(77,200,120,0.12);border:1px solid var(--green);border-radius:10px;padding:10px 20px;color:var(--green);font-size:13px;font-weight:700;cursor:pointer">🔥 Registrar calorías quemadas</button></div>'
       + '</div>';
     return;
   }
