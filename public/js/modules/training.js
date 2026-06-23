@@ -553,7 +553,7 @@ function _assignSportDay(dow, sportName, activityType, activityDetail) {
   if (overlayBody) _renderEditWeekInto(overlayBody);
 
   var dowLabels = { Sun:'Domingo', Mon:'Lunes', Tue:'Martes', Wed:'Miércoles', Thu:'Jueves', Fri:'Viernes', Sat:'Sábado' };
-  var emoji = { Correr:'🏃', Fútbol:'⚽', Bici:'🚴', Tenis:'🎾', Pádel:'🏓', Natación:'🏊', Caminata:'🚶', HIIT:'🔥', Pilates:'🧘', Otro:'🏅' };
+  var emoji = Object.assign({ Correr:'🏃', Fútbol:'⚽', Bici:'🚴', Tenis:'🎾', Pádel:'🏓', Natación:'🏊', Caminata:'🚶', HIIT:'🔥', Pilates:'🧘', Otro:'🏅' }, window._airCustomEmojis || {});
   showToast((emoji[sportName] || '⚽') + ' ' + (dowLabels[dow] || dow) + ' → ' + sportName);
 }
 
@@ -1251,7 +1251,7 @@ function _getPremiumTodayWorkouts() {
   var dow = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date().getDay()];
   var cycle = cfg.cycle || {};
   var training = cfg.training || [];
-  var sportEmojis = { Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' };
+  var sportEmojis = Object.assign({ Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' }, window._airCustomEmojis || {});
   var results = [];
 
   var val = cycle[dow];
@@ -1302,7 +1302,7 @@ function _getPremiumUpcoming() {
   if (!cfg) return [];
   var cycle = cfg.cycle || {};
   var training = cfg.training || [];
-  var sportEmojis = { Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' };
+  var sportEmojis = Object.assign({ Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' }, window._airCustomEmojis || {});
   var dowKeys  = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
   var dowNames = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
   var todayDow = new Date().getDay();

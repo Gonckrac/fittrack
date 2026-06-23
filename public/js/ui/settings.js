@@ -194,7 +194,7 @@ function getUserTrainingPattern() {
   if (!cfg || !cfg.cycle || !cfg.training) return {};
   var pattern = {};
   var dowKeys = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-  var sportEmojis = { Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' };
+  var sportEmojis = Object.assign({ Correr:'🏃', Bici:'🚴', Caminata:'🚶', HIIT:'🔥', Natación:'🏊', Pilates:'🧘', Fútbol:'⚽', Tenis:'🎾', Pádel:'🏓', Otro:'🏅' }, window._airCustomEmojis || {});
 
   dowKeys.forEach(function(dow) {
     var val = cfg.cycle[dow];

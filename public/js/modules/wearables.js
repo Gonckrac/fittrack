@@ -37,6 +37,43 @@ function isWearableConnected(provider) {
   return !!getWearableToken(provider);
 }
 
+// Refresca el access_token usando el refresh_token guardado — evita tener que reconectar manualmente.
+async function _refreshWearableToken(provider) {
+  var w = state.wearables && state.wearables[provider];
+  if (!w || !w.refreshToken) return false;
+  try {
+    var res = await fetch('https://fittrack-backend-one.vercel.app/api/wearable-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ provider: provider, refreshToken: w.refreshToken })
+    });
+    var data = await res.json();
+    if (!data.access_token) return false;
+    state.wearables[provider] = {
+      accessToken: data.access_token,
+      refreshToken: data.refresh_token || w.refreshToken,
+      expiresAt: data.expires_in ? Date.now() + data.expires_in * 1000 : null,
+      connectedAt: w.connectedAt,
+    };
+    saveState(state);
+    return true;
+  } catch(e) {
+    return false;
+  }
+}
+
+// Devuelve un access_token válido, refrescándolo primero si está vencido o por vencer.
+async function ensureWearableToken(provider) {
+  var w = state.wearables && state.wearables[provider];
+  if (!w) return null;
+  var nearExpiry = w.expiresAt && (w.expiresAt - Date.now() < 5 * 60 * 1000);
+  if (nearExpiry) {
+    var refreshed = await _refreshWearableToken(provider);
+    if (!refreshed) return null;
+  }
+  return getWearableToken(provider);
+}
+
 function connectWearable(provider) {
   var cfg = WEARABLE_CONFIG[provider];
   if (!cfg) return;
@@ -207,8 +244,9 @@ function openWearableDetail(provider) {
 }
 
 async function syncOura() {
-  var token = getWearableToken('oura');
-  if (!token) { showToast('⚠ Oura no conectado'); return; }
+  if (!isWearableConnected('oura')) { showToast('⚠ Oura no conectado'); return; }
+  var token = await ensureWearableToken('oura');
+  if (!token) { showToast('⚠ Oura: la sesión venció, reconectá de nuevo'); return; }
   showToast('↻ Sincronizando Oura…');
   try {
     var res = await fetch('https://fittrack-backend-one.vercel.app/api/oura', {
@@ -246,8 +284,9 @@ if (typeof renderSleep === 'function') renderSleep();
   }
 }
 async function syncFitbit() {
-  var token = getWearableToken('fitbit');
-  if (!token) { showToast('⚠ Fitbit no conectado'); return; }
+  if (!isWearableConnected('fitbit')) { showToast('⚠ Fitbit no conectado'); return; }
+  var token = await ensureWearableToken('fitbit');
+  if (!token) { showToast('⚠ Fitbit: la sesión venció, reconectá de nuevo'); return; }
   showToast('↻ Sincronizando Fitbit…');
   try {
     var res = await fetch('https://fittrack-backend-one.vercel.app/api/fitbit', {
