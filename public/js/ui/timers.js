@@ -505,6 +505,10 @@ function estimateSetDuration(ex) {
  * Compound heavy → 3:30, compound hypertrophy → 2:30, isolation → 60–90s
  */
 function calcRestTime(ex, completedSets, setIdx) {
+  // Descanso configurado manualmente por el usuario en el editor
+  if (typeof ex.restSec === 'number' && ex.restSec > 0) {
+    return { secs: ex.restSec, reason: 'Descanso configurado' };
+  }
   const type = classifyExercise(ex);
   const repsStr = String(ex.reps || '');
   const repRange = parseRepRange(repsStr);

@@ -1361,6 +1361,13 @@ if (_tsZoom !== 1.0) {
   </div>
 </div>
 
+<div class="modal-overlay" id="progressionModal" onclick="if(event.target===this)closeProgressionModal()">
+  <div class="modal" onclick="event.stopPropagation()" style="padding:20px;max-height:82vh;overflow-y:auto">
+    <div class="modal-title" id="progressionModalTitle">📊 Progresión <button class="modal-close" onclick="closeProgressionModal()">✕</button></div>
+    <div id="progressionModalContent"></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="settingsModal" onclick="if(event.target===this)closeModal('settingsModal')"><div class="settings-modal" onclick="event.stopPropagation()">
   <div class="modal-title">⚙ Configuración <button class="modal-close" onclick="closeModal('settingsModal')">✕</button></div>
 <div style="margin-bottom:16px">

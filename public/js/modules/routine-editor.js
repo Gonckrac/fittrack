@@ -69,21 +69,52 @@ function _reBuildExerciseListHtml() {
 
 function _reExerciseRowHtml(i) {
   var ex = _reDays[_reCurrentDay].exercises[i];
-  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+  var numSets = parseInt(ex.sets) || 3;
+  var restMin = (typeof ex.restSec === 'number' && ex.restSec > 0) ? (ex.restSec / 60).toFixed(1) : '';
+  var setRIRs = ex.setRIRs || [];
+  var rirInputs = '';
+  for (var si = 0; si < numSets; si++) {
+    var rv = (setRIRs[si] !== undefined && setRIRs[si] !== null) ? setRIRs[si] : '';
+    rirInputs += '<input class="inp" style="width:32px;margin-bottom:0;font-size:11px;text-align:center;padding:5px 2px" type="number" min="0" max="5" placeholder="' + (si+1) + '" value="' + rv + '" oninput="_reSetRIR(' + i + ',' + si + ',this.value)" title="RIR serie ' + (si+1) + '">';
+  }
+  return '<div style="background:var(--bg3);border-radius:8px;padding:6px;margin-bottom:6px">'
+    +'<div style="display:flex;gap:5px;align-items:center;margin-bottom:5px">'
     +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].name=this.value">'
-    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value">'
-    +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
+    +'<input class="inp" style="width:40px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px" placeholder="4" type="number" min="1" value="'+numSets+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value;_reBuildExerciseListHtml()">'
+    +'<input class="inp" style="width:58px;margin-bottom:0;font-size:12px;text-align:center" placeholder="'+(ex.isTimeBased?'30s':'8-12')+'" value="'+(ex.reps||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
     +'<button onclick="_reRemoveExercise('+i+')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;flex-shrink:0">✕</button>'
+    +'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">'
+    +'<button onclick="_reToggleTimeBased('+i+')" style="padding:3px 7px;border-radius:20px;border:1px solid '+(ex.isTimeBased?'var(--accent)':'var(--border)')+';background:'+(ex.isTimeBased?'rgba(77,138,255,0.12)':'transparent')+';color:'+(ex.isTimeBased?'var(--accent)':'var(--text3)')+';font-size:10px;cursor:pointer;flex-shrink:0">⏱ Tiempo</button>'
+    +'<span style="font-size:10px;color:var(--text3);flex-shrink:0">Desc:</span>'
+    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:11px;text-align:center;padding:5px 3px" type="number" min="0" step="0.5" placeholder="min" value="'+restMin+'" oninput="_reSetExRest('+i+',this.value)" title="Descanso en minutos">'
+    +'<span style="font-size:10px;color:var(--text3);flex-shrink:0">min · RIR:</span>'
+    +rirInputs
+    +'</div>'
     +'</div>';
 }
 
 function _reSSExerciseRowHtml(i, letter) {
   var ex = _reDays[_reCurrentDay].exercises[i];
-  return '<div style="display:flex;gap:6px;margin-bottom:6px;align-items:center">'
+  var numSets = parseInt(ex.sets) || 3;
+  var setRIRs = ex.setRIRs || [];
+  var rirInputs = '';
+  for (var si = 0; si < numSets; si++) {
+    var rv = (setRIRs[si] !== undefined && setRIRs[si] !== null) ? setRIRs[si] : '';
+    rirInputs += '<input class="inp" style="width:30px;margin-bottom:0;font-size:10px;text-align:center;padding:4px 2px" type="number" min="0" max="5" placeholder="'+(si+1)+'" value="'+rv+'" oninput="_reSetRIR('+i+','+si+',this.value)">';
+  }
+  return '<div style="margin-bottom:5px">'
+    +'<div style="display:flex;gap:5px;margin-bottom:3px;align-items:center">'
     +'<span style="font-size:11px;font-weight:700;color:var(--accent);width:14px;flex-shrink:0">'+letter+'</span>'
     +'<input class="inp" style="flex:2;margin-bottom:0;font-size:12px" placeholder="Ejercicio" value="'+(ex.name||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].name=this.value">'
-    +'<input class="inp" style="width:44px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px" placeholder="4" type="number" min="1" value="'+(ex.sets||3)+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value">'
-    +'<input class="inp" style="width:60px;margin-bottom:0;font-size:12px;text-align:center" placeholder="8-12" value="'+(ex.reps||'8-12')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
+    +'<input class="inp" style="width:40px;margin-bottom:0;font-size:13px;text-align:center;padding:8px 4px" placeholder="4" type="number" min="1" value="'+numSets+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].sets=+this.value;_reBuildExerciseListHtml()">'
+    +'<input class="inp" style="width:58px;margin-bottom:0;font-size:12px;text-align:center" placeholder="'+(ex.isTimeBased?'30s':'8-12')+'" value="'+(ex.reps||'')+'" oninput="_reDays[_reCurrentDay].exercises['+i+'].reps=this.value">'
+    +'</div>'
+    +'<div style="display:flex;flex-wrap:wrap;gap:4px;align-items:center;padding-left:20px">'
+    +'<button onclick="_reToggleTimeBased('+i+')" style="padding:2px 6px;border-radius:20px;border:1px solid '+(ex.isTimeBased?'var(--accent)':'var(--border)')+';background:'+(ex.isTimeBased?'rgba(77,138,255,0.12)':'transparent')+';color:'+(ex.isTimeBased?'var(--accent)':'var(--text3)')+';font-size:10px;cursor:pointer">⏱</button>'
+    +'<span style="font-size:10px;color:var(--text3)">RIR:</span>'
+    +rirInputs
+    +'</div>'
     +'</div>';
 }
 
@@ -127,6 +158,23 @@ function reAddExercise() {
   if (!_reDays[_reCurrentDay].exercises) _reDays[_reCurrentDay].exercises = [];
   _reDays[_reCurrentDay].exercises.push({name:'',sets:3,reps:'8-12'});
   _reBuildExerciseListHtml();
+}
+
+function _reToggleTimeBased(i) {
+  _reDays[_reCurrentDay].exercises[i].isTimeBased = !_reDays[_reCurrentDay].exercises[i].isTimeBased;
+  _reBuildExerciseListHtml();
+}
+
+function _reSetExRest(i, val) {
+  var min = parseFloat(val);
+  _reDays[_reCurrentDay].exercises[i].restSec = (isNaN(min) || min <= 0) ? null : Math.round(min * 60);
+}
+
+function _reSetRIR(i, sIdx, val) {
+  var ex = _reDays[_reCurrentDay].exercises[i];
+  if (!ex.setRIRs) ex.setRIRs = Array(parseInt(ex.sets) || 3).fill(null);
+  var v = val === '' ? null : parseInt(val);
+  ex.setRIRs[sIdx] = (v === null || isNaN(v)) ? null : Math.max(0, Math.min(5, v));
 }
 
 function reAddSuperset() {

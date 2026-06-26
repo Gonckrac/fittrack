@@ -162,7 +162,7 @@ function getConfigTraining() {
     // Day with no exercises = rest day
     if (!d.exercises || d.exercises.length === 0) return null;
     var mappedExercises = d.exercises.map(function(ex) {
-      return { name: ex.name, muscle: ex.muscle || '', sets: parseInt(ex.sets) || 3, reps: ex.reps || '8-12', noTopRep: false, ssGroup: ex.ssGroup || null, ssPart: ex.ssPart || null, ssRestSec: ex.ssRestSec || null };
+      return { name: ex.name, muscle: ex.muscle || '', sets: parseInt(ex.sets) || 3, reps: ex.reps || '8-12', noTopRep: false, ssGroup: ex.ssGroup || null, ssPart: ex.ssPart || null, ssRestSec: ex.ssRestSec || null, isTimeBased: !!ex.isTimeBased, restSec: ex.restSec || null, setRIRs: ex.setRIRs || null };
     });
     var supersets = [];
     mappedExercises.forEach(function(ex) {
@@ -1829,9 +1829,29 @@ list.innerHTML=`<div style="display:flex;align-items:center;gap:10px;padding:10p
   if (!sessionStarted) {
     var totalSets = d.exercises.reduce(function(s, ex){ return s + (parseInt(ex.sets)||3); }, 0);
     var muscleGroups = [...new Set(d.exercises.map(function(ex){ return ex.muscle||''; }).filter(Boolean))].slice(0,4);
+    // Contador de semanas y alerta de descarga
+    if (state.config && !state.config.programStartDate) {
+      state.config.programStartDate = TODAY;
+      saveState(state);
+    }
+    var weekBannerHtml = '';
+    var _progStart = state.config && state.config.programStartDate;
+    if (_progStart) {
+      var _msPerWeek = 7 * 24 * 3600 * 1000;
+      var _weekNum = Math.max(1, Math.floor((new Date(TODAY) - new Date(_progStart)) / _msPerWeek) + 1);
+      var _deloadDue = _weekNum > 0 && _weekNum % 7 === 0;
+      var _deloadSoon = !_deloadDue && _weekNum > 0 && (_weekNum % 7 === 6);
+      var _weekLabel = _deloadDue
+        ? '<span style="color:var(--yellow);font-weight:700">⚡ Semana ' + _weekNum + ' — Esta semana toca descarga</span>'
+        : _deloadSoon
+          ? '<span style="color:var(--accent)">Semana ' + _weekNum + '</span><span style="color:var(--text3);font-size:10px;margin-left:6px">· Próxima semana: descarga</span>'
+          : '<span style="color:var(--text2)">Semana ' + _weekNum + '</span>';
+      weekBannerHtml = '<div style="display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;background:var(--bg3);border-radius:8px;padding:7px 12px;margin-bottom:10px;border:1px solid ' + (_deloadDue ? 'rgba(255,200,40,0.4)' : 'var(--border)') + '">📅 ' + _weekLabel + '</div>';
+    }
     list.innerHTML =
       '<div class="card train-start-card">' +
         '<div class="train-start-day">' + d.name + '</div>' +
+        weekBannerHtml +
         '<div class="train-start-stats">' +
           '<div class="train-start-stat"><span class="train-start-stat-val">' + d.exercises.length + '</span><span class="train-start-stat-lbl">ejercicios</span></div>' +
           '<div class="train-start-divider"></div>' +
@@ -1923,14 +1943,23 @@ _renderSessionTimer();
         }
       }
 
+      const setRIR = ex.setRIRs && ex.setRIRs[sIdx] != null ? ex.setRIRs[sIdx] : null;
+      const rirBadge = setRIR !== null ? `<span style="font-size:10px;font-weight:700;color:var(--accent);background:rgba(77,138,255,0.12);padding:2px 5px;border-radius:4px;flex-shrink:0;white-space:nowrap">RIR ${setRIR}</span>` : '';
+      const weightSection = ex.isTimeBased ? '' : `<div class="weight-picker" id="wpkg-${exIdx}-${sIdx}">
+          <button class="wp-btn wp-minus" ontouchstart="event.preventDefault();adjustWeight(${exIdx},${sIdx},-2.5)" onclick="adjustWeight(${exIdx},${sIdx},-2.5)">−</button>
+          <input class="set-input wp-input" inputmode="decimal" placeholder="kg" value="${kgVal}" oninput="this.value=_sanitizeNumInput(this.value,true);updateSetAndPropagate(${exIdx},${sIdx},'kg',this.value)">
+          <button class="wp-btn wp-plus" ontouchstart="event.preventDefault();adjustWeight(${exIdx},${sIdx},2.5)" onclick="adjustWeight(${exIdx},${sIdx},2.5)">+</button>
+        </div>`;
+      const repsSection = ex.isTimeBased
+        ? `<div style="display:flex;align-items:center;gap:3px;flex:1"><input class="set-input" inputmode="numeric" placeholder="seg" value="${s.reps||''}" style="max-width:70px" oninput="this.value=_sanitizeNumInput(this.value,false);updateSet(${exIdx},${sIdx},'reps',this.value)"><span style="font-size:11px;color:var(--text3);flex-shrink:0">s</span></div>`
+        : `<input class="set-input" inputmode="numeric" placeholder="${repsPH}" value="${s.reps||''}" oninput="this.value=_sanitizeNumInput(this.value,false);updateSet(${exIdx},${sIdx},'reps',this.value)">`;
+
       return `<div class="set-row" id="setrow-${exIdx}-${sIdx}">
         <div class="set-num">${sIdx+1}</div>
-        <div class="weight-picker" id="wpkg-${exIdx}-${sIdx}">
-          <button class="wp-btn wp-minus" ontouchstart="event.preventDefault();adjustWeight(${exIdx},${sIdx},-2.5)" onclick="adjustWeight(${exIdx},${sIdx},-2.5)">−</button>
-          <input class=\"set-input wp-input\" inputmode=\"decimal\" placeholder=\"kg\" value=\"${kgVal}\" oninput=\"this.value=_sanitizeNumInput(this.value,true);updateSetAndPropagate(${exIdx},${sIdx},'kg',this.value)\">
-          <button class="wp-btn wp-plus" ontouchstart="event.preventDefault();adjustWeight(${exIdx},${sIdx},2.5)" onclick="adjustWeight(${exIdx},${sIdx},2.5)">+</button>
-        </div>
-<input class=\"set-input\" inputmode=\"numeric\" placeholder=\"${repsPH}\" value=\"${s.reps||''}\" oninput=\"this.value=_sanitizeNumInput(this.value,false);updateSet(${exIdx},${sIdx},'reps',this.value)\">        <button class="set-check ${s.done?'done':''}" id="sc-${exIdx}-${sIdx}" onclick="toggleSet(${exIdx},${sIdx})">${s.done?'✓':''}</button>
+        ${weightSection}
+        ${repsSection}
+        ${rirBadge}
+        <button class="set-check ${s.done?'done':''}" id="sc-${exIdx}-${sIdx}" onclick="toggleSet(${exIdx},${sIdx})">${s.done?'✓':''}</button>
       </div>`;
     }).join('');
 
@@ -1979,6 +2008,7 @@ function buildWeightSuggestionUpgradeOnly(exName, ex, currentSets) {
 <div class="exercise-muscle">${_translateMuscle(ex.muscle)} · ${ex.sets}×${ex.reps}</div>        </div>
     <div style="display:flex;align-items:center;gap:4px;">
           ${isPR?`<span class="tag tag-green">🏆 PR</span>`:doneCount>0?`<span class="tag tag-green">${doneCount}/${ex.sets}</span>`:''}
+          <button onclick="event.stopPropagation();openProgressionModal('${ex.name.replace(/'/g,"\\'")}')" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;padding:0 3px;line-height:1" title="Ver progreso">📊</button>
           <button onclick="event.stopPropagation();reorderExercise(${exIdx},-1)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" ${(exIdx===0||ex.ssGroup)?'disabled style="opacity:0.2;background:none;border:none;cursor:default;font-size:13px;padding:0 2px"':''}>↑</button>
           <button onclick="event.stopPropagation();reorderExercise(${exIdx},1)" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:13px;padding:0 2px;line-height:1" ${(exIdx===d.exercises.length-1||ex.ssGroup)?'disabled style="opacity:0.2;background:none;border:none;cursor:default;font-size:13px;padding:0 2px"':''}>↓</button>
           <div class="exercise-chevron">▾</div>
@@ -2204,10 +2234,16 @@ s.done = !s.done;
     }
   }
 
-  if (s.done && !allDone && ex) {
+  if (s.done && ex) {
     if (ex.ssGroup && ex.ssPart === 'a') {
-      startSSTimer(ex, allSets, sIdx);
-    } else if (!ex.ssGroup) {
+      // Disparar timer SS incluso cuando todas las series de A terminan,
+      // siempre que B tenga series pendientes (fix: antes se bloqueaba con !allDone)
+      const _ts2 = state[TODAY]['trainSets_'+day] || {};
+      const _bIdx2 = cfg ? cfg.exercises.findIndex(function(e2){ return e2.ssGroup === ex.ssGroup && e2.ssPart === 'b'; }) : -1;
+      const _bSets2 = _bIdx2 >= 0 ? (_ts2[_bIdx2] || []) : [];
+      const _bAllDone2 = _bSets2.length > 0 && _bSets2.every(function(s2){ return s2.done; });
+      if (!_bAllDone2) startSSTimer(ex, allSets, sIdx);
+    } else if (!ex.ssGroup && !allDone) {
       startRestTimer(ex, allSets, sIdx);
     }
   }
@@ -2275,6 +2311,66 @@ function addSet(exIdx) {
 function _sanitizeNumInput(val, allowDecimals) {
   if (allowDecimals) return val.replace(/[^0-9.]/g, '').replace(/(\..*)\./g, '$1');
   return val.replace(/[^0-9]/g, '');
+}
+
+// ─── MODAL DE PROGRESIÓN POR EJERCICIO ───────────────────────────
+function openProgressionModal(exName) {
+  var hist = (state.exerciseHistory || {})[exName] || [];
+  var modal = document.getElementById('progressionModal');
+  var titleEl = document.getElementById('progressionModalTitle');
+  var content = document.getElementById('progressionModalContent');
+  if (!modal || !content) return;
+  if (titleEl) titleEl.innerHTML = '📊 ' + exName + ' <button class="modal-close" onclick="closeProgressionModal()">✕</button>';
+
+  if (hist.length === 0) {
+    content.innerHTML = '<div style="text-align:center;color:var(--text3);padding:24px 0">Sin historial aún — completá series para ver el progreso.</div>';
+    modal.classList.add('open');
+    return;
+  }
+
+  var chartData = hist.slice().reverse().map(function(h){ return { val: h.oneRM || h.maxKg, label: (h.date || '').slice(5), date: h.date }; });
+  var maxOneRM = Math.max.apply(null, hist.map(function(h){ return h.oneRM || h.maxKg || 0; }));
+  var latest = hist[0];
+  var prev = hist[1];
+  var diff = prev ? ((latest.oneRM || latest.maxKg || 0) - (prev.oneRM || prev.maxKg || 0)).toFixed(1) : null;
+  var diffColor = diff > 0 ? 'var(--green)' : diff < 0 ? 'var(--red)' : 'var(--text)';
+
+  content.innerHTML =
+    '<div class="stat-trio" style="margin-bottom:14px">' +
+      '<div class="stat-pill"><div class="stat-pill-val" style="color:var(--accent)">' + (latest.maxKg || '—') + 'kg</div><div class="stat-pill-lbl">Último peso</div></div>' +
+      '<div class="stat-pill"><div class="stat-pill-val" style="color:var(--yellow)">' + maxOneRM + '</div><div class="stat-pill-lbl">1RM est. max</div></div>' +
+      '<div class="stat-pill"><div class="stat-pill-val" style="color:' + diffColor + '">' + (diff != null ? ((+diff > 0 ? '+' : '') + diff + 'kg') : '—') + '</div><div class="stat-pill-lbl">vs anterior</div></div>' +
+    '</div>' +
+    (chartData.length >= 2
+      ? '<div style="margin-bottom:14px"><div style="font-size:11px;color:var(--text3);margin-bottom:6px">1RM estimado a lo largo del tiempo</div>' +
+        '<svg id="progressionChartSvg" viewBox="0 0 360 140" width="100%" height="140" style="display:block"></svg></div>'
+      : '') +
+    '<div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:1px;margin-bottom:6px">Historial reciente</div>' +
+    hist.slice(0, 15).map(function(h) {
+      var isPR = (h.oneRM || h.maxKg) === maxOneRM;
+      var setsDetail = h.setsLog ? h.setsLog.map(function(sl){ return sl.kg + 'kg×' + sl.reps; }).join(', ') : '';
+      return '<div class="ex-history-item">' +
+        '<div class="ex-history-date">' + h.date + '</div>' +
+        '<div style="flex:1">' +
+          '<div style="display:flex;align-items:center;gap:6px">' +
+            '<div class="ex-history-val">' + (h.maxKg || '—') + 'kg × ' + (h.avgReps || '?') + ' reps</div>' +
+            (h.oneRM ? '<span style="font-size:10px;color:var(--text3)">1RM≈' + h.oneRM + '</span>' : '') +
+            (isPR ? '<span class="ex-history-pr">PR</span>' : '') +
+          '</div>' +
+          (setsDetail ? '<div style="font-size:10px;color:var(--text3);margin-top:1px">' + setsDetail + '</div>' : '') +
+        '</div>' +
+      '</div>';
+    }).join('');
+
+  modal.classList.add('open');
+  if (chartData.length >= 2 && typeof drawLineChart === 'function') {
+    setTimeout(function(){ drawLineChart('progressionChartSvg', chartData, 'var(--accent)'); }, 60);
+  }
+}
+
+function closeProgressionModal() {
+  var modal = document.getElementById('progressionModal');
+  if (modal) modal.classList.remove('open');
 }
 function _clampPositive(val) { return Math.max(0, parseFloat(val) || 0); }
 
