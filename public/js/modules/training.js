@@ -1479,9 +1479,9 @@ function _ewRemoveActivity(dow, type, identifier) {
   if (type === 'gym') {
     cfg.cycle[dow] = -1;
   } else if (type === 'sport') {
-    if (cfg.cycle[dow] === 'sport' && cfg.sportNames && cfg.sportNames[dow] === identifier) {
+    if (cfg.cycle[dow] === 'sport' && (!cfg.sportNames || !cfg.sportNames[dow] || cfg.sportNames[dow] === identifier)) {
       cfg.cycle[dow] = -1;
-      delete cfg.sportNames[dow];
+      if (cfg.sportNames) delete cfg.sportNames[dow];
     } else if (cfg.extraActivities && cfg.extraActivities[dow]) {
       var idx = cfg.extraActivities[dow].indexOf(identifier);
       if (idx !== -1) cfg.extraActivities[dow].splice(idx, 1);
@@ -1718,6 +1718,7 @@ var hasRoutine = state.config && state.config.training && state.config.training.
         ? '<button onclick="openAIRoutine()" class="prem-action-btn"><span>🤖</span>Nueva rutina IA</button>'
         : '<button onclick="openAIRoutine()" class="prem-action-btn prem-action-primary"><span style="font-size:18px">🤖</span>Generar rutina con IA</button>')
     + '<button onclick="toggleEditWeekMode()" class="prem-action-btn"><span>✏️</span>Editar semana</button>'
+    + '<button onclick="_openTrainingCsvSheet()" class="prem-action-btn"><span>📁</span>Importar CSV</button>'
     + '</div>';
   container.innerHTML =
     '<div class="premium">'
@@ -2416,5 +2417,218 @@ var toastParts = ['✓ ' + sportName + ' completado'];
   renderTraining();
   renderRoutineCards();
   if (typeof renderHome === 'function') renderHome();
+}
+
+// ─── IMPORTAR RUTINA DESDE CSV ─────────────────────────────────────
+var _trainingCsvPreview = null;
+
+function _openTrainingCsvSheet() {
+  var existing = document.getElementById('trainingCsvSheet');
+  if (existing) { existing.remove(); return; }
+  var sheet = document.createElement('div');
+  sheet.id = 'trainingCsvSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:9999;display:flex;align-items:flex-end;justify-content:center';
+  sheet.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;width:100%;max-width:480px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden">' +
+      '<div style="padding:16px 20px 0;flex-shrink:0"><div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px"></div></div>' +
+      '<div style="padding:0 20px;flex:1;overflow-y:auto">' +
+        '<div style="font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px">Importar rutina desde archivo</div>' +
+        '<div style="font-size:13px;color:var(--text3);line-height:1.6;margin-bottom:16px">Subí un CSV con una fila por ejercicio. Columnas esperadas:</div>' +
+        '<div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px;overflow-x:auto">' +
+          '<code style="font-size:11px;color:var(--text2);white-space:nowrap;display:block">Día rutina,Ejercicio,Series,Reps,RIR,Descanso (seg),Superserie (S/N)</code>' +
+          '<code style="font-size:11px;color:var(--text3);white-space:nowrap;display:block">Pecho,Press banca,4,8-12,2,90,N</code>' +
+          '<code style="font-size:11px;color:var(--text3);white-space:nowrap;display:block">Pecho,Press inclinado,3,10-12,2,60,S</code>' +
+          '<code style="font-size:11px;color:var(--text3);white-space:nowrap;display:block">Pecho,Aperturas,3,12-15,1,60,S</code>' +
+        '</div>' +
+        '<div style="font-size:11px;color:var(--text3);margin-bottom:16px">Las superseries se agrupan de a pares: dos ejercicios consecutivos con <strong>S</strong> forman una superserie. El RIR se aplica igual a todas las series del ejercicio.</div>' +
+        '<button onclick="_downloadTrainingCsvTemplate()" class="btn btn-ghost" style="width:100%;margin-bottom:10px;font-size:13px">⬇️ Descargar plantilla de ejemplo</button>' +
+        '<button onclick="_triggerTrainingCsvInput()" class="btn btn-primary" style="width:100%;font-size:14px">📁 Elegir archivo CSV</button>' +
+      '</div>' +
+      '<div style="padding:16px 20px 32px;flex-shrink:0">' +
+        '<button onclick="document.getElementById(\'trainingCsvSheet\').remove()" class="btn btn-ghost" style="width:100%">Cerrar</button>' +
+      '</div>' +
+    '</div>';
+  sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
+  document.body.appendChild(sheet);
+}
+
+function _downloadTrainingCsvTemplate() {
+  var rows = [
+    ['Día rutina','Ejercicio','Series','Reps','RIR','Descanso (seg)','Superserie (S/N)'],
+    ['Pecho','Press banca',4,'8-12',2,90,'N'],
+    ['Pecho','Press inclinado con mancuernas',3,'10-12',2,60,'S'],
+    ['Pecho','Aperturas con mancuernas',3,'12-15',1,60,'S'],
+    ['Pecho','Extensión de tríceps en polea',3,'10-12',2,60,'N'],
+    ['Espalda','Dominadas',4,'6-8',2,120,'N'],
+    ['Espalda','Remo con barra',4,'8-10',2,90,'S'],
+    ['Espalda','Curl de bíceps con barra',3,'10-12',1,60,'S'],
+    ['Piernas','Sentadilla',4,'6-10',2,120,'N'],
+    ['Piernas','Prensa de piernas',3,'10-15',2,90,'N'],
+    ['Piernas','Extensión de cuádriceps',3,'12-15',1,60,'S'],
+    ['Piernas','Curl femoral acostado',3,'12-15',1,60,'S'],
+  ];
+  var csv = rows.map(function(r){ return r.join(','); }).join('\n');
+  var blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+  var url = URL.createObjectURL(blob);
+  _fallbackDownload(url, 'plantilla-rutina.csv');
+}
+
+function _triggerTrainingCsvInput() {
+  var input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.csv,text/csv';
+  input.style.cssText = 'position:fixed;opacity:0;top:0;left:0';
+  document.body.appendChild(input);
+  input.onchange = function(e) {
+    var file = e.target.files[0];
+    document.body.removeChild(input);
+    if (!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev) { _handleTrainingCsvImport(ev.target.result); };
+    reader.onerror = function() { showToast('⚠ No se pudo leer el archivo'); };
+    reader.readAsText(file, 'UTF-8');
+  };
+  input.click();
+}
+
+function _handleTrainingCsvImport(text) {
+  var parsed = _parseTrainingCSV(text);
+  if (!parsed.days.length) {
+    showToast('⚠ No se encontraron ejercicios válidos en el archivo' + (parsed.errors.length ? ' (' + parsed.errors.length + ' con errores)' : ''));
+    return;
+  }
+  _trainingCsvPreview = parsed;
+  _openTrainingCsvConfirmSheet(parsed);
+}
+
+function _openTrainingCsvConfirmSheet(parsed) {
+  var totalEx = parsed.days.reduce(function(s, d){ return s + d.exercises.length; }, 0);
+  var summary = parsed.days.length + ' día' + (parsed.days.length > 1 ? 's' : '') + ' de rutina · ' + totalEx + ' ejercicio' + (totalEx > 1 ? 's' : '');
+  var errHtml = parsed.errors.length ?
+    '<div style="background:rgba(255,196,0,0.08);border:1px solid var(--yellow);border-radius:10px;padding:10px 12px;margin-bottom:16px">' +
+      '<div style="font-size:12px;font-weight:700;color:var(--yellow);margin-bottom:4px">⚠ ' + parsed.errors.length + ' fila' + (parsed.errors.length > 1 ? 's' : '') + ' con problemas (se van a ignorar)</div>' +
+      parsed.errors.slice(0, 6).map(function(e){ return '<div style="font-size:11px;color:var(--text3)">• ' + _escapeHtml(e) + '</div>'; }).join('') +
+      (parsed.errors.length > 6 ? '<div style="font-size:11px;color:var(--text3)">… y ' + (parsed.errors.length - 6) + ' más</div>' : '') +
+    '</div>' : '';
+  var previewHtml = parsed.days.map(function(d) {
+    var exHtml = d.exercises.slice(0, 5).map(function(ex) {
+      var ssLabel = ex.ssGroup ? ' <span style="color:var(--green);font-size:10px;font-weight:700">SS</span>' : '';
+      return '<div style="font-size:11px;color:var(--text3);padding:2px 0 2px 8px">• ' + _escapeHtml(ex.name) + ' · ' + ex.sets + '×' + ex.reps + ' · RIR ' + (ex.setRIRs && ex.setRIRs[0] !== undefined ? ex.setRIRs[0] : '—') + ' · ' + ex.restSec + 's descanso' + ssLabel + '</div>';
+    }).join('') + (d.exercises.length > 5 ? '<div style="font-size:11px;color:var(--text3);padding:2px 0 2px 8px">… y ' + (d.exercises.length - 5) + ' más</div>' : '');
+    return '<div style="margin-bottom:12px;border-bottom:1px solid var(--bg4);padding-bottom:10px">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">🏋️ ' + _escapeHtml(d.name) + '</div>' +
+      exHtml +
+    '</div>';
+  }).join('');
+  var existing = document.getElementById('trainingCsvConfirmSheet'); if (existing) existing.remove();
+  var sheet = document.createElement('div');
+  sheet.id = 'trainingCsvConfirmSheet';
+  sheet.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:flex-end;justify-content:center';
+  sheet.innerHTML =
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column">' +
+      '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;flex-shrink:0"></div>' +
+      '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;flex-shrink:0">' + summary + '</div>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:12px;flex-shrink:0">Si ya existe un día con el mismo nombre, sus ejercicios se reemplazan.</div>' +
+      '<div style="overflow-y:auto;flex:1;margin-bottom:12px">' + errHtml + previewHtml + '</div>' +
+      '<button onclick="_confirmTrainingCsvImport()" class="btn btn-primary" style="width:100%;margin-bottom:8px;flex-shrink:0">✅ Agregar a mi rutina</button>' +
+      '<button onclick="document.getElementById(\'trainingCsvConfirmSheet\').remove()" class="btn btn-ghost" style="width:100%;flex-shrink:0">Cancelar</button>' +
+    '</div>';
+  sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
+  document.body.appendChild(sheet);
+}
+
+function _confirmTrainingCsvImport() {
+  var parsed = _trainingCsvPreview;
+  var s1 = document.getElementById('trainingCsvConfirmSheet'); if (s1) s1.remove();
+  var s2 = document.getElementById('trainingCsvSheet'); if (s2) s2.remove();
+  if (!parsed || !parsed.days.length) return;
+  if (!state.config) state.config = {};
+  if (!state.config.training) state.config.training = [];
+  parsed.days.forEach(function(csvDay) {
+    var idx = state.config.training.findIndex(function(d){ return d.name === csvDay.name; });
+    if (idx >= 0) {
+      state.config.training[idx].exercises = csvDay.exercises;
+    } else {
+      state.config.training.push({ name: csvDay.name, exercises: csvDay.exercises });
+    }
+  });
+  saveState(state);
+  renderTraining();
+  if (typeof renderHome === 'function') renderHome();
+  _trainingCsvPreview = null;
+  showToast('✅ ' + parsed.days.length + ' día' + (parsed.days.length > 1 ? 's' : '') + ' de rutina importado' + (parsed.days.length > 1 ? 's' : ''));
+}
+
+function _parseTrainingCSV(text) {
+  var days = [], errors = [], rawByDay = {}, dayOrder = [];
+  if (!text) return { days: days, errors: errors };
+  var lines = text.replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n').filter(function(l){ return l.trim().length; });
+  if (!lines.length) return { days: days, errors: errors };
+
+  var firstLine = lines[0];
+  var delim = (firstLine.match(/;/g)||[]).length > (firstLine.match(/,/g)||[]).length ? ';' : ',';
+  var numDelim = delim === ';' ? ',' : null;
+
+  function parseNum(v) {
+    if (numDelim) v = String(v).replace(numDelim, '.');
+    return parseFloat(v);
+  }
+  function splitLine(line) {
+    var out = [], cur = '', inQ = false;
+    for (var i = 0; i < line.length; i++) {
+      var ch = line[i];
+      if (inQ) { if (ch==='"') { if(line[i+1]==='"'){cur+='"';i++;} else inQ=false; } else cur+=ch; }
+      else { if(ch==='"') inQ=true; else if(ch===delim){out.push(cur);cur='';} else cur+=ch; }
+    }
+    out.push(cur);
+    return out.map(function(c){ return c.trim(); });
+  }
+
+  var headerCells = splitLine(firstLine).map(function(c){ return c.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g,'').trim(); });
+  var looksLikeHeader = headerCells.some(function(c){ return ['dia rutina','ejercicio','series','reps'].indexOf(c) >= 0; });
+  var startIdx = looksLikeHeader ? 1 : 0;
+
+  for (var i = startIdx; i < lines.length; i++) {
+    var rowNum = i + 1;
+    var cells = splitLine(lines[i]);
+    var dayName = (cells[0] || '').trim();
+    var exName  = (cells[1] || '').trim();
+    if (!dayName || !exName) { if (dayName || exName) errors.push('Fila ' + rowNum + ': falta nombre de día o ejercicio'); continue; }
+    var sets    = Math.max(1, parseInt(cells[2]) || 3);
+    var reps    = (cells[3] || '8-12').trim() || '8-12';
+    var rir     = isNaN(parseNum(cells[4])) ? 2 : Math.max(0, Math.min(5, Math.round(parseNum(cells[4]))));
+    var restSec = isNaN(parseNum(cells[5])) ? 90 : Math.max(0, Math.round(parseNum(cells[5])));
+    var ssRaw   = (cells[6] || '').trim().toUpperCase();
+    var isSuperset = ssRaw === 'S' || ssRaw === 'SI' || ssRaw === 'SÍ' || ssRaw === '1' || ssRaw === 'YES';
+    if (!rawByDay[dayName]) { rawByDay[dayName] = []; dayOrder.push(dayName); }
+    rawByDay[dayName].push({ name: exName, sets: sets, reps: reps, rir: rir, restSec: restSec, isSuperset: isSuperset });
+  }
+
+  // Deduplicate dayOrder and build days with superset grouping
+  dayOrder.filter(function(d, i, a){ return a.indexOf(d) === i; }).forEach(function(dayName) {
+    var rawExs = rawByDay[dayName];
+    var exercises = [];
+    var ssCounter = 0;
+    var pendingSS = null;
+    rawExs.forEach(function(raw) {
+      var ex = { name: raw.name, sets: raw.sets, reps: raw.reps, restSec: raw.restSec, setRIRs: Array(raw.sets).fill(raw.rir) };
+      if (raw.isSuperset) {
+        if (!pendingSS) {
+          ex.ssGroup = 'csv_ss_' + ssCounter;
+          ex.ssPart = 'a';
+          pendingSS = ex;
+        } else {
+          ex.ssGroup = pendingSS.ssGroup;
+          ex.ssPart = 'b';
+          ssCounter++;
+          pendingSS = null;
+        }
+      }
+      exercises.push(ex);
+    });
+    if (pendingSS) { delete pendingSS.ssGroup; delete pendingSS.ssPart; }
+    days.push({ name: dayName, exercises: exercises });
+  });
+  return { days: days, errors: errors };
 }
 
