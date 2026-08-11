@@ -1350,7 +1350,10 @@ function toggleEditWeekMode() {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)';
     overlay.innerHTML = '<div style="position:sticky;top:0;z-index:1;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'
       + '<div><div style="font-size:15px;font-weight:700;color:var(--text)">✏️ Editar semana</div><div style="font-size:11px;color:var(--text3);margin-top:1px">Arrastrá actividades entre días</div></div>'
+      + '<div style="display:flex;gap:8px;align-items:center">'
+      + '<button onclick="_openTrainingCsvSheet()" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:7px 12px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">📁 CSV</button>'
       + '<button onclick="toggleEditWeekMode()" style="background:var(--accent);border:none;border-radius:10px;padding:8px 16px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">✓ Listo</button>'
+      + '</div>'
       + '</div>'
       + '<div id="editWeekOverlayBody" style="padding:16px;flex:1"></div>';
     document.body.appendChild(overlay);
