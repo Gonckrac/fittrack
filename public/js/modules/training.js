@@ -1350,10 +1350,7 @@ function toggleEditWeekMode() {
     overlay.style.cssText = 'position:fixed;inset:0;z-index:9000;background:var(--bg);overflow-y:auto;display:flex;flex-direction:column;padding-top:env(safe-area-inset-top)';
     overlay.innerHTML = '<div style="position:sticky;top:0;z-index:1;background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;justify-content:space-between">'
       + '<div><div style="font-size:15px;font-weight:700;color:var(--text)">✏️ Editar semana</div><div style="font-size:11px;color:var(--text3);margin-top:1px">Arrastrá actividades entre días</div></div>'
-      + '<div style="display:flex;gap:8px;align-items:center">'
-      + '<button onclick="_openTrainingCsvSheet()" style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:7px 12px;color:var(--text2);font-size:12px;font-weight:600;cursor:pointer">📁 CSV</button>'
       + '<button onclick="toggleEditWeekMode()" style="background:var(--accent);border:none;border-radius:10px;padding:8px 16px;color:#fff;font-size:13px;font-weight:700;cursor:pointer">✓ Listo</button>'
-      + '</div>'
       + '</div>'
       + '<div id="editWeekOverlayBody" style="padding:16px;flex:1"></div>';
     document.body.appendChild(overlay);
@@ -1606,7 +1603,8 @@ function _buildEditWeekHTML() {
       + '</div>';
   }).join('');
 
-return '<div class="ew-grid">' + rows + '</div>';
+return '<div class="ew-grid">' + rows + '</div>'
+  + '<button onclick="_openTrainingCsvSheet()" style="width:100%;margin-top:16px;padding:12px;border-radius:12px;border:1px dashed var(--border);background:var(--bg3);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px"><span>📁</span>Importar rutina desde CSV</button>';
 }
 
 function _renderPremiumTraining() {
@@ -2514,12 +2512,13 @@ function _openTrainingCsvConfirmSheet(parsed) {
       (parsed.errors.length > 6 ? '<div style="font-size:11px;color:var(--text3)">… y ' + (parsed.errors.length - 6) + ' más</div>' : '') +
     '</div>' : '';
   var previewHtml = parsed.days.map(function(d) {
-    var exHtml = d.exercises.slice(0, 5).map(function(ex) {
-      var ssLabel = ex.ssGroup ? ' <span style="color:var(--green);font-size:10px;font-weight:700">SS</span>' : '';
-      return '<div style="font-size:11px;color:var(--text3);padding:2px 0 2px 8px">• ' + _escapeHtml(ex.name) + ' · ' + ex.sets + '×' + ex.reps + ' · RIR ' + (ex.setRIRs && ex.setRIRs[0] !== undefined ? ex.setRIRs[0] : '—') + ' · ' + ex.restSec + 's descanso' + ssLabel + '</div>';
-    }).join('') + (d.exercises.length > 5 ? '<div style="font-size:11px;color:var(--text3);padding:2px 0 2px 8px">… y ' + (d.exercises.length - 5) + ' más</div>' : '');
-    return '<div style="margin-bottom:12px;border-bottom:1px solid var(--bg4);padding-bottom:10px">' +
-      '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px">🏋️ ' + _escapeHtml(d.name) + '</div>' +
+    var exHtml = d.exercises.slice(0, 4).map(function(ex) {
+      var ssLabel = ex.ssGroup ? ' <span style="background:rgba(50,220,100,0.15);color:var(--green);font-size:9px;font-weight:700;border-radius:4px;padding:1px 4px">SS</span>' : '';
+      return '<div style="font-size:11px;color:var(--text3);padding:3px 0 3px 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'
+        + '• ' + _escapeHtml(ex.name) + ' &nbsp;' + ex.sets + '×' + ex.reps + ' · RIR ' + (ex.setRIRs ? ex.setRIRs[0] : '—') + ssLabel + '</div>';
+    }).join('') + (d.exercises.length > 4 ? '<div style="font-size:11px;color:var(--text3);padding:2px 0 2px 8px">… y ' + (d.exercises.length - 4) + ' más</div>' : '');
+    return '<div style="margin-bottom:10px;background:var(--bg3);border-radius:10px;padding:10px 12px">' +
+      '<div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px">🏋️ ' + _escapeHtml(d.name) + ' <span style="font-size:10px;font-weight:400;color:var(--text3)">· ' + d.exercises.length + ' ejercicios</span></div>' +
       exHtml +
     '</div>';
   }).join('');
@@ -2528,12 +2527,12 @@ function _openTrainingCsvConfirmSheet(parsed) {
   sheet.id = 'trainingCsvConfirmSheet';
   sheet.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:10001;display:flex;align-items:flex-end;justify-content:center';
   sheet.innerHTML =
-    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px;max-height:80vh;display:flex;flex-direction:column">' +
+    '<div style="background:var(--bg2);border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:480px;max-height:85vh;display:flex;flex-direction:column">' +
       '<div style="width:36px;height:4px;background:var(--border);border-radius:2px;margin:0 auto 16px;flex-shrink:0"></div>' +
       '<div style="font-size:15px;font-weight:700;color:var(--text);margin-bottom:4px;flex-shrink:0">' + summary + '</div>' +
-      '<div style="font-size:11px;color:var(--text3);margin-bottom:12px;flex-shrink:0">Si ya existe un día con el mismo nombre, sus ejercicios se reemplazan.</div>' +
-      '<div style="overflow-y:auto;flex:1;margin-bottom:12px">' + errHtml + previewHtml + '</div>' +
-      '<button onclick="_confirmTrainingCsvImport()" class="btn btn-primary" style="width:100%;margin-bottom:8px;flex-shrink:0">✅ Agregar a mi rutina</button>' +
+      '<div style="font-size:11px;color:var(--text3);margin-bottom:14px;flex-shrink:0;line-height:1.5">Después de importar, abrimos el editor de semana para que puedas asignar cada rutina al día que quieras.</div>' +
+      '<div style="overflow-y:auto;flex:1;margin-bottom:14px">' + errHtml + previewHtml + '</div>' +
+      '<button onclick="_confirmTrainingCsvImport()" class="btn btn-primary" style="width:100%;margin-bottom:8px;flex-shrink:0">✅ Importar y asignar →</button>' +
       '<button onclick="document.getElementById(\'trainingCsvConfirmSheet\').remove()" class="btn btn-ghost" style="width:100%;flex-shrink:0">Cancelar</button>' +
     '</div>';
   sheet.addEventListener('click', function(e){ if (e.target === sheet) sheet.remove(); });
@@ -2548,7 +2547,10 @@ function _confirmTrainingCsvImport() {
   if (!state.config) state.config = {};
   if (!state.config.training) state.config.training = [];
   parsed.days.forEach(function(csvDay) {
-    var idx = state.config.training.findIndex(function(d){ return d.name === csvDay.name; });
+    var idx = -1;
+    for (var j = 0; j < state.config.training.length; j++) {
+      if (state.config.training[j].name === csvDay.name) { idx = j; break; }
+    }
     if (idx >= 0) {
       state.config.training[idx].exercises = csvDay.exercises;
     } else {
@@ -2556,10 +2558,20 @@ function _confirmTrainingCsvImport() {
     }
   });
   saveState(state);
-  renderTraining();
-  if (typeof renderHome === 'function') renderHome();
   _trainingCsvPreview = null;
-  showToast('✅ ' + parsed.days.length + ' día' + (parsed.days.length > 1 ? 's' : '') + ' de rutina importado' + (parsed.days.length > 1 ? 's' : ''));
+  var dayCount = parsed.days.length;
+  // Si el overlay de editar semana está abierto, actualizarlo
+  var overlayBody = document.getElementById('editWeekOverlayBody');
+  if (overlayBody) {
+    _renderEditWeekInto(overlayBody);
+    showToast('✅ ' + dayCount + ' rutina' + (dayCount > 1 ? 's' : '') + ' importada' + (dayCount > 1 ? 's' : '') + ' — tocá ＋ en el día que querés asignarlas');
+  } else {
+    // Abrir el overlay de editar semana para que pueda asignar
+    if (typeof renderHome === 'function') renderHome();
+    _editWeekMode = false;
+    toggleEditWeekMode();
+    showToast('✅ ' + dayCount + ' rutina' + (dayCount > 1 ? 's' : '') + ' importada' + (dayCount > 1 ? 's' : '') + ' — tocá ＋ en el día que querés asignarlas');
+  }
 }
 
 function _parseTrainingCSV(text) {
