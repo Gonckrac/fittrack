@@ -53,6 +53,7 @@ function saveState(s) {
     tx.objectStore(IDB_STORE).put(s, STORE_KEY);
   }).catch(() => {});
   try { localStorage.setItem(STORE_KEY, JSON.stringify(s)); } catch(_) {}
+  if (typeof pushToCloud === 'function') pushToCloud(s);
   // Notificar otras tabs
   try {
     if (typeof BroadcastChannel !== 'undefined' && bootstrap._bc) {

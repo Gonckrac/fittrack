@@ -2,6 +2,16 @@
 async function bootstrap() {
 
   state = await loadStateAsync();
+  try {
+    var _cloudState = await pullFromCloud();
+    if (_cloudState && _cloudState._ts && (!state._ts || _cloudState._ts > state._ts)) {
+      state = _cloudState;
+      _openIDB().then(function(db) {
+        var tx = db.transaction(IDB_STORE, 'readwrite');
+        tx.objectStore(IDB_STORE).put(state, STORE_KEY);
+      }).catch(function(){});
+    }
+  } catch(_e) {}
 
   if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: 0 };
  if (!state.metricsHistory) state.metricsHistory = [];

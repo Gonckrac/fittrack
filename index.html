@@ -1385,6 +1385,7 @@ if (_tsZoom !== 1.0) {
     <!-- Sección: Peligro -->
     <div style="border-top:1px solid var(--border);margin-bottom:14px"></div>
     <div style="font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:10px">⚙ Avanzado</div>
+    <button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="closeModal('settingsModal');openSyncKeySheet()">☁ Sincronización en la nube</button>
     <button class="btn btn-ghost" style="width:100%;margin-bottom:8px" onclick="closeModal('settingsModal');backupData()">💾 Hacer backup de mis datos</button>
     <button class="btn btn-ghost" style="width:100%;margin-bottom:16px" onclick="closeModal('settingsModal');restoreData()">📂 Restaurar desde backup</button>
     <button class="btn btn-ghost" style="width:100%;color:var(--red);border-color:rgba(255,107,77,0.3)" onclick="openResetConfirm()">Reiniciar configuración</button>
@@ -1426,7 +1427,9 @@ if (_tsZoom !== 1.0) {
 ═══════════════════════════════════════════ -->
 
 <!-- Utils -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="/js/utils/storage.js?v=2"></script>
+<script src="/js/utils/cloud-sync.js?v=1"></script>
 <script src="/js/utils/debug.js?v=2"></script>
 
 <!-- Data / Config -->
