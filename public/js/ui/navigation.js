@@ -5,11 +5,11 @@
 const PAGE_REDIRECT = {
   'macros':   { page: 'nutricion', sub: 'comida' },
   'kcal':     { page: 'nutricion', sub: 'balance' },
-'supps':    { page: 'recuperacion', sub: 'suplementos' },
-  'sleep':    { page: 'recuperacion', sub: 'sueno' },
-  'water':    { page: 'recuperacion', sub: 'agua' },
-'metrics':  { page: 'progreso', sub: 'metricas' },
-  'calendar': { page: 'progreso', sub: 'calendario' },
+  'supps':    { page: 'recuperacion', sub: null },
+  'sleep':    { page: 'recuperacion', sub: null },
+  'water':    { page: 'recuperacion', sub: null },
+  'metrics':  { page: 'progreso', sub: 'metricas' },
+  'calendar': { page: 'progreso', sub: 'metricas' },
 }
 
 function showPage(id, el) {
@@ -48,12 +48,11 @@ if (id !== 'progreso') {
     if (defaultProgSub) defaultProgSub.classList.add('active');
     if (defaultProgBtn) defaultProgBtn.classList.add('active');
   }
-  if (id !== 'recuperacion') {    document.querySelectorAll('#page-recuperacion .v15-subpage').forEach(p => p.classList.remove('active'));
+  if (id !== 'recuperacion') {
+    document.querySelectorAll('#page-recuperacion .v15-subpage').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('#page-recuperacion .v15-subtab').forEach(t => t.classList.remove('active'));
-    var defaultRecSub = document.getElementById('sub-recuperacion-sueno');
-    var defaultRecBtn = document.getElementById('subtab-rec-sueno');
+    var defaultRecSub = document.getElementById('sub-recuperacion-suplementos');
     if (defaultRecSub) defaultRecSub.classList.add('active');
-    if (defaultRecBtn) defaultRecBtn.classList.add('active');
   }
 
 var targetPage = document.getElementById('page-' + id);
@@ -113,10 +112,7 @@ if (id === 'home') {
   }
 if (typeof checkAndStartTutorial === 'function') checkAndStartTutorial(id);
   if (id === 'recuperacion') {
-    _syncRecuperacionSleep();
     renderSuppsV15();
-    _syncRecuperacionWater();
-    setTimeout(function(){ if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-sueno'); },800);
   }
 }
 
@@ -134,10 +130,7 @@ function switchSubtab(pageId, subId, btn) {
 if (pageId === 'nutricion' && subId === 'plan' && typeof renderMealPlan === 'function') renderMealPlan();
   if (pageId === 'nutricion' && subId === 'balance' && typeof checkAndStartTutorial === 'function') checkAndStartTutorial('nutricion-balance');
   if (pageId === 'progreso' && subId === 'metricas')  _syncProgresoContent('metricas');
-  if (pageId === 'progreso' && subId === 'calendario') { _syncProgresoContent('calendario'); setTimeout(function(){ if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('progreso-calendario'); },800); }
-  if (pageId === 'recuperacion' && subId === 'sueno')       { _syncRecuperacionSleep(); if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-sueno'); }
   if (pageId === 'recuperacion' && subId === 'suplementos') { renderSuppsV15(); if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-suplementos'); }
-  if (pageId === 'recuperacion' && subId === 'agua')        { _syncRecuperacionWater(); if(typeof checkAndStartTutorial==='function') checkAndStartTutorial('recuperacion-agua'); }
 }
 
 // ─── HOME METRIC CARDS → navegación ──────────────────────────────
@@ -146,12 +139,6 @@ function initHomeCardNav() {
     card.addEventListener('click', function() {
       var target = card.getAttribute('data-nav');
       if (target && target !== 'home') showPage(target);
-      if (target === 'water') {
-        setTimeout(function() {
-          var btn = document.getElementById('subtab-rec-agua');
-          if (btn) switchSubtab('recuperacion', 'agua', btn);
-        }, 50);
-      }
     });
   });
 }
@@ -547,13 +534,10 @@ function init() {
   renderSupps();
   renderMetrics();
   renderMetricsPage();
-  renderSleep();
   renderKcal();
   renderActivityGrid();
-  renderWater(false);
   renderGoalBars();
   populateExSelect();
-renderCalendar();
   checkDeloadWeek();
   if (typeof isWearableConnected === 'function' && isWearableConnected('oura') && typeof syncOura === 'function') syncOura();
   if (!state.wearables) state.wearables = {};

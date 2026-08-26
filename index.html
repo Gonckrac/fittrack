@@ -185,7 +185,6 @@ if (_tsZoom !== 1.0) {
     </div>
     <div class="header-right">
       <div class="day-badge" id="dayBadge" style="display:none">DIA 1</div>
-<button class="settings-btn" onclick="openNotificationsPanel()" style="margin-right:4px;font-size:18px">🔔</button><button class="settings-btn" onclick="openWidgetPreview()" style="font-size:17px">🧩</button>
       <button class="settings-btn" onclick="openSettings()">⚙</button></div>
   </div>
 
@@ -194,7 +193,7 @@ if (_tsZoom !== 1.0) {
 <button class="tab active" id="tab-hoy"          onclick="showPage('home',this)"><span class="tab-icon">🏠</span>Hoy</button>
     <button class="tab"        id="tab-nutricion"     onclick="showPage('nutricion',this)"><span class="tab-icon">🍽</span>Nutrición</button>
     <button class="tab"        id="tab-training"      onclick="showPage('training',this)"><span class="tab-icon">💪</span>Entreno</button>
-<button class="tab"        id="tab-recuperacion"  onclick="showPage('recuperacion',this)"><span class="tab-icon">😴</span>Recup.</button>    <button class="tab"        id="tab-progreso"      onclick="showPage('progreso',this)"><span class="tab-icon">📈</span>Progreso</button>
+<button class="tab"        id="tab-recuperacion"  onclick="showPage('recuperacion',this)"><span class="tab-icon">💊</span>Suplem.</button>    <button class="tab"        id="tab-progreso"      onclick="showPage('progreso',this)"><span class="tab-icon">📈</span>Progreso</button>
     <div style="flex-shrink:0;width:env(safe-area-inset-right)"></div>
   </div>
 
@@ -239,13 +238,6 @@ if (_tsZoom !== 1.0) {
             <div class="day-metric-status" id="dayTrainStatus"></div>
             <div class="day-metric-chevron">›</div>
           </div>
-          <div class="day-metric-item" data-nav="recuperacion">
-            <div class="day-metric-icon">🌙</div>
-            <div class="day-metric-val" id="daySleepScore">—</div>
-            <div class="day-metric-lbl">Sueño</div>
-            <div class="day-metric-status" id="daySleepStatus"></div>
-            <div class="day-metric-chevron">›</div>
-          </div>
           <div class="day-metric-item" id="homeSuppCard" data-nav="supps">
             <div class="day-metric-icon">💊</div>
             <div class="day-metric-val" id="daySuppScore">—</div>
@@ -261,13 +253,6 @@ if (_tsZoom !== 1.0) {
             <div class="day-metric-chevron">›</div>
           </div>
           <div class="day-metric-item" id="homeSuppCardPlaceholder" style="display:none"></div>
-          <div class="day-metric-item" data-nav="water">
-            <div class="day-metric-icon">💧</div>
-            <div class="day-metric-val" id="dayWaterScore">—</div>
-            <div class="day-metric-lbl">Agua</div>
-            <div class="day-metric-status" id="dayWaterStatus"></div>
-            <div class="day-metric-chevron">›</div>
-          </div>
           <div class="day-metric-item" id="homeWeightCard" onclick="showPage('progreso')" style="cursor:pointer">
             <div class="day-metric-icon">⚖️</div>
             <div class="day-metric-val" id="homeWeightVal" style="font-size:13px">—</div>
@@ -855,22 +840,8 @@ if (_tsZoom !== 1.0) {
     <!-- ═══ RECUPERACIÓN PAGE (Sueño + Suplementos + Agua scroll continuo) ═══ -->
 <div class="page" id="page-recuperacion">
 
-      <!-- Sub-tabs -->
-      <div class="v15-subtabs" id="recuperacionSubtabs">
-        <button class="v15-subtab active" id="subtab-rec-sueno"       onclick="switchSubtab('recuperacion','sueno',this)">🌙 Sueño</button>
-        <button class="v15-subtab"        id="subtab-rec-suplementos" onclick="switchSubtab('recuperacion','suplementos',this)">💊 Suplementos</button>
-        <button class="v15-subtab"        id="subtab-rec-agua"        onclick="switchSubtab('recuperacion','agua',this)">💧 Agua</button>
-      </div>
-
-      <!-- Subpage: Sueño -->
-      <div class="v15-subpage active" id="sub-recuperacion-sueno">
-        <div id="recuperacion-sleep-content">
-          <!-- _syncRecuperacionContent() inyecta aquí el contenido de sleep -->
-        </div>
-      </div><!-- /sub-recuperacion-sueno -->
-
-      <!-- Subpage: Suplementos -->
-      <div class="v15-subpage" id="sub-recuperacion-suplementos">
+      <!-- Suplementos directo (sin subtabs) -->
+      <div id="sub-recuperacion-suplementos" style="display:block">
         <div class="card" id="suppStatusCard">
           <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
             <div class="card-title" style="margin-bottom:0"><span>💊</span> Estado de hoy</div>
@@ -904,35 +875,13 @@ if (_tsZoom !== 1.0) {
         </div>
       </div><!-- /sub-recuperacion-suplementos -->
 
-      <!-- Subpage: Agua -->
-      <div class="v15-subpage" id="sub-recuperacion-agua">
-        <div id="recuperacion-water-content">
-          <!-- _syncRecuperacionContent() inyecta aquí el contenido de water -->
-        </div>
-      </div><!-- /sub-recuperacion-agua -->
-
     </div><!-- /page-recuperacion -->
 
-    <!-- ═══ PROGRESO PAGE (Métricas arriba + Calendario abajo) ═══ -->
-<!-- ═══ PROGRESO PAGE (Métricas + Calendario con sub-tabs) ═══ -->
+    <!-- ═══ PROGRESO PAGE ═══ -->
     <div class="page" id="page-progreso">
-
-      <!-- Sub-tabs -->
-      <div class="v15-subtabs" id="progresoSubtabs">
-        <button class="v15-subtab active" id="subtab-prog-metricas"   onclick="switchSubtab('progreso','metricas',this)">📈 Métricas</button>
-        <button class="v15-subtab"        id="subtab-prog-calendario" onclick="switchSubtab('progreso','calendario',this)">📅 Calendario</button>
-      </div>
-
-      <!-- Subpage: Métricas -->
-      <div class="v15-subpage active" id="sub-progreso-metricas">
+      <div id="sub-progreso-metricas">
         <div id="progreso-metrics-content"></div>
       </div>
-
-      <!-- Subpage: Calendario -->
-      <div class="v15-subpage" id="sub-progreso-calendario">
-        <div id="progreso-calendar-content"></div>
-      </div>
-
     </div><!-- /page-progreso -->
 
   </div><!-- /content -->
