@@ -237,6 +237,9 @@ weight: (w !== '' && !isNaN(weight) && weight > 0) ? Math.max(0, weight) : null,
   // Sin límite de entradas — las métricas ocupan ~50 bytes por entrada
   state.metricsHistory.unshift(entry);
   saveState(state);
+  if (typeof _exportRowToSheets === 'function') {
+    _exportRowToSheets('Composición Corporal', [entry.date, entry.weight ?? '', entry.bf ?? '', entry.muscle ?? '']);
+  }
 
   // Limpiar campos (incluye los visibles del picker)
 ['inpWeight','inpBFReal','inpMuscle','inpWaist','inpChest','inpArms','inpHips',
@@ -306,6 +309,9 @@ function saveExerciseHistory(day, exIdx, sets) {
   state.exerciseHistory[key].unshift({ date:TODAY, maxKg, avgReps, oneRM, sets:sets.length, setsLog });
   if (state.exerciseHistory[key].length > 40) state.exerciseHistory[key] = state.exerciseHistory[key].slice(0,40);
   saveState(state);
+  if (typeof _exportRowToSheets === 'function') {
+    _exportRowToSheets('Gym', [TODAY, key, sets.length, avgReps ?? '', maxKg]);
+  }
 }
 
 function findExByName(name) {
