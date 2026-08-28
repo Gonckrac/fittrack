@@ -97,6 +97,10 @@ function toggleSupp(id) {
       showToast('✓ Suplemento marcado ✓');
       celebrate('supp');
     }
+    if (typeof _exportRowToSheets === 'function') {
+      var _s = todaySupps.find(function(s) { return s.id === id; });
+      if (_s) _exportRowToSheets('Suplementos', [TODAY, _s.name, _s.dose || '', _s.time]);
+    }
   }
 }
 // ─── SUPLEMENTOS — BOTTOM SHEET (reemplaza el hack del wizard) ──────

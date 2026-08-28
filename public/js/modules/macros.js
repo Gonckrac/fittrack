@@ -1546,6 +1546,10 @@ var food = {
   state.freqFoods[key].fat  = fat;
 
 saveState(state);
+  if (typeof _exportRowToSheets === 'function') {
+    var _fkcal = Math.round((food.prot||0)*4 + (food.carb||0)*4 + (food.fat||0)*9);
+    _exportRowToSheets('Nutrición', [TODAY, food.meal, food.name, _fkcal, food.prot||0, food.carb||0, food.fat||0]);
+  }
   closeModal('addFoodModal');
   _selectedCatalogFood = null;
   renderMeals();
