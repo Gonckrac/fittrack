@@ -1977,6 +1977,31 @@ const target = getProgressionTarget(ex.name, ex);
     const progBarHtml = buildProgressionBar(exSets, ex);
     // Feature 2: Weight suggestion (show if any set is done)
 const weightSuggHtml = doneCount > 0 ? buildWeightSuggestionUpgradeOnly(ex.name, ex, exSets) : '';
+    // Feature 3: Last session pill (always visible)
+    const lastSessionPill = buildLastSessionPill(ex.name);
+function buildLastSessionPill(exName) {
+  const history = (state.exerciseHistory || {})[exName] || [];
+  if (history.length === 0) return '';
+  const last = history[0];
+  const setsLog = last.setsLog || [];
+  if (setsLog.length === 0 && !last.maxKg) return '';
+  const dateStr = last.date ? last.date.slice(5).replace('-', '/') : '';
+  let setsHtml;
+  if (setsLog.length > 0) {
+    setsHtml = setsLog.map(function(s) {
+      var kg = s.kg || '—';
+      var reps = s.reps || '—';
+      return '<span class="lsp-set">' + kg + 'kg×' + reps + '</span>';
+    }).join('');
+  } else {
+    setsHtml = '<span class="lsp-set">' + (last.maxKg || '—') + 'kg×' + (last.avgReps || '?') + '</span>';
+  }
+  return '<div class="last-session-pill">'
+    + '<span class="lsp-label">Última vez</span>'
+    + (dateStr ? '<span class="lsp-date">' + dateStr + '</span><div class="lsp-divider"></div>' : '')
+    + '<div class="lsp-sets">' + setsHtml + '</div>'
+    + '</div>';
+}
 function buildWeightSuggestionUpgradeOnly(exName, ex, currentSets) {
   // Solo muestra el cartel de subir peso — nunca el "apuntá al máximo" (ya lo cubre targetHtml)
   const history = (state.exerciseHistory || {})[exName] || [];
@@ -2017,6 +2042,7 @@ function buildWeightSuggestionUpgradeOnly(exName, ex, currentSets) {
         </div>
       </div>
       <div class="sets-container">
+        ${lastSessionPill}
         ${targetHtml}${setsHtml}
         ${progBarHtml}
         ${weightSuggHtml}

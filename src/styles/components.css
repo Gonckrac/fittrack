@@ -56,6 +56,14 @@
 .set-check.done { background:var(--green); border-color:var(--green); }
 .add-set-btn { font-size:0.78em; color:var(--accent); background:none; border:none; cursor:pointer; padding:4px 0; font-family:'DM Sans', sans-serif; }
 
+/* LAST SESSION PILL */
+.last-session-pill { display:flex; flex-wrap:wrap; align-items:center; gap:6px; background:var(--bg4); border:1px solid var(--border); border-radius:8px; padding:7px 10px; margin-bottom:8px; }
+.lsp-label { font-size:0.71em; font-weight:700; color:var(--text3); text-transform:uppercase; letter-spacing:0.5px; flex-shrink:0; }
+.lsp-date { font-size:0.71em; color:var(--text3); flex-shrink:0; opacity:0.7; }
+.lsp-divider { width:1px; height:12px; background:var(--border); flex-shrink:0; }
+.lsp-sets { display:flex; flex-wrap:wrap; gap:4px; align-items:center; }
+.lsp-set { font-size:0.78em; font-weight:600; font-family:'Space Mono', monospace; color:var(--text2); background:var(--bg3); border:1px solid var(--border); border-radius:5px; padding:2px 6px; white-space:nowrap; }
+
 /* SUPPLEMENTS */
 .supps-grid { display:flex; flex-direction:column; gap:6px; }
 .supp-item { display:flex; align-items:center; gap:12px; padding:10px 14px; background:var(--bg3); border-radius:var(--radius-sm); border:1px solid var(--border); cursor:pointer; transition:all 0.2s; }
