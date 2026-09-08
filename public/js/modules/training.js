@@ -2237,7 +2237,21 @@ s.done = !s.done;
     }
   }
 
+  // Iniciar timers ANTES del re-render para que _reattachSSTimers() los reconecte al DOM nuevo
+  if (s.done && ex) {
+    if (ex.ssGroup && ex.ssPart === 'a') {
+      const _ts2 = state[TODAY]['trainSets_'+day] || {};
+      const _bIdx2 = cfg ? cfg.exercises.findIndex(function(e2){ return e2.ssGroup === ex.ssGroup && e2.ssPart === 'b'; }) : -1;
+      const _bSets2 = _bIdx2 >= 0 ? (_ts2[_bIdx2] || []) : [];
+      const _bAllDone2 = _bSets2.length > 0 && _bSets2.every(function(s2){ return s2.done; });
+      if (!_bAllDone2) startSSTimer(ex, allSets, sIdx);
+    } else if (!ex.ssGroup && !allDone) {
+      startRestTimer(ex, allSets, sIdx);
+    }
+  }
+
   // Re-render completo solo cuando termina el ejercicio o inicia la sesión
+  // (después del timer, para que _reattachSSTimers lo reconecte al DOM nuevo)
   if (allDone || !state[TODAY].trainingStarted) {
     renderTraining();
     renderHome();
@@ -2259,20 +2273,6 @@ s.done = !s.done;
         if (progBar) { progBar.style.width = pct + '%'; progBar.style.background = pct === 100 ? 'var(--green)' : 'var(--accent)'; }
         if (progLbl) progLbl.textContent = prog.done + ' de ' + prog.total + ' ejercicios completos';
       }
-    }
-  }
-
-  if (s.done && ex) {
-    if (ex.ssGroup && ex.ssPart === 'a') {
-      // Disparar timer SS incluso cuando todas las series de A terminan,
-      // siempre que B tenga series pendientes (fix: antes se bloqueaba con !allDone)
-      const _ts2 = state[TODAY]['trainSets_'+day] || {};
-      const _bIdx2 = cfg ? cfg.exercises.findIndex(function(e2){ return e2.ssGroup === ex.ssGroup && e2.ssPart === 'b'; }) : -1;
-      const _bSets2 = _bIdx2 >= 0 ? (_ts2[_bIdx2] || []) : [];
-      const _bAllDone2 = _bSets2.length > 0 && _bSets2.every(function(s2){ return s2.done; });
-      if (!_bAllDone2) startSSTimer(ex, allSets, sIdx);
-    } else if (!ex.ssGroup && !allDone) {
-      startRestTimer(ex, allSets, sIdx);
     }
   }
   if (allDone) {
