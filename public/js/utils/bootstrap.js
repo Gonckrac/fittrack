@@ -13,6 +13,9 @@ async function bootstrap() {
     }
   } catch(_e) {}
 
+  // Eventos del reloj (comidas, sueño, peso, estudio…) que falten en el state
+  if (typeof applyWatchInbox === 'function') { try { await applyWatchInbox(); } catch(_e) {} }
+
   if (!state[TODAY]) state[TODAY] = { foods:[], supps:{}, sleep:{}, metrics:null, kcal:{burned:0,active:0}, trainDay: 0 };
  if (!state.metricsHistory) state.metricsHistory = [];
   if (!state.kcalHistory) state.kcalHistory = [];
