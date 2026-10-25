@@ -86,11 +86,14 @@
     // Peso / composición (balanza vía atajo del iPhone o reloj): { weight, bf, muscle }
     metrics: function (state, ev) {
       var m = ev.data || {};
-      if (!m.weight) return;
+      if (typeof m.weight === 'string') m.weight = m.weight.replace(',', '.').replace(/[^\d.]/g, '');
+      if (!m.weight || !parseFloat(m.weight)) return;
       if (!Array.isArray(state.metricsHistory)) state.metricsHistory = [];
       var entry = { date: ev.date, weight: num(m.weight) };
-      if (m.bf != null) entry.bf = num(m.bf);
-      if (m.muscle != null) entry.muscle = num(m.muscle);
+      // Salud del iPhone a veces da porcentajes como fracción (0.18 = 18 %)
+      var pct = function (v) { var n = parseFloat(String(v).replace(',', '.').replace('%', '')); return isNaN(n) ? null : n > 0 && n <= 1 ? num(n * 100) : num(n); };
+      if (m.bf != null && m.bf !== '' && pct(m.bf) != null) entry.bf = pct(m.bf);
+      if (m.muscle != null && m.muscle !== '' && pct(m.muscle) != null) entry.muscle = pct(m.muscle);
       state.metricsHistory = state.metricsHistory.filter(function (h) { return h.date !== ev.date; });
       state.metricsHistory.push(entry);
       state.metricsHistory.sort(function (a, b) { return a.date < b.date ? -1 : a.date > b.date ? 1 : 0; });
