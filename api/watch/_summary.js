@@ -112,14 +112,19 @@ function training(state, date, day) {
           ? { kg: r1(+last.maxKg + 2.5), reps: ex.topRep, up: true }
           : { kg: r1(last.maxKg), reps: (last.avgReps || 0) + 1, up: false };
       }
+      const log = last && Array.isArray(last.setsLog)
+        ? last.setsLog.map((x) => [r1(parseFloat(String(x.kg).replace(',', '.')) || 0), parseInt(x.reps, 10) || 0]).filter((x) => x[0] || x[1])
+        : null;
       return {
         name: ex.name,
         sets: ex.sets || 3,
         reps: ex.reps || '',
         topRep: ex.topRep || null,
-        last: last ? { kg: r1(last.maxKg), reps: last.avgReps || null } : null,
+        last: last ? { kg: r1(last.maxKg), reps: last.avgReps || null, date: last.date || null, log: log && log.length ? log : null } : null,
         next,
         doneSets,
+        ss: ex.ssGroup ? { g: ex.ssGroup, p: ex.ssPart || 'a', rest: ex.ssRestSec || null } : null,
+        rest: ex.restSec || null,
       };
     }),
   };
