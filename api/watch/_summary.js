@@ -151,6 +151,15 @@ function metrics(state, date) {
   };
 }
 
+// Objetivo de agua igual que la web: 35 ml por kg, redondeado a 100 ml
+function waterGoal(state) {
+  const cfg = state.config || {};
+  const h = (state.metricsHistory || []).filter((m) => m.weight);
+  const last = h.length ? h.slice().sort((a, b) => (a.date < b.date ? -1 : 1))[h.length - 1].weight : null;
+  const w = parseFloat(cfg.weight) || parseFloat(last) || 70;
+  return Math.round((w * 35) / 100) * 100;
+}
+
 function buildSummary(state, date) {
   const day = state[date] || {};
   const s = day.sleep || {};
@@ -167,6 +176,7 @@ function buildSummary(state, date) {
       : null,
     training: training(state, date, day),
     metrics: metrics(state, date),
+    water: { ml: day.water || 0, goal: waterGoal(state) },
     study: (day.study || []).map((b) => ({ label: b.label, doneMin: b.doneMin, plannedMin: b.plannedMin, status: b.status })),
   };
 }

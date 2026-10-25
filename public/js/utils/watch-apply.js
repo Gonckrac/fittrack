@@ -53,6 +53,13 @@
       d.foods = d.foods.filter(function (f) { return f.id !== target; });
     },
 
+    // Agua: { ml } (negativo = deshacer un vaso)
+    water: function (state, ev) {
+      var d = ensureDay(state, ev.date);
+      var ml = parseFloat((ev.data || {}).ml) || 0;
+      d.water = Math.max(0, Math.round((d.water || 0) + ml));
+    },
+
     // Suplemento: { id, taken: true|false }
     supp: function (state, ev) {
       var d = ensureDay(state, ev.date);
