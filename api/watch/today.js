@@ -15,11 +15,12 @@ module.exports = async function handler(req, res) {
       loadState(sb()),
       upcomingExams().catch((e) => {
         console.warn('[watch/today] calendar', e.message);
-        return null; // sin Calendar configurado, el resto anda igual
+        return { error: e.message }; // sin Calendar configurado, el resto anda igual
       }),
     ]);
     const summary = buildSummary(state, date);
-    if (exams) summary.exams = exams;
+    if (Array.isArray(exams)) summary.exams = exams;
+    else if (exams && exams.error) summary.calendarError = exams.error;
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json({ ok: true, summary });
   } catch (e) {

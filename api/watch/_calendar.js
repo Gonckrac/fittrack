@@ -17,7 +17,14 @@ async function callCalendar(action, payload = {}, timeoutMs = 8000) {
       redirect: 'follow',
       signal: ctrl.signal,
     });
-    const j = await r.json();
+    const raw = await r.text();
+    let j;
+    try {
+      j = JSON.parse(raw);
+    } catch (e) {
+      // Si Apps Script devuelve una página (login / permisos), lo decimos claro
+      throw new Error('Apps Script no devolvió JSON (HTTP ' + r.status + '). ¿Acceso = "Cualquier persona"? ' + raw.slice(0, 80));
+    }
     if (!j.ok) throw new Error(j.error || 'calendar error');
     return j;
   } finally {
