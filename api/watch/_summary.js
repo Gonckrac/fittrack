@@ -160,6 +160,97 @@ function waterGoal(state) {
   return Math.round((w * 35) / 100) * 100;
 }
 
+// ── Logros: datos positivos reales que el reloj muestra de vez en cuando ──
+function addDays(date, n) {
+  const d = new Date(date + 'T12:00:00Z');
+  d.setUTCDate(d.getUTCDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+function fmtH(min) {
+  const h = Math.floor(min / 60);
+  const m = Math.round(min % 60);
+  return h + ' h' + (m ? ' ' + (m < 10 ? '0' : '') + m : '');
+}
+function n1(x) {
+  return String(r1(x)).replace('.', ',');
+}
+
+function wins(state, date) {
+  const out = [];
+  const daysAgo = (d) => Math.round((new Date(date + 'T12:00:00Z') - new Date(d + 'T12:00:00Z')) / 86400000);
+
+  // Cuerpo: peso, grasa y músculo contra hace ~2 y ~4 semanas
+  const h = (state.metricsHistory || []).filter((m) => m.weight).slice().sort((a, b) => (a.date < b.date ? -1 : 1));
+  if (h.length >= 2) {
+    const last = h[h.length - 1];
+    if (daysAgo(last.date) <= 10) {
+      [[10, 20], [21, 45]].forEach(([lo, hi]) => {
+        const ref = h.filter((m) => m.date < last.date && daysAgo(m.date) >= lo && daysAgo(m.date) <= hi).pop();
+        if (!ref) return;
+        const days = daysAgo(ref.date) - daysAgo(last.date);
+        const sub = 'en las últimas ' + Math.round(days / 7) + ' semanas';
+        const dw = last.weight - ref.weight;
+        if (dw <= -0.5) out.push({ id: 'peso' + hi + ':' + last.date, kind: 'body', title: 'Bajaste ' + n1(-dw) + ' kg', sub });
+        if (last.bf != null && ref.bf != null && last.bf - ref.bf <= -0.5) {
+          out.push({ id: 'grasa' + hi + ':' + last.date, kind: 'body', title: n1(ref.bf - last.bf) + ' % menos de grasa', sub });
+        }
+        if (last.muscle != null && ref.muscle != null && last.muscle - ref.muscle >= 0.3) {
+          out.push({ id: 'musc' + hi + ':' + last.date, kind: 'body', title: '+' + n1(last.muscle - ref.muscle) + ' de músculo', sub });
+        }
+      });
+    }
+  }
+
+  // Últimas 2 semanas: estudio y entrenos
+  let studyMin = 0;
+  let gymDays = 0;
+  for (let i = 1; i <= 14; i++) {
+    const d = state[addDays(date, -i)];
+    if (!d) continue;
+    (d.study || []).forEach((b) => (studyMin += +b.doneMin || 0));
+    const trained = Object.keys(d).some((k) => k.startsWith('trainSets_') && Object.values(d[k] || {}).some((sets) => Array.isArray(sets) && sets.some((x) => x && x.done)));
+    if (trained) gymDays++;
+  }
+  if (studyMin >= 300) out.push({ id: 'estudio:' + Math.floor(studyMin / 120), kind: 'study', title: 'Estudiaste ' + fmtH(studyMin), sub: 'en las últimas 2 semanas' });
+  if (gymDays >= 4) out.push({ id: 'gym:' + gymDays + ':' + addDays(date, -1), kind: 'gym', title: 'Entrenaste ' + gymDays + ' veces', sub: 'en las últimas 2 semanas' });
+
+  // Récords: la última sesión (de las últimas 2 semanas) superó todo lo anterior
+  const hist = state.exerciseHistory || {};
+  Object.keys(hist).forEach((name) => {
+    const list = (hist[name] || []).filter((x) => x && x.maxKg);
+    if (list.length < 2) return;
+    const lastE = list[0];
+    if (daysAgo(lastE.date) > 14) return;
+    const best = Math.max.apply(null, list.slice(1).map((x) => +x.maxKg || 0));
+    if (+lastE.maxKg > best) {
+      out.push({ id: 'pr:' + name + ':' + lastE.maxKg, kind: 'pr', title: 'Récord en ' + name, sub: n1(lastE.maxKg) + ' kg' + (lastE.avgReps ? ' × ' + lastE.avgReps : '') });
+    }
+  });
+
+  // Última semana: proteína, sueño y agua
+  const tg = targets(state.config).prot;
+  let protDays = 0;
+  const sleeps = [];
+  let waterDays = 0;
+  const wg = waterGoal(state);
+  for (let i = 1; i <= 7; i++) {
+    const d = state[addDays(date, -i)];
+    if (!d) continue;
+    if (eaten(d).prot >= tg * 0.95) protDays++;
+    const sl = d.sleep || {};
+    const hrs = +(sl.hours || sl.manHours) || 0;
+    if (hrs) sleeps.push(hrs);
+    if ((d.water || 0) >= wg) waterDays++;
+  }
+  if (protDays >= 5) out.push({ id: 'prot:' + protDays + ':' + addDays(date, -1), kind: 'food', title: 'Proteína cumplida ' + protDays + ' de 7 días', sub: 'esta última semana' });
+  if (sleeps.length >= 5) {
+    const avg = sleeps.reduce((a, b) => a + b, 0) / sleeps.length;
+    if (avg >= 7) out.push({ id: 'sueno:' + addDays(date, -1), kind: 'sleep', title: 'Dormiste ' + fmtH(avg * 60) + ' de promedio', sub: 'esta última semana' });
+  }
+  if (waterDays >= 4) out.push({ id: 'agua:' + waterDays + ':' + addDays(date, -1), kind: 'water', title: 'Llegaste al agua ' + waterDays + ' de 7 días', sub: 'esta última semana' });
+  return out;
+}
+
 function buildSummary(state, date) {
   const day = state[date] || {};
   const s = day.sleep || {};
@@ -177,6 +268,7 @@ function buildSummary(state, date) {
     training: training(state, date, day),
     metrics: metrics(state, date),
     water: { ml: day.water || 0, goal: waterGoal(state) },
+    wins: wins(state, date),
     study: (day.study || []).map((b) => ({ label: b.label, doneMin: b.doneMin, plannedMin: b.plannedMin, status: b.status })),
   };
 }
