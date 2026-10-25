@@ -129,17 +129,20 @@ function metrics(state, date) {
   const h = (state.metricsHistory || []).filter((m) => m.weight).slice().sort((a, b) => (a.date < b.date ? -1 : 1));
   if (!h.length) return null;
   const last = h[h.length - 1];
-  // Cambio contra la medición más cercana a 7 días antes
-  const ref = new Date(date + 'T12:00:00Z');
-  ref.setUTCDate(ref.getUTCDate() - 7);
-  const refStr = ref.toISOString().slice(0, 10);
-  const prev = h.filter((m) => m.date <= refStr).pop();
+  // Cambio semanal: solo si hay una medición de hace 5 a 14 días.
+  // Si la anterior es más vieja, se informa aparte con su fecha (sincePct / sinceDate).
+  const daysAgo = (d) => Math.round((new Date(date + 'T12:00:00Z') - new Date(d + 'T12:00:00Z')) / 86400000);
+  const older = h.filter((m) => m.date < last.date);
+  const weekRef = older.filter((m) => daysAgo(m.date) >= 5 && daysAgo(m.date) <= 14).pop();
+  const prev = older[older.length - 1];
   return {
     date: last.date,
     weight: r1(last.weight),
     bf: last.bf != null ? r1(last.bf) : null,
     muscle: last.muscle != null ? r1(last.muscle) : null,
-    weekPct: prev ? r1(((last.weight - prev.weight) / prev.weight) * 100) : null,
+    weekPct: weekRef ? r1(((last.weight - weekRef.weight) / weekRef.weight) * 100) : null,
+    sincePct: prev ? r1(((last.weight - prev.weight) / prev.weight) * 100) : null,
+    sinceDate: prev ? prev.date : null,
   };
 }
 
