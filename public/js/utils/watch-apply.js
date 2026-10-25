@@ -111,6 +111,45 @@
       });
     },
 
+    // Ejercicio terminado en el reloj:
+    // { day (1-based, igual que trainDay), exIdx, name, totalEx, sets: [{kg, reps}] }
+    // Queda igual que si lo tachabas en la app: trainSets_<day> + exerciseHistory.
+    gym_ex: function (state, ev) {
+      var g = ev.data || {};
+      if (!g.day || g.exIdx == null || !Array.isArray(g.sets) || !g.sets.length) return;
+      var d = ensureDay(state, ev.date);
+      var key = 'trainSets_' + g.day;
+      if (!d[key]) d[key] = {};
+      var total = g.totalEx || 0;
+      for (var i = 0; i < total; i++) if (!d[key][i]) d[key][i] = [];
+      d[key][g.exIdx] = g.sets.map(function (s) {
+        return { kg: s.kg != null ? String(s.kg) : '', reps: s.reps != null ? String(s.reps) : '', done: true };
+      });
+      d.trainingStarted = true;
+      d.trainDay = g.day;
+
+      if (!g.name) return;
+      if (!state.exerciseHistory || typeof state.exerciseHistory !== 'object') state.exerciseHistory = {};
+      var hist = state.exerciseHistory[g.name] || [];
+      var kg = g.sets.map(function (s) { return parseFloat(s.kg); }).filter(function (v) { return !isNaN(v) && v > 0; });
+      var reps = g.sets.map(function (s) { return parseFloat(s.reps); }).filter(function (v) { return !isNaN(v) && v > 0; });
+      if (!kg.length) return;
+      var maxKg = Math.max.apply(null, kg);
+      var avgReps = reps.length ? Math.round(reps.reduce(function (a, b) { return a + b; }, 0) / reps.length) : null;
+      var entry = {
+        date: ev.date,
+        maxKg: maxKg,
+        avgReps: avgReps,
+        oneRM: avgReps ? Math.round(maxKg * (1 + avgReps / 30)) : maxKg,
+        sets: g.sets.length,
+        setsLog: g.sets.map(function (s) { return { kg: String(s.kg || ''), reps: String(s.reps || '') }; }),
+        src: 'reloj',
+      };
+      hist = hist.filter(function (h) { return h.date !== ev.date; }); // si lo rehace, queda lo último
+      hist.unshift(entry);
+      state.exerciseHistory[g.name] = hist.slice(0, 40);
+    },
+
     // Hora a la que apagó la alarma: { time: 'HH:MM', target: 'HH:MM' }
     wake: function (state, ev) {
       var d = ensureDay(state, ev.date);

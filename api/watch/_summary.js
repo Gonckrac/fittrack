@@ -95,13 +95,17 @@ function training(state, date, day) {
   const r = routines[idx];
   const hist = state.exerciseHistory || {};
   const done = day ? Object.keys(day).some((k) => k.startsWith('trainSets_')) : false;
+  const saved = (day && day['trainSets_' + (idx + 1)]) || {};
   return {
     type: 'gym',
     day: idx + 1,
     name: r.name,
     done,
-    exercises: (r.exercises || []).map((ex) => {
-      const last = (hist[ex.name] || [])[0];
+    exercises: (r.exercises || []).map((ex, i) => {
+      const doneSets = (saved[i] || []).filter((s) => s && s.done).length;
+      const prevAll = hist[ex.name] || [];
+      // "Última" = la última sesión ANTERIOR a hoy (si hoy ya lo hiciste, no cuenta)
+      const last = prevAll.find((h) => h.date !== date);
       let next = null;
       if (last && last.maxKg && ex.topRep) {
         next = (last.avgReps || 0) >= ex.topRep
@@ -115,6 +119,7 @@ function training(state, date, day) {
         topRep: ex.topRep || null,
         last: last ? { kg: r1(last.maxKg), reps: last.avgReps || null } : null,
         next,
+        doneSets,
       };
     }),
   };

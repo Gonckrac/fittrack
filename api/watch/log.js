@@ -12,6 +12,40 @@ const { buildSummary } = require('./_summary');
 
 const MAX_EVENTS = 100;
 
+// Copia a la hoja de Google (igual que hace la app web) lo que llegó del reloj.
+async function exportToSheets(events, state) {
+  const url = process.env.APPS_SCRIPT_URL;
+  const secret = process.env.SHEETS_SECRET;
+  if (!url || !secret) return;
+  const gym = events
+    .filter((e) => e.type === 'gym_ex' && e.data && e.data.name && Array.isArray(e.data.sets))
+    .map((e) => {
+      const kg = e.data.sets.map((s) => parseFloat(s.kg)).filter((v) => v > 0);
+      const reps = e.data.sets.map((s) => parseFloat(s.reps)).filter((v) => v > 0);
+      const avg = reps.length ? Math.round(reps.reduce((a, b) => a + b, 0) / reps.length) : '';
+      return [e.date, e.data.name, e.data.sets.length, avg, kg.length ? Math.max(...kg) : ''];
+    });
+  const supps = (state.config && state.config.supps) || [];
+  const sup = events
+    .filter((e) => e.type === 'supp' && e.data && e.data.taken !== false)
+    .map((e) => {
+      const i = supps.findIndex((s, k) => (s.id || 'cfg_supp_' + k) === e.data.id);
+      const s = supps[i];
+      return s ? [e.date, s.name, s.dose || '', s.time || ''] : null;
+    })
+    .filter(Boolean);
+  const post = (sheet, rows) =>
+    rows.length
+      ? fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ secret, sheet, rows }),
+          redirect: 'follow',
+        }).catch((err) => console.warn('[watch/log] sheets', sheet, err.message))
+      : null;
+  await Promise.all([post('Gym', gym), post('Suplementos', sup)]);
+}
+
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end();
   if (!authorized(req)) return res.status(401).json({ error: 'unauthorized' });
@@ -38,8 +72,13 @@ module.exports = async function handler(req, res) {
     const client = sb();
     await storeInbox(client, events);
     const state = await loadState(client);
+    const before = Object.assign({}, state._watchApplied || {});
     const applied = applyWatchEvents(state, events);
-    if (applied) await saveState(client, state);
+    if (applied) {
+      await saveState(client, state);
+      // Solo exportamos lo que se aplicó por primera vez (no duplicar filas)
+      await exportToSheets(events.filter((e) => !before[e.id]), state);
+    }
     res.status(200).json({
       ok: true,
       received: events.length,
