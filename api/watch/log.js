@@ -9,6 +9,7 @@
 // desde la bandeja lo que falte (ver public/js/utils/watch-inbox.js).
 const { sb, authorized, loadState, saveState, storeInbox, applyWatchEvents, todayAR } = require('./_lib');
 const { buildSummary } = require('./_summary');
+const { upcomingExams, createReminder } = require('./_calendar');
 
 const MAX_EVENTS = 100;
 
@@ -70,6 +71,20 @@ module.exports = async function handler(req, res) {
 
   try {
     const client = sb();
+    // Recordatorios → Google Calendar. Si falla, NO se confirma al reloj (lo reintenta).
+    const failed = {};
+    await Promise.all(
+      events
+        .filter((e) => e.type === 'remind')
+        .map((e) =>
+          createReminder(e).catch((err) => {
+            console.warn('[watch/log] remind', err.message);
+            failed[e.id] = err.message;
+          }),
+        ),
+    );
+    events = events.filter((e) => !failed[e.id]);
+    if (!events.length) return res.status(200).json({ ok: true, received: 0, applied: 0, ids: [], failed });
     await storeInbox(client, events);
     const state = await loadState(client);
     const before = Object.assign({}, state._watchApplied || {});
@@ -79,12 +94,16 @@ module.exports = async function handler(req, res) {
       // Solo exportamos lo que se aplicó por primera vez (no duplicar filas)
       await exportToSheets(events.filter((e) => !before[e.id]), state);
     }
+    const summary = buildSummary(state, todayAR());
+    const exams = await upcomingExams().catch(() => null);
+    if (exams) summary.exams = exams;
     res.status(200).json({
       ok: true,
       received: events.length,
       applied,
       ids: events.map((e) => e.id), // el reloj saca estos de su cola
-      summary: buildSummary(state, todayAR()),
+      failed,
+      summary,
     });
   } catch (e) {
     console.error('[watch/log]', e.message);
