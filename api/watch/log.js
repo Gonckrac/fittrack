@@ -10,6 +10,7 @@
 const { sb, authorized, loadState, saveState, storeInbox, applyWatchEvents, todayAR } = require('./_lib');
 const { buildSummary } = require('./_summary');
 const { upcomingExams, createReminder } = require('./_calendar');
+const { sportsFor } = require('./_sports');
 
 const MAX_EVENTS = 100;
 
@@ -95,8 +96,9 @@ module.exports = async function handler(req, res) {
       await exportToSheets(events.filter((e) => !before[e.id]), state);
     }
     const summary = buildSummary(state, todayAR());
-    const exams = await upcomingExams().catch(() => null);
+    const [exams, sports] = await Promise.all([upcomingExams().catch(() => null), sportsFor(todayAR()).catch(() => null)]);
     if (exams) summary.exams = exams;
+    if (sports) summary.sports = sports;
     res.status(200).json({
       ok: true,
       received: events.length,
