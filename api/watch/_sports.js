@@ -94,6 +94,9 @@ function parseEvents(json, sport, league) {
       date: arDate(start),
       home: shortName(home.team, sport),
       away: shortName(away.team, sport),
+      // escudos: el reloj los trae guardados como crest/s<id>.png (fútbol) o crest/n<abrev>.png (NBA)
+      hc: sport === 'nba' ? 'n' + String(home.team.abbreviation || '').toLowerCase() : 's' + home.team.id,
+      ac: sport === 'nba' ? 'n' + String(away.team.abbreviation || '').toLowerCase() : 's' + away.team.id,
       mine: mine[home.team.displayName] ? 'home' : 'away',
       state: st.state || 'pre', // pre | in | post
       detail: st.shortDetail || '',
