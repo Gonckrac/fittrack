@@ -160,6 +160,46 @@
       state.exerciseHistory[g.name] = hist.slice(0, 40);
     },
 
+    // Rutina y plan de comidas que manda el reloj (una vez por versión):
+    // { v, training: [rutinas], cycle: { Mon: 0, ... }, mealPlan: [7 días, lunes primero], presets: [...] }
+    // Guarda lo anterior en config.programBackup. Si ya hay una versión igual o más
+    // nueva (o la editaste en la app después), no pisa nada.
+    program: function (state, ev) {
+      var p = ev.data || {};
+      if (!p.v || !Array.isArray(p.training) || !p.training.length) return;
+      if (!state.config || typeof state.config !== 'object') state.config = {};
+      var cfg = state.config;
+      if ((cfg.programV || 0) >= p.v) return;
+      cfg.programBackup = {
+        at: ev.date,
+        training: cfg.training || null,
+        cycle: cfg.cycle || null,
+        mealPlan: (state.mealPlan && state.mealPlan.plan) || null,
+      };
+      cfg.training = p.training;
+      if (p.cycle) cfg.cycle = p.cycle;
+      if (Array.isArray(p.mealPlan) && p.mealPlan.length === 7) {
+        if (!state.mealPlan || typeof state.mealPlan !== 'object') state.mealPlan = {};
+        state.mealPlan.plan = p.mealPlan;
+        state.mealPlan.generatedAt = ev.date;
+        state.mealPlan.source = 'recetario';
+      }
+      if (Array.isArray(p.presets)) {
+        if (!Array.isArray(state.foodPresets)) state.foodPresets = [];
+        p.presets.forEach(function (x) {
+          state.foodPresets = state.foodPresets.filter(function (f) { return String(f.name).toLowerCase() !== String(x.name).toLowerCase(); });
+          state.foodPresets.unshift(x);
+        });
+      }
+      // El día de hoy pasa a la rutina nueva que le toca
+      var dow = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][new Date(ev.date + 'T12:00:00Z').getUTCDay()];
+      var idx = cfg.cycle && cfg.cycle[dow];
+      var d = ensureDay(state, ev.date);
+      var trained = Object.keys(d).some(function (k) { return k.indexOf('trainSets_') === 0; });
+      if (!trained && typeof idx === 'number' && idx >= 0) d.trainDay = idx + 1;
+      cfg.programV = p.v;
+    },
+
     // Hora a la que apagó la alarma: { time: 'HH:MM', target: 'HH:MM' }
     wake: function (state, ev) {
       var d = ensureDay(state, ev.date);
