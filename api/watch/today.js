@@ -23,7 +23,10 @@ module.exports = async function handler(req, res) {
     const summary = buildSummary(state, date);
     if (Array.isArray(exams)) summary.exams = exams;
     else if (exams && exams.error) summary.calendarError = exams.error;
-    if (sports) summary.sports = sports;
+    if (sports) {
+      summary.sports = sports;
+      summary.sportsMeta = sports.meta || null; // para el diagnóstico del reloj
+    } else summary.sportsMeta = { fetchedAt: Date.now(), ok: 0, failed: ['error interno'], count: 0 };
     res.setHeader('Cache-Control', 'no-store');
     res.status(200).json({ ok: true, summary });
   } catch (e) {

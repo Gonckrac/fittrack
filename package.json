@@ -1,11 +1,12 @@
 {
   "name": "fittrack",
   "version": "1.0.0",
-  "description": "FitTrack — fitness tracking app",
+  "description": "FitTrack \u2014 fitness tracking app",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "node --test tests/"
   },
   "devDependencies": {
     "vite": "^5.0.0"

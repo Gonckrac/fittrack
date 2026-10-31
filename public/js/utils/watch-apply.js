@@ -30,6 +30,12 @@
     return isNaN(n) ? 0 : Math.round(n * 10) / 10;
   }
 
+  // Pesos: hasta 2 decimales exactos (11,25 · 12,75), acepta coma o punto
+  function kg2(v) {
+    var n = parseFloat(String(v == null ? '' : v).replace(',', '.'));
+    return isNaN(n) || n < 0 ? 0 : Math.round(n * 100) / 100;
+  }
+
   var HANDLERS = {
     // Comida: { name, meal: 'Desayuno'|'Almuerzo'|'Merienda'|'Cena'|'Extra', prot, carb, fat }
     food: function (state, ev) {
@@ -60,12 +66,45 @@
       d.water = Math.max(0, Math.round((d.water || 0) + ml));
     },
 
-    // Suplemento: { id, taken: true|false }
+    // Suplemento: { id, taken: true|false, at (ms, hora real en que lo marcaste) }
+    // Si llega una marca más vieja que la última guardada, no la pisa.
     supp: function (state, ev) {
       var d = ensureDay(state, ev.date);
       var s = ev.data || {};
       if (!s.id) return;
+      if (!d.suppsAt || typeof d.suppsAt !== 'object') d.suppsAt = {};
+      var prev = d.suppsAt[s.id];
+      var at = +s.at || ev.at || 0;
+      if (prev && prev.at && at && prev.at > at) return;
       d.supps[s.id] = s.taken !== false;
+      d.suppsAt[s.id] = { at: at, taken: s.taken !== false, src: 'reloj' };
+    },
+
+    // Plan de estudio semanal del horario del reloj (para los objetivos):
+    // { v, byDow: { 0: { min, blocks }, ... } }
+    study_plan: function (state, ev) {
+      var p = ev.data || {};
+      if (!p.byDow) return;
+      if (!state.config || typeof state.config !== 'object') state.config = {};
+      var prev = state.config.studyPlan;
+      if (prev && (prev.at || 0) > (ev.at || 0)) return;
+      state.config.studyPlan = { v: p.v || 1, byDow: p.byDow, at: ev.at };
+    },
+
+    // Cambio de horario de un bloque (mover/acortar un bloque de estudio desde el reloj):
+    // { date, key: 'study@15:45', t, end, min, label, removed, at }
+    schedule: function (state, ev) {
+      var o = ev.data || {};
+      var date = o.date || ev.date;
+      if (!o.key || !date) return;
+      if (!state.scheduleOverrides || typeof state.scheduleOverrides !== 'object') state.scheduleOverrides = {};
+      var day = state.scheduleOverrides[date] || (state.scheduleOverrides[date] = {});
+      var prev = day[o.key];
+      if (prev && (prev.at || 0) > (o.at || 0)) return;
+      day[o.key] = { t: o.t || null, end: o.end || null, min: o.min != null ? Math.round(+o.min) : null, label: o.label || null, removed: !!o.removed, at: o.at || ev.at };
+      // Solo se guardan los últimos 30 días
+      var keys = Object.keys(state.scheduleOverrides).sort();
+      while (keys.length > 30) delete state.scheduleOverrides[keys.shift()];
     },
 
     // Sueño de la noche que TERMINA en ev.date:
@@ -111,11 +150,16 @@
       var d = ensureDay(state, ev.date);
       if (!Array.isArray(d.study)) d.study = [];
       var s = ev.data || {};
+      // Un bloque con id propio se registra una sola vez (aunque reabras la app o se reintente)
+      if (s.id && d.study.some(function (x) { return x.blockId === s.id; })) return;
       d.study.push({
+        blockId: s.id || null,
+        blockKey: s.blockKey || null,
         id: 'w_' + ev.id,
         label: s.label || 'Estudio',
         plannedMin: Math.round(s.plannedMin || 0),
         doneMin: Math.round(s.doneMin || 0),
+        pomos: s.pomos != null ? Math.round(+s.pomos || 0) : null,
         start: s.start || null,
         status: s.status || 'done',
       });
@@ -200,12 +244,122 @@
       cfg.programV = p.v;
     },
 
+    // Una serie hecha (o corregida, o borrada) en el reloj:
+    // { sessionId, setId, day, exIdx, name, totalEx, setIndex, side: null|'der'|'izq',
+    //   kg, reps, timed, completedAtMs, restSec, rev, deleted }
+    // La serie tiene identidad estable (setId) y versión (rev): si llega dos veces,
+    // o llega una versión vieja después de una nueva, no cambia nada.
+    gym_set: function (state, ev) {
+      var g = ev.data || {};
+      if (!g.setId || !g.day || g.exIdx == null || g.setIndex == null) return;
+      var d = ensureDay(state, ev.date);
+      if (!d.watchSets || typeof d.watchSets !== 'object') d.watchSets = {};
+      var prev = d.watchSets[g.setId];
+      if (prev && (prev.rev || 0) >= (g.rev || 0)) return;
+      d.watchSets[g.setId] = {
+        day: g.day, exIdx: g.exIdx, name: g.name || (prev && prev.name) || '', setIndex: g.setIndex,
+        side: g.side || null, kg: kg2(g.kg), reps: Math.round(+g.reps || 0), timed: !!g.timed,
+        at: g.completedAtMs || ev.at, restSec: g.restSec || null, rev: g.rev || 1, deleted: !!g.deleted,
+        sessionId: g.sessionId || null,
+      };
+      rebuildWatchExercise(state, d, ev.date, g.day, g.exIdx, g.totalEx);
+    },
+
+    // Fin del entrenamiento: { sessionId, day, name, startedAt, endedAt, durationMin, sets, volume }
+    gym_end: function (state, ev) {
+      var g = ev.data || {};
+      if (!g.sessionId) return;
+      var d = ensureDay(state, ev.date);
+      if (!Array.isArray(d.workouts)) d.workouts = [];
+      d.workouts = d.workouts.filter(function (w) { return w.sessionId !== g.sessionId; });
+      d.workouts.push({
+        sessionId: g.sessionId, day: g.day || null, name: g.name || '', startedAt: g.startedAt || null,
+        endedAt: g.endedAt || null, durationMin: Math.round(+g.durationMin || 0), sets: +g.sets || 0,
+        volume: +g.volume || 0, src: 'reloj',
+      });
+    },
+
     // Hora a la que apagó la alarma: { time: 'HH:MM', target: 'HH:MM' }
     wake: function (state, ev) {
       var d = ensureDay(state, ev.date);
       d.wake = { time: (ev.data || {}).time, target: (ev.data || {}).target || null, src: 'reloj' };
     },
   };
+
+  // Reconstruye las filas de un ejercicio (trainSets_<day>[exIdx]) y su historial
+  // del día a partir de las series del reloj. Las filas que cargaste en la app web
+  // en posiciones que el reloj no tocó se respetan.
+  function rebuildWatchExercise(state, d, date, day, exIdx, totalEx) {
+    var key = 'trainSets_' + day;
+    if (!d[key]) d[key] = {};
+    for (var i = 0; i < (totalEx || 0); i++) if (!d[key][i]) d[key][i] = [];
+    var mine = [];
+    Object.keys(d.watchSets).forEach(function (id) {
+      var s = d.watchSets[id];
+      if (s.day === day && s.exIdx === exIdx) mine.push(s);
+    });
+    var rows = (d[key][exIdx] || []).slice();
+    // Primero se limpian las filas que había puesto el reloj
+    rows = rows.map(function (r) { return r && r.w ? { kg: '', reps: '', done: false } : r; });
+    var byIdx = {};
+    mine.forEach(function (s) {
+      if (s.deleted) return;
+      (byIdx[s.setIndex] = byIdx[s.setIndex] || {})[s.side || '-'] = s;
+    });
+    Object.keys(byIdx).forEach(function (k) {
+      var idx = +k;
+      var b = byIdx[k];
+      var main = b['-'] || b.der || b.izq;
+      var row = { kg: String(main.kg), reps: String(main.reps), done: true, w: 1 };
+      if (b.der || b.izq) {
+        row.sides = {};
+        if (b.der) row.sides.der = { kg: b.der.kg, reps: b.der.reps };
+        if (b.izq) row.sides.izq = { kg: b.izq.kg, reps: b.izq.reps };
+        row.done = !!(b.der && b.izq);
+      }
+      while (rows.length <= idx) rows.push({ kg: '', reps: '', done: false });
+      rows[idx] = row;
+    });
+    // Sin filas vacías colgando al final
+    while (rows.length && !rows[rows.length - 1].done && rows[rows.length - 1].kg === '' && rows[rows.length - 1].reps === '') rows.pop();
+    d[key][exIdx] = rows;
+    d.trainingStarted = true;
+    d.trainDay = day;
+
+    // Historial del día del ejercicio (por nombre, como lo usa la app)
+    var name = (mine[0] && mine[0].name) || '';
+    if (!name) return;
+    if (!state.exerciseHistory || typeof state.exerciseHistory !== 'object') state.exerciseHistory = {};
+    var hist = (state.exerciseHistory[name] || []).filter(function (h) { return h.date !== date; });
+    // Todas las apariciones del ejercicio ese día (puede estar dos veces en la rutina)
+    var all = [];
+    Object.keys(d.watchSets).forEach(function (id) {
+      var s = d.watchSets[id];
+      if (!s.deleted && s.name === name && s.day === day) all.push(s);
+    });
+    all.sort(function (a, b) { return a.exIdx - b.exIdx || a.setIndex - b.setIndex || (a.side === 'izq' ? 1 : 0) - (b.side === 'izq' ? 1 : 0); });
+    if (all.length) {
+      var kgs = all.map(function (s) { return s.kg; }).filter(function (v) { return v > 0; });
+      var reps = all.map(function (s) { return s.reps; }).filter(function (v) { return v > 0; });
+      var maxKg = kgs.length ? Math.max.apply(null, kgs) : 0;
+      var avgReps = reps.length ? Math.round(reps.reduce(function (a, b) { return a + b; }, 0) / reps.length) : null;
+      var byEx = {};
+      all.forEach(function (s) {
+        (byEx[s.exIdx] = byEx[s.exIdx] || []).push(s.side ? [s.kg, s.reps, s.side] : [s.kg, s.reps]);
+      });
+      hist.unshift({
+        date: date,
+        maxKg: maxKg,
+        avgReps: avgReps,
+        oneRM: avgReps ? Math.round(maxKg * (1 + avgReps / 30)) : maxKg,
+        sets: all.length,
+        setsLog: all.map(function (s) { var o = { kg: String(s.kg), reps: String(s.reps) }; if (s.side) o.side = s.side; return o; }),
+        byIdx: byEx,
+        src: 'reloj',
+      });
+    }
+    state.exerciseHistory[name] = hist.slice(0, 40);
+  }
 
   // Aplica una lista de eventos. Devuelve cuántos se aplicaron (0 = nada nuevo).
   function applyWatchEvents(state, events) {

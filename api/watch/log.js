@@ -98,7 +98,10 @@ module.exports = async function handler(req, res) {
     const summary = buildSummary(state, todayAR());
     const [exams, sports] = await Promise.all([upcomingExams().catch(() => null), sportsFor(todayAR()).catch(() => null)]);
     if (exams) summary.exams = exams;
-    if (sports) summary.sports = sports;
+    if (sports) {
+      summary.sports = sports;
+      summary.sportsMeta = sports.meta || null;
+    } else summary.sportsMeta = { fetchedAt: Date.now(), ok: 0, failed: ['error interno'], count: 0 };
     res.status(200).json({
       ok: true,
       received: events.length,

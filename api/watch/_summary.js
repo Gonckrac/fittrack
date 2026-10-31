@@ -1,11 +1,18 @@
 // Arma el resumen compacto del día que baja el reloj.
 // Pensado para ocupar poco: solo lo que el reloj muestra o usa para avisos.
 
+const { computeGoals } = require('./_goals');
+
 const SLOT_LABEL = { breakfast: 'Desayuno', lunch: 'Almuerzo', snack: 'Merienda', dinner: 'Cena' };
 const DOW_KEYS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 function r1(n) {
   return Math.round((+n || 0) * 10) / 10;
+}
+
+// Pesos con 2 decimales (11,25 kg no se puede volver 11,3)
+function r2(n) {
+  return Math.round((parseFloat(String(n == null ? '' : n).replace(',', '.')) || 0) * 100) / 100;
 }
 
 function kcalOf(p, c, f) {
@@ -76,10 +83,26 @@ function quickFoods(state) {
 function supps(state, day) {
   const list = (state.config && state.config.supps) || [];
   const taken = (day && day.supps) || {};
+  const at = (day && day.suppsAt) || {};
   return list.map((s, i) => {
     const id = s.id || 'cfg_supp_' + i;
-    return { id, name: s.name, dose: s.dose || '', slot: s.time || 'morning', taken: !!taken[id] };
+    const o = { id, name: s.name, dose: s.dose || '', slot: s.time || 'morning', taken: !!taken[id] };
+    if (taken[id] && at[id] && at[id].at) o.takenAt = at[id].at;
+    return o;
   });
+}
+
+// Cambios de horario de hoy y mañana (para que el reloj los recupere si se reinstala)
+function scheduleOverrides(state, date) {
+  const all = state.scheduleOverrides || {};
+  const next = new Date(date + 'T12:00:00Z');
+  next.setUTCDate(next.getUTCDate() + 1);
+  const tomorrow = next.toISOString().slice(0, 10);
+  const out = {};
+  [date, tomorrow].forEach((d) => {
+    if (all[d]) out[d] = all[d];
+  });
+  return out;
 }
 
 function training(state, date, day) {
@@ -109,22 +132,34 @@ function training(state, date, day) {
       let next = null;
       if (last && last.maxKg && ex.topRep) {
         next = (last.avgReps || 0) >= ex.topRep
-          ? { kg: r1(+last.maxKg + 2.5), reps: ex.topRep, up: true }
-          : { kg: r1(last.maxKg), reps: (last.avgReps || 0) + 1, up: false };
+          ? { kg: r2(+last.maxKg + 2.5), reps: ex.topRep, up: true }
+          : { kg: r2(last.maxKg), reps: (last.avgReps || 0) + 1, up: false };
       }
-      const log = last && Array.isArray(last.setsLog)
-        ? last.setsLog.map((x) => [r1(parseFloat(String(x.kg).replace(',', '.')) || 0), parseInt(x.reps, 10) || 0]).filter((x) => x[0] || x[1])
-        : null;
+      // Series de la vez anterior, una por una y en orden (con el lado si es "por lado").
+      // Si el ejercicio aparece dos veces en la rutina, se usa la aparición de esta posición.
+      const pos = last && last.byIdx && last.byIdx[i];
+      const log = pos
+        ? pos.map((x) => (x[2] ? [r2(x[0]), x[1] | 0, x[2]] : [r2(x[0]), x[1] | 0]))
+        : last && Array.isArray(last.setsLog)
+          ? last.setsLog
+            .map((x) => {
+              const e = [r2(x.kg), parseInt(x.reps, 10) || 0];
+              if (x.side) e.push(x.side);
+              return e;
+            })
+            .filter((x) => x[0] || x[1])
+          : null;
       return {
         name: ex.name,
         sets: ex.sets || 3,
         reps: ex.reps || '',
         topRep: ex.topRep || null,
-        last: last ? { kg: r1(last.maxKg), reps: last.avgReps || null, date: last.date || null, log: log && log.length ? log : null } : null,
+        last: last ? { kg: r2(last.maxKg), reps: last.avgReps || null, date: last.date || null, log: log && log.length ? log : null } : null,
         next,
         doneSets,
         ss: ex.ssGroup ? { g: ex.ssGroup, p: ex.ssPart || 'a', rest: ex.ssRestSec || null } : null,
-        rest: ex.restSec || null,
+        rest: ex.restSec || null, // segundos
+        timed: !!ex.isTimeBased,
       };
     }),
   };
@@ -254,6 +289,12 @@ function wins(state, date) {
 function buildSummary(state, date) {
   const day = state[date] || {};
   const s = day.sleep || {};
+  let goals = null;
+  try {
+    goals = computeGoals(state, date, { eaten, targets, waterGoal, mealPlanToday });
+  } catch (e) {
+    goals = { computedAt: Date.now(), date, error: String(e && e.message), featured: null, wins: [], goals: [] };
+  }
   return {
     date,
     ts: state._ts || null,
@@ -268,9 +309,12 @@ function buildSummary(state, date) {
     training: training(state, date, day),
     metrics: metrics(state, date),
     water: { ml: day.water || 0, goal: waterGoal(state) },
-    wins: wins(state, date),
-    study: (day.study || []).map((b) => ({ label: b.label, doneMin: b.doneMin, plannedMin: b.plannedMin, status: b.status })),
+    // Logros reales (para la esfera) y objetivos: ver _goals.js
+    wins: goals.wins.map((w) => ({ id: w.id, kind: w.cat, title: w.title, sub: w.sub, date: w.date })),
+    goals,
+    schedule: scheduleOverrides(state, date),
+    study: (day.study || []).map((b) => ({ id: b.blockId || null, blockKey: b.blockKey || null, label: b.label, doneMin: b.doneMin, plannedMin: b.plannedMin, status: b.status })),
   };
 }
 
-module.exports = { buildSummary };
+module.exports = { buildSummary, oldWins: wins };
