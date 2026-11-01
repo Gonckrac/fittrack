@@ -151,6 +151,7 @@ function training(state, date, day) {
           : null;
       return {
         name: ex.name,
+        muscle: ex.muscle || '',
         sets: ex.sets || 3,
         reps: ex.reps || '',
         topRep: ex.topRep || null,
